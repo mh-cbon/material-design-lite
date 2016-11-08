@@ -523,7 +523,6 @@ gulp.task('serve:browsersync', () => {
 gulp.task('serve', () => {
 
   isLive = true;
-  
   $.connect.server({
     root: 'dist',
     port: 5000,
