@@ -187,7 +187,7 @@
       if (this.element_.hasAttribute('bt-el')) {
         this.btEl_ = document.querySelector(this.element_.getAttribute('bt-el'));
         if (this.btEl_) {
-          this.element_.addEventListener('change', this.updateBt_);
+          this.element_.addEventListener('change', this.updateBt_.bind(this));
           this.updateBt_();
         }
       }
