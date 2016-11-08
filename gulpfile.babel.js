@@ -89,9 +89,12 @@ const SOURCES = [
   // Complex components (which reuse base components)
   'src/layout/layout.js',
   'src/data-table/data-table.js',
+  'src/custom-data-table/data-table.js',
   // And finally, the ripples
   'src/ripple/ripple.js'
 ];
+
+var isLive = false;
 
 // ***** Development tasks ****** //
 
@@ -106,8 +109,8 @@ gulp.task('lint', () => {
     .pipe($.jscs())
     .pipe($.jshint.reporter('jshint-stylish'))
     .pipe($.jscs.reporter())
-    .pipe($.if(!browserSync.active, $.jshint.reporter('fail')))
-    .pipe($.if(!browserSync.active, $.jscs.reporter('fail')));
+    .pipe($.if(!isLive, $.jshint.reporter('fail')))
+    .pipe($.if(!isLive, $.jscs.reporter('fail')));
 });
 
 // ***** Production build tasks ****** //
@@ -518,6 +521,9 @@ gulp.task('serve:browsersync', () => {
 });
 
 gulp.task('serve', () => {
+
+  isLive = true;
+  
   $.connect.server({
     root: 'dist',
     port: 5000,
