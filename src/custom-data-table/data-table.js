@@ -28,6 +28,7 @@
    */
   var CustomDataTable = function CustomDataTable(element) {
     this.element_ = element;
+    this.btEl_ = null;
 
     // Initialize instance.
     this.init();
@@ -147,9 +148,9 @@
     var table = this.element_;
     var sTr = table.querySelectorAll('tbody > .is-selected');
     if (sTr.length) {
-      btEl.removeAttribute('disabled');
+      this.btEl_.removeAttribute('disabled');
     } else {
-      btEl.setAttribute('disabled', 'disabled');
+      this.btEl_.setAttribute('disabled', 'disabled');
     }
   };
 
@@ -183,17 +184,28 @@
         this.element_.classList.add(this.CssClasses_.IS_UPGRADED);
       }
 
-      var btEl;
       if (this.element_.hasAttribute('bt-el')) {
-        btEl = document.querySelector(this.element_.getAttribute('bt-el'));
-        if (btEl) {
-          var that = this;
-          this.element_.addEventListener('change', function(ev) {
-            that.updateBt_(btEl);
-          });
-          that.updateBt_(btEl);
+        this.btEl_ = document.querySelector(this.element_.getAttribute('bt-el'));
+        if (this.btEl_) {
+          this.element_.addEventListener('change', this.updateBt_);
+          this.updateBt_();
         }
       }
+    }
+  };
+
+  /**
+   * Downgrade element.
+   */
+  CustomDataTable.prototype.mdlDowngrade_ = function() {
+    this.element_.removeEventListener('change', this.updateBt_);
+    var checkboxes = this.element_.querySelectorAll('tbody tr td input[type="checkbox"]');
+    for (var i = 0; i < checkboxes.length; i++) {
+      checkboxes[i].removeEventListener('change');
+    }
+    var allCheckbox = this.element_.querySelectorAll('tbody th td input[type="checkbox"]');
+    for (var e = 0; e < allCheckbox.length; i++) {
+      allCheckbox.removeEventListener('change');
     }
   };
 
