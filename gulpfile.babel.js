@@ -68,6 +68,7 @@ const AUTOPREFIXER_BROWSERS = [
 ];
 
 const SOURCES = [
+  'node_modules/velocity-animate/velocity.min.js',
   // Component handler
   'src/mdlComponentHandler.js',
   // Polyfills/dependencies
@@ -90,6 +91,9 @@ const SOURCES = [
   'src/layout/layout.js',
   'src/data-table/data-table.js',
   'src/custom-data-table/data-table.js',
+  'src/custom-dialog/dialog.js',
+  'src/custom-confirm-button/button.js',
+  'src/custom-expander/expander.js',
   // And finally, the ripples
   'src/ripple/ripple.js'
 ];

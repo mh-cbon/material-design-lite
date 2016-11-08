@@ -129,9 +129,11 @@
         checkbox.value = row.getAttribute('value');
       }
       checkbox.checked = row.classList.contains(this.CssClasses_.IS_SELECTED);
-      checkbox.addEventListener('change', this.selectRow_(checkbox, row));
+      checkbox.__fn = this.selectRow_(checkbox, row);
+      checkbox.addEventListener('change', checkbox.__fn);
     } else if (opt_rows) {
-      checkbox.addEventListener('change', this.selectRow_(checkbox, null, opt_rows));
+      checkbox.__fn = this.selectRow_(checkbox, null, opt_rows);
+      checkbox.addEventListener('change', checkbox.__fn);
     }
 
     label.appendChild(checkbox);
@@ -187,7 +189,8 @@
       if (this.element_.hasAttribute('bt-el')) {
         this.btEl_ = document.querySelector(this.element_.getAttribute('bt-el'));
         if (this.btEl_) {
-          this.element_.addEventListener('change', this.updateBt_.bind(this));
+          this.btEl_.__fn = this.updateBt_.bind(this);
+          this.element_.addEventListener('change', this.btEl_.__fn);
           this.updateBt_();
         }
       }
@@ -198,15 +201,18 @@
    * Downgrade element.
    */
   CustomDataTable.prototype.mdlDowngrade_ = function() {
-    this.element_.removeEventListener('change', this.updateBt_);
+    this.element_.removeEventListener('change', this.btEl_.__fn);
     var checkboxes = this.element_.querySelectorAll('tbody tr td input[type="checkbox"]');
     for (var i = 0; i < checkboxes.length; i++) {
-      checkboxes[i].removeEventListener('change');
+      checkboxes[i].removeEventListener('change', checkboxes[i].__fn);
+      checkboxes[i].__fn = null;
     }
     var allCheckbox = this.element_.querySelectorAll('tbody th td input[type="checkbox"]');
     for (var e = 0; e < allCheckbox.length; i++) {
-      allCheckbox.removeEventListener('change');
+      allCheckbox[i].removeEventListener('change', allCheckbox[i].__fn);
+      allCheckbox[i].__fn = null;
     }
+    this.element_.classList.remove(this.CssClasses_.IS_UPGRADED);
   };
 
   // The component registers itself. It can assume componentHandler is available
