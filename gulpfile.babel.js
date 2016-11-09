@@ -69,10 +69,13 @@ const AUTOPREFIXER_BROWSERS = [
 
 const SOURCES = [
   'node_modules/velocity-animate/velocity.min.js',
+  'node_modules/moment/min/moment-with-locales.min.js',
+  'node_modules/md-date-time-picker/dist/js/mdDateTimePicker.js',
   // Component handler
   'src/mdlComponentHandler.js',
   // Polyfills/dependencies
-  'src/third_party/**/*.js',
+  'src/third_party/rAf.js',
+  'src/third_party/vanilla.js',
   // Base components
   'src/button/button.js',
   'src/checkbox/checkbox.js',
@@ -94,6 +97,7 @@ const SOURCES = [
   'src/custom-dialog/dialog.js',
   'src/custom-confirm-button/button.js',
   'src/custom-expander/expander.js',
+  'src/custom-datefield/datefield.js',
   // And finally, the ripples
   'src/ripple/ripple.js'
 ];
@@ -240,11 +244,11 @@ gulp.task('closure', () => {
 // Concatenate And Minify JavaScript
 gulp.task('scripts', ['lint'], () => {
   return gulp.src(SOURCES)
-    .pipe($.if(/mdlComponentHandler\.js/, $.util.noop(), uniffe()))
+    .pipe($.if(/(mdlComponentHandler|moment\.min|mdDateTimePicker)\.js/, $.util.noop(), uniffe()))
     .pipe($.sourcemaps.init())
     // Concatenate Scripts
     .pipe($.concat('material.js'))
-    .pipe($.iife({useStrict: true}))
+    .pipe($.iife({useStrict: true, bindThis: true}))
     .pipe(gulp.dest('dist'))
     // Minify Scripts
     .pipe($.uglify({

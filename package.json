@@ -74,5 +74,9 @@
   },
   "babel": {
     "only": "gulpfile.babel.js"
+  },
+  "dependencies": {
+    "md-date-time-picker": "^2.2.0",
+    "moment": "^2.15.2"
   }
 }
