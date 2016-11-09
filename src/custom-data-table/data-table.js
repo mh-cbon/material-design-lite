@@ -63,47 +63,6 @@
   };
 
   /**
-   * Generates and returns a function that toggles the selection state of a
-   * single row (or multiple rows).
-   *
-   * @param {Element} checkbox Checkbox that toggles the selection state.
-   * @param {Element} row Row to toggle when checkbox changes.
-   * @param {(Array<Object>|NodeList)=} opt_rows Rows to toggle when checkbox changes.
-   * @private
-   */
-  CustomDataTable.prototype.selectRow_ = function(checkbox, row, opt_rows) {
-    if (row) {
-      return function() {
-        if (checkbox.checked) {
-          row.classList.add(this.CssClasses_.IS_SELECTED);
-        } else {
-          row.classList.remove(this.CssClasses_.IS_SELECTED);
-        }
-      }.bind(this);
-    }
-
-    if (opt_rows) {
-      return function() {
-        var i;
-        var el;
-        if (checkbox.checked) {
-          for (i = 0; i < opt_rows.length; i++) {
-            el = opt_rows[i].querySelector('td').querySelector('.mdl-checkbox');
-            el['MaterialCheckbox'].check();
-            opt_rows[i].classList.add(this.CssClasses_.IS_SELECTED);
-          }
-        } else {
-          for (i = 0; i < opt_rows.length; i++) {
-            el = opt_rows[i].querySelector('td').querySelector('.mdl-checkbox');
-            el['MaterialCheckbox'].uncheck();
-            opt_rows[i].classList.remove(this.CssClasses_.IS_SELECTED);
-          }
-        }
-      }.bind(this);
-    }
-  };
-
-  /**
    * Creates a checkbox for a single or or multiple rows and hooks up the
    * event handling.
    *
@@ -129,11 +88,6 @@
         checkbox.value = row.getAttribute('value');
       }
       checkbox.checked = row.classList.contains(this.CssClasses_.IS_SELECTED);
-      checkbox.__fn = this.selectRow_(checkbox, row);
-      checkbox.addEventListener('change', checkbox.__fn);
-    } else if (opt_rows) {
-      checkbox.__fn = this.selectRow_(checkbox, null, opt_rows);
-      checkbox.addEventListener('change', checkbox.__fn);
     }
 
     label.appendChild(checkbox);
@@ -147,8 +101,7 @@
    * @private
    */
   CustomDataTable.prototype.updateBt_ = function(btEl) {
-    var table = this.element_;
-    var sTr = table.querySelectorAll('tbody > .is-selected');
+    var sTr = this.element_.querySelectorAll('tr.is-selected');
     if (sTr.length) {
       this.btEl_.removeAttribute('disabled');
     } else {
@@ -184,15 +137,56 @@
           }
         }
         this.element_.classList.add(this.CssClasses_.IS_UPGRADED);
+
+        var that = this;
+        this.element_.__selectall = window.delegateEvent(this.element_, 'change', 'input[type="checkbox"]', function() {
+          var cb = this;
+          var row = window.getParentsUntil(this, 'tr');
+          if (row) {
+            row = row.pop().parentNode;
+            var isHeader = row.querySelectorAll('th').length > 0;
+
+            if (isHeader) {
+              var cell;
+              cell = window.getParentsUntil(this, 'th');
+              cell = cell.pop().parentNode;
+
+              if (isHeader) {
+                var rows = that.element_.querySelectorAll('tbody > tr');
+                for (var i = 0; i < rows.length; i++) {
+                  if (cb.checked) {
+                    rows[i].classList.add(that.CssClasses_.IS_SELECTED);
+                  } else {
+                    rows[i].classList.remove(that.CssClasses_.IS_SELECTED);
+                  }
+                  var rowCb = rows[i].querySelector('td:nth-child(1) .mdl-checkbox');
+                  if (rowCb) {
+                    if (cb.checked) {
+                      rowCb['MaterialCheckbox'].check();
+                    } else {
+                      rowCb['MaterialCheckbox'].uncheck();
+                    }
+                  }
+                }
+              }
+            } else {
+              if (cb.checked) {
+                row.classList.add(that.CssClasses_.IS_SELECTED);
+              } else {
+                row.classList.remove(that.CssClasses_.IS_SELECTED);
+              }
+            }
+          }
+
+          if (that.btEl_) {
+            that.updateBt_();
+          }
+        });
       }
 
       if (this.element_.hasAttribute('bt-el')) {
         this.btEl_ = document.querySelector(this.element_.getAttribute('bt-el'));
-        if (this.btEl_) {
-          this.btEl_.__fn = this.updateBt_.bind(this);
-          this.element_.addEventListener('change', this.btEl_.__fn);
-          this.updateBt_();
-        }
+        this.updateBt_();
       }
     }
   };
@@ -201,17 +195,7 @@
    * Downgrade element.
    */
   CustomDataTable.prototype.mdlDowngrade_ = function() {
-    this.element_.removeEventListener('change', this.btEl_.__fn);
-    var checkboxes = this.element_.querySelectorAll('tbody tr td input[type="checkbox"]');
-    for (var i = 0; i < checkboxes.length; i++) {
-      checkboxes[i].removeEventListener('change', checkboxes[i].__fn);
-      checkboxes[i].__fn = null;
-    }
-    var allCheckbox = this.element_.querySelectorAll('tbody th td input[type="checkbox"]');
-    for (var e = 0; e < allCheckbox.length; i++) {
-      allCheckbox[i].removeEventListener('change', allCheckbox[i].__fn);
-      allCheckbox[i].__fn = null;
-    }
+    this.element_.removeEventListener('change', this.element_.__selectall);
     this.element_.classList.remove(this.CssClasses_.IS_UPGRADED);
   };
 
