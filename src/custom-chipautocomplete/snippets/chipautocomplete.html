@@ -1,0 +1,20 @@
+
+<div class="custom-chipautocomplete custom-js-chipautocomplete"
+  url-completer="static-results.json?input=myinput"
+  url-completer-args='{"limit": 30}'
+  url-placeholder="myinput"
+  url-creator="static-create.json"
+  url-creator-args='{"extra": "arg"}'
+  txt-remote-unreachable="Server gone south, baaaadddd!"
+  chip-name="inputname"
+  >
+  <div class="mdl-textfield mdl-js-textfield">
+      <input class="mdl-textfield__input"id="chipautocomplete1" autocomplete="off" type="text">
+      <label class="mdl-textfield__label" for="chipautocomplete1">chip autocomplete</label>
+      <span class="mdl-textfield__error">blah</span>
+      <div class="custom-chipautocomplete-results mdl-shadow--2dp">
+        <ul class="mdl-list"></ul>
+      </div>
+    </div>
+    <div class="custom-chipautocomplete-selected"></div>
+</div>

@@ -1,5 +1,26 @@
 (function() {
   'use strict';
+
+  /**
+   * debounce a function.
+   * @param  {!Function} The function to debounce.
+   * @param  {!Integer} The delay before the function is invoked.
+   * @return {!Function} The debounced function.
+   */
+  var debounce = function(fn, delay) {
+    var timer = null;
+    return function() {
+      var context = this;
+      var args = arguments;
+      clearTimeout(timer);
+      timer = setTimeout(function() {
+        fn.apply(context, args);
+      }, delay);
+    };
+  };
+  window.debounce = debounce;
+  window['debounce'] = debounce;
+
   /**
    * outerHeight polyfill.
    * @param  {!DomElement} The element we want the outer heihgt of.
