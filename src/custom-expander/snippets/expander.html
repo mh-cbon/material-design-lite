@@ -1,20 +1,12 @@
 
-
-<div class="custom-js-dialog custom-dialog">
-  <div class="custom-dialog-bg mdl-color--grey"></div>
-  <div class="custom-dialog-container mdl-dialog mdl-color--white">
-    <h4 class="mdl-dialog__title">Title of the dialog</h4>
-    <div class="mdl-dialog__content">
-      <p>Text of the dialog</p>
-    </div>
-    <div class="mdl-dialog__actions">
-      <button type="button" class="mdl-button custom-dialog-confirm">OK</button>
-      <button type="button" class="mdl-button custom-dialog-cancel">CANCEL</button>
-    </div>
-    <button type="button" class="mdl-button custom-dialog-close">
-      <i class="material-icons">close</i>
-    </button>
+<div class="custom-js-expander custom-expander">
+  <div class="custom-expander-bt">
+    Click me to expand!
+    <i class="material-icons custom-expander-shown">arrow_drop_down</i>
+    <i class="material-icons custom-expander-hidden">arrow_drop_up</i>
+  </div>
+  <div class="custom-expander-container mdl-color--grey">
+    <div style="height:50px;">expanded</div>
+    <div style="height:50px;">too</div>
   </div>
 </div>
-
-show me with document.querySelector(".custom-dialog").CustomDialog.showBox_()

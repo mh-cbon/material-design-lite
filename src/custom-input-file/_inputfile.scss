@@ -14,23 +14,27 @@
  * limitations under the License.
  */
 
-.custom-expander {
+ .custom-inputfile{
 
-  &:not(.is-expanded) .custom-expander-shown {
+  .mdl-button--icon {
+    left: 100%;
+    z-index: 5;
+  }
+  &.is-dirty .material-icons:not(.custom-clearbutton) {
+    display: none;
+  }
+  &:not(.is-dirty) .custom-clearbutton {
     display: none;
   }
 
-  &.is-expanded .custom-expander-hidden {
-    display: none;
+  input[type="file"] {
+    cursor: pointer;
+    height: 100%;
+    right: 0;
+    opacity: 0;
+    position: absolute;
+    top: 0;
+    width: 300px;
+    z-index: 4;
   }
-
-  &.is-expanded .custom-expander-container {
-    height: auto;
-  }
-
-  .custom-expander-container {
-    height: 0;
-    overflow: hidden;
-  }
-
-}
+ }

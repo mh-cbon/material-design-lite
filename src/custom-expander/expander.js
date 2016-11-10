@@ -58,8 +58,6 @@
   CustomExpander.prototype.CssClasses_ = {
     IS_UPGRADED: 'is-upgraded',
     IS_EXPANDED: 'is-expanded',
-    // IS_HIDDEN: 'hide',
-    // IS_SHOWN: 'show',
   };
 
   /**
@@ -90,7 +88,6 @@
       * complete.
       */
       complete: function() {
-        // that.element_.classList.remove(that.CssClasses_.IS_HIDDEN);
         that.element_.classList.add(that.CssClasses_.IS_EXPANDED);
         that.element_.style.height = 'auto';
       }
@@ -109,7 +106,6 @@
       * complete.
       */
       complete: function() {
-        // that.element_.classList.add(that.CssClasses_.IS_HIDDEN);
         that.element_.classList.remove(that.CssClasses_.IS_EXPANDED);
       }
     });
@@ -125,10 +121,6 @@
 
       this.bt_.__fn = this.toggleBox_.bind(this);
       this.bt_.addEventListener('click', this.bt_.__fn);
-
-      // if (!this.element_.classList.contains(this.CssClasses_.IS_SHOWN)) {
-      //   this.element_.classList.add(this.CssClasses_.IS_HIDDEN);
-      // }
       this.element_.classList.add(this.CssClasses_.IS_UPGRADED);
     }
   };
@@ -139,8 +131,6 @@
   CustomExpander.prototype.mdlDowngrade_ = function() {
     this.bt_.removeEventListener('click', this.bt_.__fn);
     this.bt_.__fn = null;
-    // this.element_.classList.remove(this.CssClasses_.IS_SHOWN);
-    // this.element_.classList.remove(this.CssClasses_.IS_HIDDEN);
     this.element_.classList.remove(this.CssClasses_.IS_EXPANDED);
     this.element_.classList.remove(this.CssClasses_.IS_UPGRADED);
   };

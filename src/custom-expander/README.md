@@ -1,7 +1,7 @@
 ## Introduction
 
-The Custom **dialog** component is ....
+The Custom **custom expander** component is ....
 
-### To include an MDL **dialog** component:
+### To include an MDL **custom expander** component:
 
 &nbsp;1. Code a ...
