@@ -19,16 +19,16 @@
 
 .custom-expander {
 
-  &.show .custom-expander-container{
+  &:not(.is-expanded) .custom-expander-shown {
+    display: none;
+  }
+
+  &.is-expanded .custom-expander-hidden {
+    display: none;
+  }
+
+  &.is-expanded .custom-expander-container {
     height: auto;
-  }
-
-  &.hide .custom-expander-shown {
-    display: none;
-  }
-
-  &.show .custom-expander-hidden {
-    display: none;
   }
 
   .custom-expander-container {

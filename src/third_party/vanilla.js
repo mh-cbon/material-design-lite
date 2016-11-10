@@ -15,6 +15,24 @@
   window['outerHeight'] = outerHeight;
 
   /**
+   * Get child element nodes only.
+   * @param  {!DomElement} The parent element.
+   * @return {!DomNodes} The list of dom child nodes.
+   */
+  var childElements = function(el) {
+    var ret = [];
+    var els = el.childNodes;
+    for (var i = 0; i < els.length; i++) {
+      if (els[i].nodeType === 1) {
+        ret.push(els[i]);
+      }
+    }
+    return ret;
+  };
+  window.childElements = childElements;
+  window['childElements'] = childElements;
+
+  /**
    * Event delegation.
    * @param  {!string} A selector string or a DomNode onto which attach the event.
    * @param  {!string} An event name to listen to.

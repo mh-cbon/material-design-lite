@@ -98,6 +98,7 @@ const SOURCES = [
   'src/custom-confirm-button/button.js',
   'src/custom-expander/expander.js',
   'src/custom-datefield/datefield.js',
+  'node_modules/mdl-selectfield/src/selectfield/selectfield.js',
   // And finally, the ripples
   'src/ripple/ripple.js'
 ];

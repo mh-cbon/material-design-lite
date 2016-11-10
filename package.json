@@ -54,6 +54,7 @@
     "jpegtran-bin": "^3.1.0",
     "jquery": "^3.1.1",
     "jshint-stylish": "^2.0.1",
+    "mdl-selectfield": "^1.0.4",
     "merge-stream": "^1.0.0",
     "mocha": "^3.0.2",
     "node-sass": "^3.11.2",
