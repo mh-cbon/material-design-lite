@@ -33,6 +33,7 @@ import through from 'through2';
 import swig from 'swig';
 import gulp from 'gulp';
 import closureCompiler from 'gulp-closure-compiler';
+import gulpCopy from 'gulp-copy';
 import gulpLoadPlugins from 'gulp-load-plugins';
 import uniffe from './utils/uniffe.js';
 import pkg from './package.json';
@@ -71,6 +72,7 @@ const SOURCES = [
   'node_modules/velocity-animate/velocity.min.js',
   'node_modules/moment/min/moment-with-locales.min.js',
   'node_modules/md-date-time-picker/dist/js/mdDateTimePicker.js',
+  // 'node_modules/tinymce/tinymce.min.js',
   // Component handler
   'src/mdlComponentHandler.js',
   // Polyfills/dependencies
@@ -99,12 +101,21 @@ const SOURCES = [
   'src/custom-expander/expander.js',
   'src/custom-datefield/datefield.js',
   'src/custom-input-file/inputfile.js',
+  'src/custom-tinymce/tinymce.js',
   'node_modules/mdl-selectfield/src/selectfield/selectfield.js',
   // And finally, the ripples
   'src/ripple/ripple.js'
 ];
 
 var isLive = false;
+
+// Copy tinymce sources
+gulp.task('tinymce', () => {
+  return gulp.src([
+      'node_modules/tinymce/**',
+    ])
+    .pipe(gulpCopy('dist/tinymce', {prefix: 1}));
+});
 
 // ***** Development tasks ****** //
 

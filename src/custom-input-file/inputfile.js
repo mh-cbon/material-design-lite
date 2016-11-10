@@ -91,7 +91,7 @@
       var label = this.element_.querySelector('.mdl-textfield__label');
       if (label) {
         // var originalLabel = label.innerHTML;
-        this.fileinput_.__fn = function(ev) {
+        this.fileinput_.__change = function(ev) {
           if (file.files.length) {
             // label.innerHTML = joinFileNames(file.files);
             text.value = joinFileNames(file.files);
@@ -101,7 +101,7 @@
           }
           element_['MaterialTextfield'].updateClasses_();
         }.bind(this);
-        this.fileinput_.addEventListener('change', this.fileinput_.__fn);
+        this.fileinput_.addEventListener('change', this.fileinput_.__change);
       }
 
       this.element_.classList.add(this.CssClasses_.IS_UPGRADED);
@@ -112,10 +112,10 @@
    * Downgrade element.
    */
   CustomInputFile.prototype.mdlDowngrade_ = function() {
-    this.textinput_.removeEventListener('click', this.textinput_.__fn);
-    this.textinput_.__fn = null;
-    this.fileinput_.removeEventListener('change', this.fileinput_.__fn);
-    this.fileinput_.__fn = null;
+    this.clear_.removeEventListener('click', this.textinput_.__click);
+    this.clear_.__click = null;
+    this.fileinput_.removeEventListener('change', this.fileinput_.__change);
+    this.fileinput_.__change = null;
     this.element_.classList.remove(this.CssClasses_.IS_UPGRADED);
   };
 
