@@ -1,0 +1,13 @@
+{
+  "Valid": true,
+  "Data": {
+    "Text": "static only",
+    "Value": "b"
+  },
+  "HasFailure": false,
+  "Failure": "an error here",
+  "HasFieldErrors": false,
+  "FieldErrors": {
+    "Value": "some error here"
+  },
+}

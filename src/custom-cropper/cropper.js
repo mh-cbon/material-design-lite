@@ -78,7 +78,7 @@
       this.img_.src = URL.createObjectURL(files[0]);
       this.textEl_.classList.remove('is-dirty');
       this.pendingImg_ = files[0].name;
-      this.textInput_.value = "";
+      this.textInput_.value = '';
       this.file_.value = null;
 
       this.updateBoxHeight_();
@@ -201,6 +201,9 @@
       this.cropperOptions_ = {
         aspectRatio: 1,
         preview: this.preview_,
+        /**
+         * xxxxxx.
+         */
         ready: function() {
           that.dialog_['CustomDialog'].showBox_();
           window.URL.revokeObjectURL(that.img_.src);

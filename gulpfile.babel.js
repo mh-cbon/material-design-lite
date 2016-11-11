@@ -118,7 +118,13 @@ gulp.task('tinymce', () => {
   return gulp.src([
       'node_modules/tinymce/**',
     ])
-    .pipe(gulpCopy('dist/tinymce', {prefix: 1}));
+    .pipe(gulpCopy('dist/tinymce', {prefix: 2}));
+});
+gulp.task('demofork', () => {
+  return gulp.src([
+      'demo/**',
+    ])
+    .pipe(gulpCopy('dist/', {prefix: 1}));
 });
 
 // ***** Development tasks ****** //
@@ -298,6 +304,8 @@ gulp.task('default', ['clean'], cb => {
   runSequence(
     ['styles', 'styles-grid'],
     ['scripts'],
+    ['tinymce'],
+    ['demofork'],
     ['mocha'],
     cb);
 });
@@ -308,6 +316,7 @@ gulp.task('all', ['clean'], cb => {
     ['styletemplates'],
     ['styles-grid', 'styles:gen'],
     ['scripts'],
+    ['tinymce'],
     ['mocha'],
     ['assets', 'pages',
      'templates', 'images', 'metadata'],
@@ -556,7 +565,7 @@ gulp.task('serve', () => {
 
   watch();
 
-  gulp.src('dist/index.html')
+  gulp.src('dist/test.html')
     .pipe($.open({uri: 'http://localhost:5000'}));
 });
 

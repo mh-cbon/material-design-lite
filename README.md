@@ -16,6 +16,14 @@ It s not AAA compliant all browsers, but could be!
 - custom-confirmbutton: A button which shows a dialog box to require confirmation of the action.
 
 
+### Your local workflow
+
+```sh
+npm i
+./node_modules/.bin/gulp default
+./node_modules/.bin/gulp serve
+```
+
 # Material Design Lite
 
 [![GitHub version](https://badge.fury.io/gh/google%2Fmaterial-design-lite.svg)](https://badge.fury.io/gh/google%2Fmaterial-design-lite)
