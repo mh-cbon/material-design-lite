@@ -16,6 +16,8 @@ It s not AAA compliant all browsers, but could be!
 - custom-confirmbutton: A button which shows a dialog box to require confirmation of the action.
 
 
+See it in action [here](https://mh-cbon.github.io/material-design-lite/test.html)
+
 ### Your local workflow
 
 ```sh
