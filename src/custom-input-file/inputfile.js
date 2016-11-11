@@ -80,7 +80,7 @@
 
       this.clear_.__click = function(ev) {
         ev.stopPropagation();
-        ev.stopImmediatePropagation();
+        // ev.stopImmediatePropagation();
         ev.preventDefault();
         file.value = null;
         text.value = '';

@@ -66,9 +66,9 @@
    * Show the dialog.
    */
   CustomDialog.prototype.showBox_ = function() {
+    document.body.appendChild(this.element_);
     this.element_.classList.add('beforeshow');
-    this.container_.style.marginTop = '-' + (this.container_.offsetHeight / 2) + 'px';
-    this.container_.style.marginLeft = '-' + (this.container_.offsetWidth / 2) + 'px';
+    this.updateBoxPosition_();
     this.element_.classList.add('show');
   };
 
@@ -78,6 +78,15 @@
   CustomDialog.prototype.closeBox_ = function() {
     this.element_.classList.remove('beforeshow');
     this.element_.classList.remove('show');
+    this.placeholder_.parentNode.insertBefore(this.element_, this.placeholder_);
+  };
+
+  /**
+   * Update the dialog positionning.
+   */
+  CustomDialog.prototype.updateBoxPosition_ = function() {
+    this.container_.style.marginTop = '-' + (this.container_.offsetHeight / 2) + 'px';
+    this.container_.style.marginLeft = '-' + (this.container_.offsetWidth / 2) + 'px';
   };
 
   /**
@@ -92,15 +101,19 @@
 
       this.close_.__fn = this.closeBox_.bind(this);
       this.close_.addEventListener('click', this.close_.__fn);
+
       this.confirm_.__fn = this.closeBox_.bind(this);
       this.confirm_.addEventListener('click', this.confirm_.__fn);
+
       this.cancel_.__fn = this.closeBox_.bind(this);
       this.cancel_.addEventListener('click', this.cancel_.__fn);
+
+      this.container_.__resize = window.debounce(this.updateBoxPosition_.bind(this), 100);
+      window.addEventListener('resize', this.container_.__resize);
 
       this.placeholder_ = document.createElement('input');
       this.placeholder_.setAttribute('type', 'hidden');
       this.element_.parentNode.insertBefore(this.placeholder_, this.element_);
-      document.body.appendChild(this.element_);
 
       this.element_.classList.add(this.CssClasses_.IS_UPGRADED);
     }
@@ -110,13 +123,19 @@
    * Downgrade element.
    */
   CustomDialog.prototype.mdlDowngrade_ = function() {
+
     this.close_.removeEventListener('click', this.close_.__fn);
     this.close_.__fn = null;
+
     this.confirm_.removeEventListener('click', this.confirm_.__fn);
     this.confirm_.__fn = null;
+
     this.cancel_.removeEventListener('click', this.cancel_.__fn);
     this.cancel_.__fn = null;
-    this.placeholder_.parentNode.insertBefore(this.element_, this.placeholder_);
+
+    window.removeEventListener('resize', this.container_.__resize);
+    this.container_.__resize = null;
+
     this.placeholder_.remove();
     this.element_.classList.remove(this.CssClasses_.IS_UPGRADED);
   };

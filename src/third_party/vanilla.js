@@ -36,6 +36,20 @@
   window['outerHeight'] = outerHeight;
 
   /**
+   * innerHeight polyfill.
+   * @param  {!DomElement} The element we want the outer heihgt of.
+   * @return {!Integer} The value of the height in pixel.
+   */
+  var innerHeight = function(el) {
+    var s = el.offsetHeight;
+    var style = getComputedStyle(el);
+    s -= parseInt(style.paddingTop) + parseInt(style.paddingBottom);
+    return s;
+  };
+  window.innerHeight = innerHeight;
+  window['innerHeight'] = innerHeight;
+
+  /**
    * Get child element nodes only.
    * @param  {!DomElement} The parent element.
    * @return {!DomNodes} The list of dom child nodes.
@@ -250,4 +264,20 @@
   window.getParentsUntil = getParentsUntil;
   window['getParentsUntil'] = getParentsUntil;
 
+  /**
+   * Get image as data url value.
+   *
+   * @param  {!Node} elem The base element
+   * @return {!string} Data url of the image.
+   */
+  var imgAsDataUrl = function(img) {
+    var canvas = document.createElement('canvas');
+    var ctx = canvas.getContext('2d');
+    ctx.canvas.width  = img.offsetWidth;
+    ctx.canvas.height = img.offsetHeight;
+    ctx.drawImage(img, 0, 0, img.offsetWidth, img.offsetHeight);
+    return canvas.toDataURL('image/png');
+  };
+  window.imgAsDataUrl = imgAsDataUrl;
+  window['imgAsDataUrl'] = imgAsDataUrl;
 })();

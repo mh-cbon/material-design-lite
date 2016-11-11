@@ -73,6 +73,7 @@ const SOURCES = [
   'node_modules/moment/min/moment-with-locales.min.js',
   'node_modules/md-date-time-picker/dist/js/mdDateTimePicker.js',
   'node_modules/@fdaciuk/ajax/dist/ajax.min.js',
+  'node_modules/cropperjs/dist/cropper.min.js',
   // 'node_modules/tinymce/tinymce.min.js',
   // Component handler
   'src/mdlComponentHandler.js',
@@ -105,6 +106,7 @@ const SOURCES = [
   'src/custom-tinymce/tinymce.js',
   'node_modules/mdl-selectfield/src/selectfield/selectfield.js',
   'src/custom-chipautocomplete/chipautocomplete.js',
+  'src/custom-cropper/cropper.js',
   // And finally, the ripples
   'src/ripple/ripple.js'
 ];
