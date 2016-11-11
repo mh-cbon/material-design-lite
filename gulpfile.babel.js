@@ -34,6 +34,7 @@ import swig from 'swig';
 import gulp from 'gulp';
 import closureCompiler from 'gulp-closure-compiler';
 import gulpCopy from 'gulp-copy';
+import ghPages from 'gulp-gh-pages';
 import gulpLoadPlugins from 'gulp-load-plugins';
 import uniffe from './utils/uniffe.js';
 import pkg from './package.json';
@@ -113,18 +114,24 @@ const SOURCES = [
 
 var isLive = false;
 
-// Copy tinymce sources
+// Fork udpates
 gulp.task('tinymce', () => {
   return gulp.src([
       'node_modules/tinymce/**',
     ])
     .pipe(gulpCopy('dist/tinymce', {prefix: 2}));
 });
+
 gulp.task('demofork', () => {
   return gulp.src([
       'demo/**',
     ])
     .pipe(gulpCopy('dist/', {prefix: 1}));
+});
+
+gulp.task('gh', function() {
+  return gulp.src('./dist/**/*')
+    .pipe(ghPages());
 });
 
 // ***** Development tasks ****** //

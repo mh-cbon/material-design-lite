@@ -22,6 +22,7 @@ It s not AAA compliant all browsers, but could be!
 npm i
 ./node_modules/.bin/gulp default
 ./node_modules/.bin/gulp serve
+./node_modules/.bin/gulp gh # publish your update on your gh pages.
 ```
 
 # Material Design Lite
