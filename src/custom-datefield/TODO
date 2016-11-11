@@ -1,4 +1,0 @@
-- on mobile it is not necessary to dispaly such component,
-we can rely on system components.
-
-- missing a clean destroy method
