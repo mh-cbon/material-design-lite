@@ -1,3 +1,21 @@
+# Material Design Lite - Fork
+
+this forks add several components to the MDL base.
+
+It s not AAA compliant all browsers, but could be!
+
+- custom-selectfield: Mdl integration fo the select field.
+- custom-chipautocomplete: An autocomplete field which records selected data into chips.
+- custom-cropper: An input file which opens an image cropper and appropriately sets form values.
+- custom-input-file: An input file support for mdl.
+- custom-tinymce: A textfield which supports tinymce integration right out of the box.
+- custom-datefield: A text field which diplays an awesome date picker.
+- custom-datatable: Improved data table which can enable/disable a button, set checkbox values.
+- custom-expander: Easily expand nodes with css classes.
+- custom-dialog: A dialog box implementation.
+- custom-confirmbutton: A button which shows a dialog box to require confirmation of the action.
+
+
 # Material Design Lite
 
 [![GitHub version](https://badge.fury.io/gh/google%2Fmaterial-design-lite.svg)](https://badge.fury.io/gh/google%2Fmaterial-design-lite)
