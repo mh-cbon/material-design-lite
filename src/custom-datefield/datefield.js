@@ -80,9 +80,6 @@
 
         var moment = window.moment;
         moment.locale(displaylocale);
-        console.log(displaylocale);
-        console.log(moment.locale(displaylocale));
-        console.log(moment.locale(displaylocale));
         var mdDateTimePicker = window.mdDateTimePicker;
 
         var options = {
@@ -93,7 +90,7 @@
           past: past && moment(past, format) || past,
           mode: mode,
           orientation: orientation,
-          colon: colon,
+          colon: colon=="true",
         };
         var dialog = new mdDateTimePicker.default(options);
         this.dialog = dialog;
