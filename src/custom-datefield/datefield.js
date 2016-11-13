@@ -90,7 +90,7 @@
           past: past && moment(past, format) || past,
           mode: mode,
           orientation: orientation,
-          colon: colon=="true",
+          colon: colon === 'true',
         };
         var dialog = new mdDateTimePicker.default(options);
         this.dialog = dialog;
