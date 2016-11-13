@@ -134,6 +134,22 @@ gulp.task('gh', function() {
     .pipe(ghPages());
 });
 
+gulp.task('build', [
+  'build-dist',
+  ],
+function() {
+  return gulp.src([
+      'dist/**',
+    ])
+    .pipe(gulpCopy('build/', {prefix: 1}));
+});
+gulp.task('build-dist', ['clean'], cb => {
+  runSequence(
+    ['styles', 'styles-grid'],
+    ['scripts'],
+    ['tinymce'],
+    cb);
+});
 // ***** Development tasks ****** //
 
 // Lint JavaScript

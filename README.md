@@ -18,13 +18,21 @@ It s not AAA compliant all browsers, but could be!
 
 See it in action [here](https://mh-cbon.github.io/material-design-lite/test.html)
 
+### Install
+
+```sh
+npm i @mh-cbon/material-design-lite --save
+```
+
 ### Your local workflow
 
 ```sh
+git clone https://github.com/mh-cbon/material-design-lite.git
+cd material-design-lite
 npm i
 ./node_modules/.bin/gulp default
 ./node_modules/.bin/gulp serve
-./node_modules/.bin/gulp gh # publish your update on your gh pages.
+./node_modules/.bin/gulp gh # publish your updates on your own gh-pages branch.
 ```
 
 # Material Design Lite

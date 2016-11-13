@@ -1,0 +1,10 @@
+./.**
+demo/
+dist/
+docs/
+src/
+templates/
+test/
+utils/
+bower.json
+gulpfile.*
