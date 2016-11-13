@@ -4,6 +4,9 @@
   "description": "Material Design Components in CSS, JS and HTML",
   "license": "Apache-2.0",
   "author": "Google",
+  "contributors": [
+    "mh-cbon <mh-cbon@users.noreply.github.com>"
+  ],
   "repository": "google/material-design-lite",
   "main": "dist/material.min.js",
   "devDependencies": {
