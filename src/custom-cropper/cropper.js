@@ -163,7 +163,7 @@
     if (this.dataResult_) {
       this.dataResult_.value = null;
     }
-    if (this.currentImg_) {
+    if (this.currentImg_ && this.originalCurrentImg_) {
       this.currentImg_.src = this.originalCurrentImg_;
     }
   };
@@ -198,7 +198,9 @@
       this.dialogCancel_ = this.dialog_.querySelector('.custom-dialog-cancel');
 
       var cherry = window.cherry;
-      this.originalCurrentImg_ = cherry.imgAsDataUrl(this.currentImg_);
+      if (this.currentImg_) {
+        this.originalCurrentImg_ = cherry.imgAsDataUrl(this.currentImg_);
+      }
       this.cropper_ = null;
       this.cropperOptions_ = {
         aspectRatio: 1,
