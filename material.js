@@ -2579,6 +2579,11 @@ window.addEventListener('load', function() {
   }
 });
 
+if (!window.cherry || !window['cherry']) {
+    window.cherry = {};
+    window['cherry'] = {};
+}
+var cherry = window.cherry || window['cherry'];
 /**
    * debounce a function.
    * @param  {!Function} The function to debounce.
@@ -2596,8 +2601,8 @@ var debounce = function (fn, delay) {
         }, delay);
     };
 };
-window.debounce = debounce;
-window['debounce'] = debounce;
+cherry.debounce = debounce;
+cherry['debounce'] = debounce;
 /**
    * outerHeight polyfill.
    * @param  {!DomElement} The element we want the outer heihgt of.
@@ -2609,8 +2614,8 @@ var outerHeight = function (el) {
     s += parseInt(style.marginTop) + parseInt(style.marginBottom);
     return s;
 };
-window.outerHeight = outerHeight;
-window['outerHeight'] = outerHeight;
+cherry.outerHeight = outerHeight;
+cherry['outerHeight'] = outerHeight;
 /**
    * innerHeight polyfill.
    * @param  {!DomElement} The element we want the outer heihgt of.
@@ -2622,8 +2627,8 @@ var innerHeight = function (el) {
     s -= parseInt(style.paddingTop) + parseInt(style.paddingBottom);
     return s;
 };
-window.innerHeight = innerHeight;
-window['innerHeight'] = innerHeight;
+cherry.innerHeight = innerHeight;
+cherry['innerHeight'] = innerHeight;
 /**
    * Get child element nodes only.
    * @param  {!DomElement} The parent element.
@@ -2639,8 +2644,8 @@ var childElements = function (el) {
     }
     return ret;
 };
-window.childElements = childElements;
-window['childElements'] = childElements;
+cherry.childElements = childElements;
+cherry['childElements'] = childElements;
 /**
    * Event delegation.
    * @param  {!string} A selector string or a DomNode onto which attach the event.
@@ -2675,8 +2680,8 @@ function delegateEvent(elSelector, eventName, selector, fn) {
     element.addEventListener(eventName, handler);
     return handler;
 }
-window.delegateEvent = delegateEvent;
-window['delegateEvent'] = delegateEvent;
+cherry.delegateEvent = delegateEvent;
+cherry['delegateEvent'] = delegateEvent;
 /**
    * Get all DOM element up the tree that contain a class, ID, or data attribute.
    *
@@ -2725,8 +2730,8 @@ var getParents = function (elem, selector) {
     }
     return null;
 };
-window.getParents = getParents;
-window['getParents'] = getParents;
+cherry.getParents = getParents;
+cherry['getParents'] = getParents;
 /**
    * Get all DOM element up the tree that contain a class, ID, or data attribute.
    *
@@ -2804,8 +2809,8 @@ var getParentsUntil = function (elem, parent, selector) {
     }
     return null;
 };
-window.getParentsUntil = getParentsUntil;
-window['getParentsUntil'] = getParentsUntil;
+cherry.getParentsUntil = getParentsUntil;
+cherry['getParentsUntil'] = getParentsUntil;
 /**
    * Get image as data url value.
    *
@@ -2820,8 +2825,8 @@ var imgAsDataUrl = function (img) {
     ctx.drawImage(img, 0, 0, img.offsetWidth, img.offsetHeight);
     return canvas.toDataURL('image/png');
 };
-window.imgAsDataUrl = imgAsDataUrl;
-window['imgAsDataUrl'] = imgAsDataUrl;
+cherry.imgAsDataUrl = imgAsDataUrl;
+cherry['imgAsDataUrl'] = imgAsDataUrl;
 /**
  * @license
  * Copyright 2015 Google Inc. All Rights Reserved.
@@ -6159,15 +6164,16 @@ CustomDataTable.prototype.init = function () {
             }
             this.element_.classList.add(this.CssClasses_.IS_UPGRADED);
             var that = this;
-            this.element_.__selectall = window.delegateEvent(this.element_, 'change', 'input[type="checkbox"]', function () {
+            var cherry = window.cherry;
+            this.element_.__selectall = cherry.delegateEvent(this.element_, 'change', 'input[type="checkbox"]', function () {
                 var cb = this;
-                var row = window.getParentsUntil(this, 'tr');
+                var row = cherry.getParentsUntil(this, 'tr');
                 if (row) {
                     row = row.pop().parentNode;
                     var isHeader = row.querySelectorAll('th').length > 0;
                     if (isHeader) {
                         var cell;
-                        cell = window.getParentsUntil(this, 'th');
+                        cell = cherry.getParentsUntil(this, 'th');
                         cell = cell.pop().parentNode;
                         if (isHeader) {
                             var rows = that.element_.querySelectorAll('tbody > tr');
@@ -6310,7 +6316,8 @@ CustomDialog.prototype.init = function () {
         this.confirm_.addEventListener('click', this.confirm_.__fn);
         this.cancel_.__fn = this.closeBox_.bind(this);
         this.cancel_.addEventListener('click', this.cancel_.__fn);
-        this.container_.__resize = window.debounce(this.updateBoxPosition_.bind(this), 100);
+        var cherry = window.cherry;
+        this.container_.__resize = cherry.debounce(this.updateBoxPosition_.bind(this), 100);
         window.addEventListener('resize', this.container_.__resize);
         this.placeholder_ = document.createElement('input');
         this.placeholder_.setAttribute('type', 'hidden');
@@ -6480,9 +6487,13 @@ CustomExpander.prototype.CssClasses_ = {
    * Toggle the dialog display.
    */
 CustomExpander.prototype.toggleBox_ = function () {
-    if (this.element_.classList.contains(this.CssClasses_.IS_EXPANDED)) {
+    console.log('click', this.bt_);
+    window.Velocity(this.container_, 'stop', true);
+    if (this.nextDir_ === 'close') {
+        this.nextDir_ = 'open';
         this.closeBox_();
     } else {
+        this.nextDir_ = 'close';
         this.showBox_();
     }
 };
@@ -6491,9 +6502,10 @@ CustomExpander.prototype.toggleBox_ = function () {
    */
 CustomExpander.prototype.showBox_ = function () {
     var h = 0;
-    var els = window.childElements(this.container_);
+    var cherry = window.cherry;
+    var els = cherry.childElements(this.container_);
     for (var i = 0; i < els.length; i++) {
-        h += window.outerHeight(els[i]);
+        h += cherry.outerHeight(els[i]);
     }
     var that = this;
     window.Velocity(this.container_, { height: h }, {
@@ -6527,8 +6539,18 @@ CustomExpander.prototype.init = function () {
     if (this.element_) {
         this.container_ = this.element_.querySelector('.custom-expander-container');
         this.bt_ = this.element_.querySelector('.custom-expander-bt');
-        this.bt_.__fn = this.toggleBox_.bind(this);
-        this.bt_.addEventListener('click', this.bt_.__fn);
+        this.nextDir_ = 'open';
+        if (this.element_.classList.contains(this.CssClasses_.IS_EXPANDED)) {
+            this.nextDir_ = 'close';
+        }
+        var cherry = window.cherry;
+        this.bt_.__fn = cherry.debounce(this.toggleBox_.bind(this), 10);
+        // for some this reasons to undercover,
+        // click event is triggered twice
+        // foreach real click.
+        // debounce it until more advanced into is found.
+        // this.bt_.__fn = this.toggleBox_.bind(this);
+        this.bt_.addEventListener('change', this.bt_.__fn);
         this.element_.classList.add(this.CssClasses_.IS_UPGRADED);
     }
 };
@@ -6617,9 +6639,6 @@ CustomDateField.prototype.init = function () {
             var colon = this.element_.getAttribute('colon') || undefined;
             var moment = window.moment;
             moment.locale(displaylocale);
-            console.log(displaylocale);
-            console.log(moment.locale(displaylocale));
-            console.log(moment.locale(displaylocale));
             var mdDateTimePicker = window.mdDateTimePicker;
             var options = {
                 type: 'date',
@@ -6629,7 +6648,7 @@ CustomDateField.prototype.init = function () {
                 past: past && moment(past, format) || past,
                 mode: mode,
                 orientation: orientation,
-                colon: colon
+                colon: colon === 'true'
             };
             var dialog = new mdDateTimePicker.default(options);
             this.dialog = dialog;
@@ -7086,20 +7105,33 @@ CustomChipAutocomplete.prototype.clearComponent_ = function () {
     this.textfield_['MaterialTextfield'].updateClasses_();    // this.element_.classList.remove("is-dirty");
 };
 /**
+   * Make an url to fetch results on the remote.
+   *
+   * @private
+   */
+CustomChipAutocomplete.prototype.makeFetchUrl_ = function (text) {
+    var url = this.urlCompleter_.replace(this.urlPlaceholder_, text);
+    var urlArgs = '';
+    var getArgs = this.completerArgs_;
+    Object.keys(getArgs).forEach(function (key) {
+        urlArgs += key + '=' + getArgs[key];
+    });
+    if (url.match(/[?]/)) {
+        url = url + '&' + urlArgs;
+    } else {
+        url = url + '?' + urlArgs;
+    }
+    return url;
+};
+/**
    * Fetch results on the remote server.
    *
    * @private
    */
 CustomChipAutocomplete.prototype.fetchResults_ = function (text) {
-    var url = this.urlCompleter_.replace(this.urlPlaceholder_, text);
-    var urlArgs = '?';
-    var getArgs = this.completerArgs_;
-    Object.keys(getArgs).forEach(function (key) {
-        urlArgs += key + '=' + getArgs[key];
-    });
     var ajax = window.ajax;
     var that = this;
-    var request = ajax().get(url + urlArgs);
+    var request = ajax().get(this.makeFetchUrl_(text));
     request.then(function (response) {
         var results = response;
         if (!results.length || !that.resultsContainsText_(results, text)) {
@@ -7184,14 +7216,15 @@ CustomChipAutocomplete.prototype.resultsContainsText_ = function (results, text)
 CustomChipAutocomplete.prototype.showResults_ = function () {
     this.results_.style.visibility = 'hidden';
     this.results_.classList.add('show');
-    var componentHeight = window.outerHeight(this.results_);
+    var cherry = window.cherry;
+    var componentHeight = cherry.outerHeight(this.results_);
     var bodyRect = document.body.getBoundingClientRect();
     var inputRect = this.input_.getBoundingClientRect();
     var inputLeft = inputRect.left;
     var inputTop = inputRect.top - bodyRect.top;
-    var inputHeight = window.outerHeight(this.input_);
+    var inputHeight = cherry.outerHeight(this.input_);
     var intFrameHeight = window.innerHeight;
-    if (intFrameHeight > inputTop + inputHeight + componentHeight) {
+    if (intFrameHeight > inputRect.top + inputHeight + componentHeight) {
         this.results_.style.top = '' + (inputTop + inputHeight) + 'px';
     } else {
         this.results_.style.top = '' + (inputTop - componentHeight - 1) + 'px';
@@ -7431,8 +7464,9 @@ CustomChipAutocomplete.prototype.init = function () {
         this.chipName_ = element_.getAttribute('chip-name') || 'chip';
         document.body.appendChild(this.results_);
         this.results_.style.width = this.input_.offsetWidth + 'px';
-        var debounce = window.debounce;
-        var delegateEvent = window.delegateEvent;
+        var cherry = window.cherry;
+        var debounce = cherry.debounce;
+        var delegateEvent = cherry.delegateEvent;
         this.selected_.__click = delegateEvent(this.selected_, 'click', '.mdl-chip__action', this.removeChip_);
         this.ul_.__click = delegateEvent(this.ul_, 'click', 'li', this.onResultClick_());
         this.input_.__blur = debounce(this.clearComponent_.bind(this), 150);
@@ -7557,11 +7591,12 @@ CustomCropper.prototype.updateBoxPosition_ = function () {
    * Update the dialog height.
    */
 CustomCropper.prototype.updateBoxHeight_ = function () {
+    var cherry = window.cherry;
     var containerHeight = this.dialogContainer_.offsetHeight;
-    var contentInner = window.innerHeight(this.dialogContent_);
-    var contentOuter = window.outerHeight(this.dialogContent_);
-    var actionsHeight = window.outerHeight(this.dialogActions_);
-    var titleHeight = window.outerHeight(this.dialogTtile_);
+    var contentInner = cherry.innerHeight(this.dialogContent_);
+    var contentOuter = cherry.outerHeight(this.dialogContent_);
+    var actionsHeight = cherry.outerHeight(this.dialogActions_);
+    var titleHeight = cherry.outerHeight(this.dialogTtile_);
     var imgH = containerHeight - actionsHeight - titleHeight - (contentOuter - contentInner);
     this.preview_.style.right = (contentOuter - contentInner) / 2;
     this.preview_.style.bottom = actionsHeight + (contentOuter - contentInner) / 2;
@@ -7606,7 +7641,7 @@ CustomCropper.prototype.onFileCleared = function () {
     if (this.dataResult_) {
         this.dataResult_.value = null;
     }
-    if (this.currentImg_) {
+    if (this.currentImg_ && this.originalCurrentImg_) {
         this.currentImg_.src = this.originalCurrentImg_;
     }
 };
@@ -7635,7 +7670,10 @@ CustomCropper.prototype.init = function () {
         this.dialogConfirm_ = this.dialog_.querySelector('.custom-dialog-confirm');
         this.dialogClose_ = this.dialog_.querySelector('.custom-dialog-close');
         this.dialogCancel_ = this.dialog_.querySelector('.custom-dialog-cancel');
-        this.originalCurrentImg_ = window.imgAsDataUrl(this.currentImg_);
+        var cherry = window.cherry;
+        if (this.currentImg_) {
+            this.originalCurrentImg_ = cherry.imgAsDataUrl(this.currentImg_);
+        }
         this.cropper_ = null;
         this.cropperOptions_ = {
             aspectRatio: 1,
@@ -7660,7 +7698,7 @@ CustomCropper.prototype.init = function () {
         this.dialogCancel_.addEventListener('click', this.dialogCancel_.__click);
         this.clearFile_.__click = this.onFileCleared.bind(this);
         this.clearFile_.addEventListener('click', this.clearFile_.__click);
-        this.element_.__resize = window.debounce(this.updateBoxPosition_.bind(this), 100);
+        this.element_.__resize = cherry.debounce(this.updateBoxPosition_.bind(this), 100);
         window.addEventListener('resize', this.element_.__resize);
         this.element_.classList.add(this.CssClasses_.IS_UPGRADED);
     }

@@ -7,10 +7,12 @@
 </head>
 <body>
 
+<hr/>
+
 <div>
 
     <table
-    class="mdl-data-table custom-js-data-table mdl-data-table--selectable mdl-shadow--2dp"
+    class="mdl-data-table custom-js-data-table custom-data-table mdl-data-table--selectable mdl-shadow--2dp"
     bt-el="#bt-action"
     >
       <thead>
@@ -62,6 +64,48 @@
       <i class="material-icons">close</i>
     </button>
   </div>
+</div>
+
+<hr/>
+<div>
+
+    <table
+    class="mdl-data-table custom-js-data-table custom-data-table mdl-data-table--selectable mdl-shadow--2dp"
+    bt-el="#bt-action"
+    >
+      <thead>
+        <tr>
+          <th class="mdl-data-table__cell--non-numeric mdl-data-table__header--sorted-ascending">
+            <a href="?sort=desc">Material</a>
+          </th>
+          <th class="mdl-data-table__header--sorted">
+            <a href="?sort=asc"><i class='material-icons'>sort_by_alpha</i>Quantity</a>
+          </th>
+          <th class="mdl-data-table__header--sorted-descending">
+            <a href="?sort=asc">Unit price</a>
+          </th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr value="r">
+          <td class="mdl-data-table__cell--non-numeric">Acrylic (Transparent)</td>
+          <td>25</td>
+          <td>$2.90</td>
+        </tr>
+        <tr value="t">
+          <td class="mdl-data-table__cell--non-numeric">Plywood (Birch)</td>
+          <td>50</td>
+          <td>$1.25</td>
+        </tr>
+        <tr value="yy">
+          <td class="mdl-data-table__cell--non-numeric">Laminate (Gold on Blue)</td>
+          <td>10</td>
+          <td>$2.35</td>
+        </tr>
+      </tbody>
+    </table>
+</div>
+
 </div>
 
 <hr/>
@@ -248,10 +292,12 @@
       <input class="mdl-textfield__input"id="chipautocomplete1" autocomplete="off" type="text">
       <label class="mdl-textfield__label" for="chipautocomplete1">chip autocomplete</label>
       <span class="mdl-textfield__error">blah</span>
-      <div class="custom-chipautocomplete-results mdl-shadow--2dp">
-        <ul class="mdl-list"></ul>
-      </div>
     </div>
+
+    <div class="custom-chipautocomplete-results mdl-shadow--2dp">
+      <ul class="mdl-list"></ul>
+    </div>
+
     <div class="custom-chipautocomplete-selected"></div>
 </div>
 
@@ -268,10 +314,12 @@
     <input class="mdl-textfield__input" id="chipautocomplete1" autocomplete="off" type="text">
     <label class="mdl-textfield__label" for="chipautocomplete1">chip autocomplete</label>
     <span class="mdl-textfield__error">blah</span>
-    <div class="custom-chipautocomplete-results mdl-shadow--2dp">
-      <ul class="mdl-list"></ul>
-    </div>
   </div>
+
+  <div class="custom-chipautocomplete-results mdl-shadow--2dp">
+    <ul class="mdl-list"></ul>
+  </div>
+
   <div class="custom-chipautocomplete-selected">
 
     <span class="mdl-chip mdl-chip--deletable">
@@ -298,8 +346,8 @@
     <img src="avatar-1.png" />
   </div>
 
-<input class="custom-cropper-b64-result" type="hidden" name="the name you need" />
-<input class="custom-cropper-data-result" type="hidden" name="the name you need" />
+  <input class="custom-cropper-b64-result" type="hidden" name="the name you need" />
+  <input class="custom-cropper-data-result" type="hidden" name="the name you need" />
 
   <div class="mdl-textfield mdl-js-textfield custom-inputfile custom-js-inputfile
               is-invalid mdl-textfield--floating-label">
@@ -341,6 +389,61 @@
   </div>
 
 </div>
+
+<hr/>
+
+<div class="custom-cropper custom-js-cropper"
+  >
+
+  <!-- <div class="custom-cropper-current-img">
+    <img src="avatar-1.png" />
+  </div> -->
+
+  <input class="custom-cropper-b64-result" type="hidden" name="the name you need" />
+  <input class="custom-cropper-data-result" type="hidden" name="the name you need" />
+
+  <div class="mdl-textfield mdl-js-textfield custom-inputfile custom-js-inputfile
+              is-invalid mdl-textfield--floating-label">
+    <input class="mdl-textfield__input" type="text"
+        id="inputfile2" value="" readonly="readonly" />
+
+    <label>
+      <div class="mdl-button mdl-button--icon">
+        <i class="material-icons">attach_file</i>
+        <i class="material-icons custom-clearbutton">clear</i>
+      </div>
+      <input type="file" />
+    </label>
+
+    <label class="mdl-textfield__label" for="inputfile2">Choose a file</label>
+    <span class="mdl-textfield__error">beep boop</span>
+  </div>
+
+  <div class="custom-cropper-dialog custom-js-dialog custom-dialog">
+    <div class="custom-dialog-bg mdl-color--grey"></div>
+    <div class="custom-dialog-container mdl-dialog mdl-color--white">
+      <h4 class="mdl-dialog__title">Title of the dialog</h4>
+      <div class="mdl-dialog__content">
+        <div class="custom-cropper-component-container">
+          <img src="" class="custom-cropper-dialog-img" />
+        </div>
+        <div class="custom-cropper-preview">
+          <img />
+        </div>
+      </div>
+      <div class="mdl-dialog__actions">
+        <button type="button" class="mdl-button custom-dialog-confirm">OK</button>
+        <button type="button" class="mdl-button custom-dialog-cancel">CANCEL</button>
+      </div>
+      <button type="button" class="mdl-button custom-dialog-close">
+        <i class="material-icons">close</i>
+      </button>
+    </div>
+  </div>
+
+</div>
+
+<hr/>
 
 <br/>
 <br/>

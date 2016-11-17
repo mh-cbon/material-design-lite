@@ -1,6 +1,6 @@
 /**
- * material-design-lite - Material Design Components in CSS, JS and HTML
- * @version v1.2.1
+ * @mh-cbon/material-design-lite - Material Design Components in CSS, JS and HTML
+ * @version v1.2.4
  * @license Apache-2.0
  * @copyright 2015 Google, Inc.
  * @link https://github.com/google/material-design-lite
@@ -11484,6 +11484,17 @@ _:-ms-input-placeholder, :root .mdl-slider.mdl-slider.is-upgraded {
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+.custom-data-table thead th.mdl-data-table__header--sorted:hover {
+  cursor: pointer; }
+  .custom-data-table thead th.mdl-data-table__header--sorted:hover a .material-icons {
+    color: rgba(0, 0, 0, 0.26); }
+
+.custom-data-table thead th a .material-icons {
+  color: rgba(0, 0, 0, 0.87);
+  font-size: 16px;
+  margin-right: 5px;
+  vertical-align: sub; }
+
 /**
  * Copyright 2015 Google Inc. All Rights Reserved.
  *
@@ -13021,11 +13032,14 @@ _:-ms-input-placeholder, :root .mdl-slider.mdl-slider.is-upgraded {
  * limitations under the License.
  */
 .custom-cropper .custom-cropper-current-img {
-  padding: 20px 0;
+  padding: 9px 0;
   display: inline-block;
   vertical-align: text-bottom; }
   .custom-cropper .custom-cropper-current-img img {
     border-radius: 50%; }
+
+.custom-cropper .mdl-textfield {
+  vertical-align: text-bottom; }
 
 .custom-cropper-dialog .custom-dialog-container {
   width: 95%;
