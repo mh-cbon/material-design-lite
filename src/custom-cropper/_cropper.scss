@@ -16,12 +16,15 @@
 
 .custom-cropper{
   .custom-cropper-current-img {
-    padding: 20px 0;
+    padding: 9px 0;
     display: inline-block;
     vertical-align: text-bottom;
     img {
       border-radius: 50%;
     }
+  }
+  .mdl-textfield{
+    vertical-align: text-bottom;
   }
 }
 .custom-cropper-dialog {
