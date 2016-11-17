@@ -13,3 +13,18 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
+.custom-data-table{
+  thead th.mdl-data-table__header--sorted:hover{
+    cursor: pointer;
+    a .material-icons{
+      color: $data-table-header-sorted-icon-hover-color;
+    }
+  }
+  thead th a .material-icons{
+    color: $data-table-header-sorted-color;
+    font-size: $data-table-header-sort-icon-size;
+    margin-right: 5px;
+    vertical-align: sub;
+  }
+}
