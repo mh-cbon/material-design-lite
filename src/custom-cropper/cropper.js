@@ -108,11 +108,12 @@
    */
   CustomCropper.prototype.updateBoxHeight_ = function() {
 
+    var cherry = window.cherry;
     var containerHeight = this.dialogContainer_.offsetHeight;
-    var contentInner = window.innerHeight(this.dialogContent_);
-    var contentOuter = window.outerHeight(this.dialogContent_);
-    var actionsHeight = window.outerHeight(this.dialogActions_);
-    var titleHeight = window.outerHeight(this.dialogTtile_);
+    var contentInner = cherry.innerHeight(this.dialogContent_);
+    var contentOuter = cherry.outerHeight(this.dialogContent_);
+    var actionsHeight = cherry.outerHeight(this.dialogActions_);
+    var titleHeight = cherry.outerHeight(this.dialogTtile_);
 
     var imgH = containerHeight - actionsHeight - titleHeight - (contentOuter - contentInner);
 
@@ -196,7 +197,8 @@
       this.dialogClose_ = this.dialog_.querySelector('.custom-dialog-close');
       this.dialogCancel_ = this.dialog_.querySelector('.custom-dialog-cancel');
 
-      this.originalCurrentImg_ = window.imgAsDataUrl(this.currentImg_);
+      var cherry = window.cherry;
+      this.originalCurrentImg_ = cherry.imgAsDataUrl(this.currentImg_);
       this.cropper_ = null;
       this.cropperOptions_ = {
         aspectRatio: 1,
@@ -228,7 +230,7 @@
       this.clearFile_.__click = this.onFileCleared.bind(this);
       this.clearFile_.addEventListener('click', this.clearFile_.__click);
 
-      this.element_.__resize = window.debounce(this.updateBoxPosition_.bind(this), 100);
+      this.element_.__resize = cherry.debounce(this.updateBoxPosition_.bind(this), 100);
       window.addEventListener('resize', this.element_.__resize);
 
       this.element_.classList.add(this.CssClasses_.IS_UPGRADED);
