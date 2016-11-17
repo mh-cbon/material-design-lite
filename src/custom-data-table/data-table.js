@@ -139,16 +139,17 @@
         this.element_.classList.add(this.CssClasses_.IS_UPGRADED);
 
         var that = this;
-        this.element_.__selectall = window.delegateEvent(this.element_, 'change', 'input[type="checkbox"]', function() {
+        var cherry = window.cherry;
+        this.element_.__selectall = cherry.delegateEvent(this.element_, 'change', 'input[type="checkbox"]', function() {
           var cb = this;
-          var row = window.getParentsUntil(this, 'tr');
+          var row = cherry.getParentsUntil(this, 'tr');
           if (row) {
             row = row.pop().parentNode;
             var isHeader = row.querySelectorAll('th').length > 0;
 
             if (isHeader) {
               var cell;
-              cell = window.getParentsUntil(this, 'th');
+              cell = cherry.getParentsUntil(this, 'th');
               cell = cell.pop().parentNode;
 
               if (isHeader) {

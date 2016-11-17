@@ -76,9 +76,10 @@
    */
   CustomExpander.prototype.showBox_ = function() {
     var h = 0;
-    var els = window.childElements(this.container_);
+    var cherry = window.cherry;
+    var els = cherry.childElements(this.container_);
     for (var i = 0; i < els.length; i++) {
-      h += window.outerHeight(els[i]);
+      h += cherry.outerHeight(els[i]);
     }
     var that = this;
     window.Velocity(this.container_, {

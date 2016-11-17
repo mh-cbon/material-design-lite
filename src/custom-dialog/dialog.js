@@ -108,7 +108,8 @@
       this.cancel_.__fn = this.closeBox_.bind(this);
       this.cancel_.addEventListener('click', this.cancel_.__fn);
 
-      this.container_.__resize = window.debounce(this.updateBoxPosition_.bind(this), 100);
+      var cherry = window.cherry;
+      this.container_.__resize = cherry.debounce(this.updateBoxPosition_.bind(this), 100);
       window.addEventListener('resize', this.container_.__resize);
 
       this.placeholder_ = document.createElement('input');
