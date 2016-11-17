@@ -64,9 +64,13 @@
    * Toggle the dialog display.
    */
   CustomExpander.prototype.toggleBox_ = function() {
-    if (this.element_.classList.contains(this.CssClasses_.IS_EXPANDED)) {
+    console.log('click', this.bt_);
+    window.Velocity(this.container_, 'stop', true);
+    if (this.nextDir_ === 'close') {
+      this.nextDir_ = 'open';
       this.closeBox_();
     } else {
+      this.nextDir_ = 'close';
       this.showBox_();
     }
   };
@@ -120,8 +124,19 @@
       this.container_ = this.element_.querySelector('.custom-expander-container');
       this.bt_ = this.element_.querySelector('.custom-expander-bt');
 
-      this.bt_.__fn = this.toggleBox_.bind(this);
-      this.bt_.addEventListener('click', this.bt_.__fn);
+      this.nextDir_ = 'open';
+      if (this.element_.classList.contains(this.CssClasses_.IS_EXPANDED)) {
+        this.nextDir_ = 'close';
+      }
+
+      var cherry = window.cherry;
+      this.bt_.__fn = cherry.debounce(this.toggleBox_.bind(this), 10);
+      // for some this reasons to undercover,
+      // click event is triggered twice
+      // foreach real click.
+      // debounce it until more advanced into is found.
+      // this.bt_.__fn = this.toggleBox_.bind(this);
+      this.bt_.addEventListener('change', this.bt_.__fn);
       this.element_.classList.add(this.CssClasses_.IS_UPGRADED);
     }
   };
