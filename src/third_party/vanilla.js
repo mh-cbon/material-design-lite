@@ -1,5 +1,12 @@
-(function() {
+(function(window) {
   'use strict';
+
+  if (!window.cherry || !window['cherry']) {
+    window.cherry = {};
+    window['cherry'] = {};
+  }
+
+  var cherry = window.cherry || window['cherry'];
 
   /**
    * debounce a function.
@@ -18,8 +25,8 @@
       }, delay);
     };
   };
-  window.debounce = debounce;
-  window['debounce'] = debounce;
+  cherry.debounce = debounce;
+  cherry['debounce'] = debounce;
 
   /**
    * outerHeight polyfill.
@@ -32,8 +39,8 @@
     s += parseInt(style.marginTop) + parseInt(style.marginBottom);
     return s;
   };
-  window.outerHeight = outerHeight;
-  window['outerHeight'] = outerHeight;
+  cherry.outerHeight = outerHeight;
+  cherry['outerHeight'] = outerHeight;
 
   /**
    * innerHeight polyfill.
@@ -46,8 +53,8 @@
     s -= parseInt(style.paddingTop) + parseInt(style.paddingBottom);
     return s;
   };
-  window.innerHeight = innerHeight;
-  window['innerHeight'] = innerHeight;
+  cherry.innerHeight = innerHeight;
+  cherry['innerHeight'] = innerHeight;
 
   /**
    * Get child element nodes only.
@@ -64,8 +71,8 @@
     }
     return ret;
   };
-  window.childElements = childElements;
-  window['childElements'] = childElements;
+  cherry.childElements = childElements;
+  cherry['childElements'] = childElements;
 
   /**
    * Event delegation.
@@ -105,8 +112,8 @@
     element.addEventListener(eventName, handler);
     return handler;
   }
-  window.delegateEvent = delegateEvent;
-  window['delegateEvent'] = delegateEvent;
+  cherry.delegateEvent = delegateEvent;
+  cherry['delegateEvent'] = delegateEvent;
 
   /**
    * Get all DOM element up the tree that contain a class, ID, or data attribute.
@@ -164,8 +171,8 @@
     }
     return null;
   };
-  window.getParents = getParents;
-  window['getParents'] = getParents;
+  cherry.getParents = getParents;
+  cherry['getParents'] = getParents;
 
   /**
    * Get all DOM element up the tree that contain a class, ID, or data attribute.
@@ -261,8 +268,8 @@
 
     return null;
   };
-  window.getParentsUntil = getParentsUntil;
-  window['getParentsUntil'] = getParentsUntil;
+  cherry.getParentsUntil = getParentsUntil;
+  cherry['getParentsUntil'] = getParentsUntil;
 
   /**
    * Get image as data url value.
@@ -278,6 +285,7 @@
     ctx.drawImage(img, 0, 0, img.offsetWidth, img.offsetHeight);
     return canvas.toDataURL('image/png');
   };
-  window.imgAsDataUrl = imgAsDataUrl;
-  window['imgAsDataUrl'] = imgAsDataUrl;
-})();
+  cherry.imgAsDataUrl = imgAsDataUrl;
+  cherry['imgAsDataUrl'] = imgAsDataUrl;
+
+})(window);
