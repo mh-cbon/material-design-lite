@@ -78,20 +78,34 @@
   };
 
   /**
+   * Make an url to fetch results on the remote.
+   *
+   * @private
+   */
+  CustomChipAutocomplete.prototype.makeFetchUrl_ = function(text) {
+    var url = this.urlCompleter_.replace(this.urlPlaceholder_, text);
+    var urlArgs = '';
+    var getArgs = this.completerArgs_;
+    Object.keys(getArgs).forEach(function(key) {
+      urlArgs += key + '=' + getArgs[key];
+    });
+    if(url.match(/[?]/)) {
+      url = url + "&" + urlArgs;
+    } else {
+      url = url + "?" + urlArgs;
+    }
+    return url
+  }
+
+  /**
    * Fetch results on the remote server.
    *
    * @private
    */
   CustomChipAutocomplete.prototype.fetchResults_ = function(text) {
-    var url = this.urlCompleter_.replace(this.urlPlaceholder_, text);
-    var urlArgs = '?';
-    var getArgs = this.completerArgs_;
-    Object.keys(getArgs).forEach(function(key) {
-      urlArgs += key + '=' + getArgs[key];
-    });
     var ajax = window.ajax;
     var that = this;
-    var request = ajax().get(url + urlArgs);
+    var request = ajax().get(this.makeFetchUrl_(text));
     request.then(function(response) {
       var results = response;
       if (!results.length || !that.resultsContainsText_(results, text)) {
