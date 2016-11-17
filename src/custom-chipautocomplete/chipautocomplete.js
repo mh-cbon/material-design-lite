@@ -89,13 +89,13 @@
     Object.keys(getArgs).forEach(function(key) {
       urlArgs += key + '=' + getArgs[key];
     });
-    if(url.match(/[?]/)) {
-      url = url + "&" + urlArgs;
+    if (url.match(/[?]/)) {
+      url = url + '&' + urlArgs;
     } else {
-      url = url + "?" + urlArgs;
+      url = url + '?' + urlArgs;
     }
-    return url
-  }
+    return url;
+  };
 
   /**
    * Fetch results on the remote server.
