@@ -199,19 +199,21 @@
   CustomChipAutocomplete.prototype.showResults_ = function() {
     this.results_.style.visibility = 'hidden';
     this.results_.classList.add('show');
-    var componentHeight   = window.outerHeight(this.results_);
+    var cherry = window.cherry;
+    var componentHeight   = cherry.outerHeight(this.results_);
     var bodyRect          = document.body.getBoundingClientRect();
     var inputRect         = this.input_.getBoundingClientRect();
     var inputLeft         = inputRect.left;
     var inputTop          = inputRect.top - bodyRect.top;
-    var inputHeight       = window.outerHeight(this.input_);
+    var inputHeight       = cherry.outerHeight(this.input_);
     var intFrameHeight    = window.innerHeight;
 
-    if (intFrameHeight > inputTop + inputHeight + componentHeight) {
+    if (intFrameHeight > inputRect.top + inputHeight + componentHeight) {
       this.results_.style.top = '' + (inputTop + inputHeight) + 'px';
     } else {
       this.results_.style.top = '' + (inputTop - componentHeight - 1) + 'px';
     }
+
     this.results_.style.left = '' + (inputLeft) + 'px';
 
     this.results_.style.visibility = 'visible';
@@ -474,8 +476,9 @@
       document.body.appendChild(this.results_);
       this.results_.style.width = this.input_.offsetWidth + 'px';
 
-      var debounce = window.debounce;
-      var delegateEvent = window.delegateEvent;
+      var cherry = window.cherry;
+      var debounce = cherry.debounce;
+      var delegateEvent = cherry.delegateEvent;
 
       this.selected_.__click = delegateEvent(this.selected_, 'click', '.mdl-chip__action', this.removeChip_);
 
