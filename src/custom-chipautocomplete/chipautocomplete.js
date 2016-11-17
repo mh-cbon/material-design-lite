@@ -158,7 +158,7 @@
   };
 
   /**
-   * Make a new create option for the result list.
+   * Make a new no-result option for the result list.
    *
    * @private
    */
@@ -170,11 +170,11 @@
   };
 
   /**
-   * Tells if the results has the create result item.
+   * Tells if the results contains the create-result option.
    *
    * @private
    */
-  CustomChipAutocomplete.prototype.hasCreateResult_ = function() {
+  CustomChipAutocomplete.prototype.hasCreateResultOption_ = function() {
     var lis = this.ul_.querySelectorAll('li');
     return lis.length && this.isCreateResultOption_(lis[0]);
   };
@@ -190,13 +190,23 @@
   };
 
   /**
-   * Tells if given li element is the create result option.
+   * Tells if given li element is the no-result option.
    *
    * @private
    */
   CustomChipAutocomplete.prototype.isNoResultOption_ = function(li) {
     return li.getAttribute('value') === '-1' &&
     li.querySelector('span').innerHTML === this.txtNoResults_;
+  };
+
+  /**
+   * Tells if the results contains the no-result option.
+   *
+   * @private
+   */
+  CustomChipAutocomplete.prototype.hasNoResultOption_ = function() {
+    var lis = this.ul_.querySelectorAll('li');
+    return lis.length && this.isNoResultOption_(lis[0]);
   };
 
   /**
@@ -340,7 +350,7 @@
   CustomChipAutocomplete.prototype.getCurrentResultsAsOptions_ = function() {
     var options = [];
     var lis = this.ul_.querySelectorAll('li');
-    var hasCreateResult = this.hasCreateResult_();
+    var hasCreateResult = this.hasCreateResultOption_();
     for (var i = (hasCreateResult ? 1 : 0); i < lis.length; i++) {
       options.push({
         Value: lis[i].getAttribute('value'),
@@ -439,17 +449,19 @@
 
     if (ev.keyCode === 13) { // enter
       var value = this.input_.value;
-      var isCreateMode = this.hasCreateResult_();
-      if (value && isCreateMode) {
-        if (this.urlCreator_) {
-          this.createNewValue_(value);
+      if (!this.hasNoResultOption_()) {
+        var isCreateMode = this.hasCreateResultOption_();
+        if (value && isCreateMode) {
+          if (this.urlCreator_) {
+            this.createNewValue_(value);
+            this.clearComponent_();
+          }
+        } else if (!isCreateMode) {
+          this.addChips_(this.getCurrentResultsAsOptions_());
           this.clearComponent_();
         }
-      } else if (!isCreateMode) {
-        this.addChips_(this.getCurrentResultsAsOptions_());
-        this.clearComponent_();
+        return false;
       }
-      return false;
     }
   };
 
