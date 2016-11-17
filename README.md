@@ -33,6 +33,8 @@ npm i
 ./node_modules/.bin/gulp default
 ./node_modules/.bin/gulp serve
 ./node_modules/.bin/gulp gh # publish your updates on your own gh-pages branch.
+./node_modules/.bin/gulp build # to build dist folder
+npm run patch|minor|major # to publish an npm package of the built dist folder
 ```
 
 # Material Design Lite
