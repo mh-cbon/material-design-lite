@@ -7218,16 +7218,16 @@ CustomChipAutocomplete.prototype.showResults_ = function () {
     this.results_.classList.add('show');
     var cherry = window.cherry;
     var componentHeight = cherry.outerHeight(this.results_);
-    var bodyRect = document.body.getBoundingClientRect();
     var inputRect = this.input_.getBoundingClientRect();
     var inputLeft = inputRect.left;
-    var inputTop = inputRect.top - bodyRect.top;
+    var inputTop = inputRect.top;
     var inputHeight = cherry.outerHeight(this.input_);
     var intFrameHeight = window.innerHeight;
-    if (intFrameHeight > inputRect.top + inputHeight + componentHeight) {
-        this.results_.style.top = '' + (inputTop + inputHeight) + 'px';
+    var scrollTop = document.body.scrollTop;
+    if (intFrameHeight > inputTop + inputHeight + componentHeight) {
+        this.results_.style.top = '' + (inputTop + inputHeight + scrollTop) + 'px';
     } else {
-        this.results_.style.top = '' + (inputTop - componentHeight - 1) + 'px';
+        this.results_.style.top = '' + (inputTop + scrollTop - componentHeight - 1) + 'px';
     }
     this.results_.style.left = '' + inputLeft + 'px';
     this.results_.style.visibility = 'visible';
