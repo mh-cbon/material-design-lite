@@ -7,7 +7,7 @@
   "contributors": [
     "mh-cbon <mh-cbon@users.noreply.github.com>"
   ],
-  "repository": "google/material-design-lite",
+  "repository": "mh-cbon/material-design-lite",
   "main": "dist/material.min.js",
   "devDependencies": {
     "@fdaciuk/ajax": "^2.1.2",
