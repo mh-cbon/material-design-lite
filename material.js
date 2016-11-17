@@ -6550,7 +6550,7 @@ CustomExpander.prototype.init = function () {
         // foreach real click.
         // debounce it until more advanced into is found.
         // this.bt_.__fn = this.toggleBox_.bind(this);
-        this.bt_.addEventListener('change', this.bt_.__fn);
+        this.bt_.addEventListener('click', this.bt_.__fn);
         this.element_.classList.add(this.CssClasses_.IS_UPGRADED);
     }
 };
