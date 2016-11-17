@@ -109,7 +109,11 @@
     request.then(function(response) {
       var results = response;
       if (!results.length) {
-        results.unshift(that.makeNoResultOption_());
+        if (that.urlCreator_) {
+          results.unshift(that.makeCreateResultOption_());
+        } else {
+          results.unshift(that.makeNoResultOption_());
+        }
       } else if (results.length && !that.resultsContainsText_(results, text)) {
         if (that.urlCreator_) {
           results.unshift(that.makeCreateResultOption_());
