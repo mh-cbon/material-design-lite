@@ -7134,9 +7134,11 @@ CustomChipAutocomplete.prototype.fetchResults_ = function (text) {
     var request = ajax().get(this.makeFetchUrl_(text));
     request.then(function (response) {
         var results = response;
-        if (!results.length || !that.resultsContainsText_(results, text)) {
+        if (!results.length) {
+            results.unshift(that.makeNoResultOption_());
+        } else if (results.length && !that.resultsContainsText_(results, text)) {
             if (that.urlCreator_) {
-                results.unshift(that.makeCreateResult_());
+                results.unshift(that.makeCreateResultOption_());
             }
         }
         that.emptyResults_();
@@ -7170,10 +7172,21 @@ CustomChipAutocomplete.prototype.setResults_ = function (results) {
    *
    * @private
    */
-CustomChipAutocomplete.prototype.makeCreateResult_ = function () {
+CustomChipAutocomplete.prototype.makeCreateResultOption_ = function () {
     return {
         Value: '-1',
-        Text: 'Press enter to create <i class="material-icons">create</i>'
+        Text: this.txtCreateResult_
+    };
+};
+/**
+   * Make a new create option for the result list.
+   *
+   * @private
+   */
+CustomChipAutocomplete.prototype.makeNoResultOption_ = function () {
+    return {
+        Value: '-1',
+        Text: this.txtNoResults_
     };
 };
 /**
@@ -7183,16 +7196,23 @@ CustomChipAutocomplete.prototype.makeCreateResult_ = function () {
    */
 CustomChipAutocomplete.prototype.hasCreateResult_ = function () {
     var lis = this.ul_.querySelectorAll('li');
-    return lis.length && this.isCreateResultEl_(lis[0]);
+    return lis.length && this.isCreateResultOption_(lis[0]);
 };
 /**
    * Tells if given li element is the create result option.
    *
    * @private
    */
-CustomChipAutocomplete.prototype.isCreateResultEl_ = function (li) {
-    var optCreate = this.makeCreateResult_();
-    return li.getAttribute('value') === optCreate.Value && li.querySelector('span').innerHTML === optCreate.Text;
+CustomChipAutocomplete.prototype.isCreateResultOption_ = function (li) {
+    return li.getAttribute('value') === '-1' && li.querySelector('span').innerHTML === this.txtCreateResult_;
+};
+/**
+   * Tells if given li element is the create result option.
+   *
+   * @private
+   */
+CustomChipAutocomplete.prototype.isNoResultOption_ = function (li) {
+    return li.getAttribute('value') === '-1' && li.querySelector('span').innerHTML === this.txtNoResults_;
 };
 /**
    * Tells if given options contains given text.
@@ -7240,9 +7260,9 @@ CustomChipAutocomplete.prototype.showResults_ = function () {
 CustomChipAutocomplete.prototype.onResultClick_ = function () {
     var that = this;
     return function () {
-        if (that.isCreateResultEl_(this)) {
+        if (that.isCreateResultOption_(this)) {
             that.createNewValue_(that.input_.value);
-        } else {
+        } else if (!that.isNoResultOption_(this)) {
             var option = {
                 Value: this.getAttribute('value'),
                 Text: this.querySelector('span').innerHTML
@@ -7460,6 +7480,8 @@ CustomChipAutocomplete.prototype.init = function () {
         this.urlCreator_ = this.urlCreator_ && decodeURI(this.urlCreator_);
         this.creatorArgs_ = element_.getAttribute('url-creator-args') || '{}';
         this.creatorArgs_ = JSON.parse(this.creatorArgs_);
+        this.txtCreateResult_ = element_.getAttribute('txt-create-results') || 'Press enter to create <i class="material-icons">create</i>';
+        this.txtNoResults_ = element_.getAttribute('txt-no-results') || 'No results';
         this.txtRemoteUnreachable_ = element_.getAttribute('txt-remote-unreachable') || 'Failed to query the remote application';
         this.chipName_ = element_.getAttribute('chip-name') || 'chip';
         document.body.appendChild(this.results_);
