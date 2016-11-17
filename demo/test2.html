@@ -1,16 +1,26 @@
 <html>
   <head>
-  <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons">
-  <link rel="stylesheet" href="/static/node_modules/@mh-cbon/material-design-lite/build/material.min.css">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons">
+    <link rel="stylesheet" href="material.css">
+    <script defer src="material.js"></script>
+    <script src="tinymce/tinymce.min.js"></script>
   </head>
   <body>
     <h4>Chip autocomplete</h4>
 
-
+    <br/><br/><br/><br/><br/><br/><br/><br/><br/>
+    <br/><br/><br/><br/><br/><br/><br/><br/><br/>
+    <br/><br/><br/><br/><br/><br/><br/><br/><br/>
+    <br/><br/><br/><br/><br/><br/><br/><br/><br/>
 <div
-  url-completer="/chip_autocomplete_list?input=itsinput"  url-placeholder="itsinput"  id="rnd-0"
+   id="rnd-0"
   class="custom-chipautocomplete custom-js-chipautocomplete
   "
+    url-completer="static-results.json?input=myinput"
+    url-completer-args='{"limit": 30}'
+    url-placeholder="myinput"
+    txt-remote-unreachable="Server gone south, baaaadddd!"
+    chip-name="inputname"
   >
 
   <div
@@ -104,7 +114,5 @@
 
       <hr/>
 
-    <script src="/static/node_modules/@mh-cbon/material-design-lite/build/tinymce/tinymce.min.js"></script>
-    <script src="/static/node_modules/@mh-cbon/material-design-lite/build/material.min.js"></script>
   </body>
   </html>
