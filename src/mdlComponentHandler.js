@@ -359,6 +359,8 @@ componentHandler = (function() {
     for (var n = 0; n < registeredComponents_.length; n++) {
       upgradeDomInternal(registeredComponents_[n].className);
     }
+    var ev = createEvent_('mdl-componentsupgraded', true, false);
+    window.dispatchEvent(ev);
   }
 
   /**
@@ -375,9 +377,11 @@ componentHandler = (function() {
 
       var upgrades = component.element_.getAttribute('data-upgraded').split(',');
       var componentPlace = upgrades.indexOf(component[componentConfigProperty_].classAsString);
+      if (component.mdlDowngrade_) {
+        component.mdlDowngrade_();
+      }
       upgrades.splice(componentPlace, 1);
       component.element_.setAttribute('data-upgraded', upgrades.join(','));
-
       var ev = createEvent_('mdl-componentdowngraded', true, false);
       component.element_.dispatchEvent(ev);
     }
@@ -409,6 +413,20 @@ componentHandler = (function() {
     }
   }
 
+  /**
+   * Downgrade node and its children recursively.
+   *
+   * @param {!Node|!Array<!Node>|!NodeList} nodes
+   */
+  function downgradeNodeRecursive(node) {
+    for (var n = 0; n < registeredComponents_.length; n++) {
+      var els = node.querySelectorAll('.' + registeredComponents_[n].cssClass);
+      for (var e = 0; e < els.length; e++) {
+        downgradeNodesInternal(els[e]); // this might downgrade a node twice if it has multiple components.
+      }
+    }
+  }
+
   // Now return the functions that should be made public with their publicly
   // facing names...
   return {
@@ -418,7 +436,8 @@ componentHandler = (function() {
     upgradeAllRegistered: upgradeAllRegisteredInternal,
     registerUpgradedCallback: registerUpgradedCallbackInternal,
     register: registerInternal,
-    downgradeElements: downgradeNodesInternal
+    downgradeElements: downgradeNodesInternal,
+    downgradeElementRecursive: downgradeNodeRecursive,
   };
 })();
 
@@ -474,6 +493,7 @@ componentHandler['registerUpgradedCallback'] =
     componentHandler.registerUpgradedCallback;
 componentHandler['register'] = componentHandler.register;
 componentHandler['downgradeElements'] = componentHandler.downgradeElements;
+componentHandler['downgradeElementRecursive'] = componentHandler.downgradeElementRecursive;
 window.componentHandler = componentHandler;
 window['componentHandler'] = componentHandler;
 
