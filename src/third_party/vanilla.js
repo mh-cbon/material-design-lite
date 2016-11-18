@@ -75,6 +75,17 @@
   cherry['childElements'] = childElements;
 
   /**
+   * Get index of given node within parent node.
+   * @param  {!DomElement} The element.
+   * @return {!int} The index.
+   */
+  var indexElement = function(el) {
+    return [].slice.call(el.parentNode.children).indexOf(el);
+  };
+  cherry.indexElement = indexElement;
+  cherry['indexElement'] = indexElement;
+
+  /**
    * Event delegation.
    * @param  {!string} A selector string or a DomNode onto which attach the event.
    * @param  {!string} An event name to listen to.
