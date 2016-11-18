@@ -105,6 +105,7 @@ const SOURCES = [
   'src/custom-datefield/datefield.js',
   'src/custom-input-file/inputfile.js',
   'src/custom-tinymce/tinymce.js',
+  'src/custom-dup/dup.js',
   'node_modules/mdl-selectfield/src/selectfield/selectfield.js',
   'src/custom-chipautocomplete/chipautocomplete.js',
   'src/custom-cropper/cropper.js',
