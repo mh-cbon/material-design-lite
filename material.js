@@ -2436,6 +2436,8 @@ componentHandler = (function() {
     for (var n = 0; n < registeredComponents_.length; n++) {
       upgradeDomInternal(registeredComponents_[n].className);
     }
+    var ev = createEvent_('mdl-componentsupgraded', true, false);
+    window.dispatchEvent(ev);
   }
 
   /**
@@ -2452,9 +2454,11 @@ componentHandler = (function() {
 
       var upgrades = component.element_.getAttribute('data-upgraded').split(',');
       var componentPlace = upgrades.indexOf(component[componentConfigProperty_].classAsString);
+      if (component.mdlDowngrade_) {
+        component.mdlDowngrade_();
+      }
       upgrades.splice(componentPlace, 1);
       component.element_.setAttribute('data-upgraded', upgrades.join(','));
-
       var ev = createEvent_('mdl-componentdowngraded', true, false);
       component.element_.dispatchEvent(ev);
     }
@@ -2486,6 +2490,20 @@ componentHandler = (function() {
     }
   }
 
+  /**
+   * Downgrade node and its children recursively.
+   *
+   * @param {!Node|!Array<!Node>|!NodeList} nodes
+   */
+  function downgradeNodeRecursive(node) {
+    for (var n = 0; n < registeredComponents_.length; n++) {
+      var els = node.querySelectorAll('.' + registeredComponents_[n].cssClass);
+      for (var e = 0; e < els.length; e++) {
+        downgradeNodesInternal(els[e]); // this might downgrade a node twice if it has multiple components.
+      }
+    }
+  }
+
   // Now return the functions that should be made public with their publicly
   // facing names...
   return {
@@ -2495,7 +2513,8 @@ componentHandler = (function() {
     upgradeAllRegistered: upgradeAllRegisteredInternal,
     registerUpgradedCallback: registerUpgradedCallbackInternal,
     register: registerInternal,
-    downgradeElements: downgradeNodesInternal
+    downgradeElements: downgradeNodesInternal,
+    downgradeElementRecursive: downgradeNodeRecursive,
   };
 })();
 
@@ -2551,6 +2570,7 @@ componentHandler['registerUpgradedCallback'] =
     componentHandler.registerUpgradedCallback;
 componentHandler['register'] = componentHandler.register;
 componentHandler['downgradeElements'] = componentHandler.downgradeElements;
+componentHandler['downgradeElementRecursive'] = componentHandler.downgradeElementRecursive;
 window.componentHandler = componentHandler;
 window['componentHandler'] = componentHandler;
 
@@ -2646,6 +2666,16 @@ var childElements = function (el) {
 };
 cherry.childElements = childElements;
 cherry['childElements'] = childElements;
+/**
+   * Get index of given node within parent node.
+   * @param  {!DomElement} The element.
+   * @return {!int} The index.
+   */
+var indexElement = function (el) {
+    return [].slice.call(el.parentNode.children).indexOf(el);
+};
+cherry.indexElement = indexElement;
+cherry['indexElement'] = indexElement;
 /**
    * Event delegation.
    * @param  {!string} A selector string or a DomNode onto which attach the event.
@@ -6099,10 +6129,9 @@ CustomDataTable.prototype.CssClasses_ = {
    * event handling.
    *
    * @param {Element} row Row to toggle when checkbox changes.
-   * @param {(Array<Object>|NodeList)=} opt_rows Rows to toggle when checkbox changes.
    * @private
    */
-CustomDataTable.prototype.createCheckbox_ = function (row, opt_rows) {
+CustomDataTable.prototype.createCheckbox_ = function (row) {
     var label = document.createElement('label');
     var labelClasses = [
         'mdl-checkbox',
@@ -6130,11 +6159,108 @@ CustomDataTable.prototype.createCheckbox_ = function (row, opt_rows) {
    * @private
    */
 CustomDataTable.prototype.updateBt_ = function (btEl) {
-    var sTr = this.element_.querySelectorAll('tr.is-selected');
-    if (sTr.length) {
-        this.btEl_.removeAttribute('disabled');
+    if (this.btEl_) {
+        var sTr = this.element_.querySelectorAll('tr.is-selected');
+        if (sTr.length) {
+            this.btEl_.removeAttribute('disabled');
+        } else {
+            this.btEl_.setAttribute('disabled', 'disabled');
+        }
+    }
+};
+/**
+   * Traverse all rows and check them.
+   *
+   * @private
+   */
+CustomDataTable.prototype.checkAllRows_ = function () {
+    var rows = this.element_.querySelectorAll('tbody > tr');
+    for (var i = 0; i < rows.length; i++) {
+        rows[i].classList.add(this.CssClasses_.IS_SELECTED);
+        var rowCb = rows[i].querySelector('td:nth-child(1) .mdl-checkbox');
+        if (rowCb && rowCb['MaterialCheckbox']) {
+            rowCb['MaterialCheckbox'].check();
+        }
+    }
+};
+/**
+   * Traverse all rows and uncheck them.
+   *
+   * @private
+   */
+CustomDataTable.prototype.uncheckAllRows_ = function () {
+    var rows = this.element_.querySelectorAll('tbody > tr');
+    for (var i = 0; i < rows.length; i++) {
+        rows[i].classList.remove(this.CssClasses_.IS_SELECTED);
+        var rowCb = rows[i].querySelector('td:nth-child(1) .mdl-checkbox');
+        if (rowCb && rowCb['MaterialCheckbox']) {
+            rowCb['MaterialCheckbox'].uncheck();
+        }
+    }
+};
+/**
+   * Handles checkbox click event.
+   *
+   * @private
+   */
+CustomDataTable.prototype.onCheckboxClick_ = function () {
+    var that = this;
+    var cherry = window.cherry;
+    return function () {
+        var cb = this;
+        var row = cherry.getParentsUntil(this, 'tr');
+        if (row) {
+            row = row.pop().parentNode;
+            var isHeader = row.querySelectorAll('th').length > 0;
+            if (isHeader) {
+                if (cb.checked) {
+                    that.checkAllRows_();
+                } else {
+                    that.uncheckAllRows_();
+                }
+            } else {
+                if (cb.checked) {
+                    row.classList.add(that.CssClasses_.IS_SELECTED);
+                } else {
+                    row.classList.remove(that.CssClasses_.IS_SELECTED);
+                }
+            }
+        }
+        that.updateBt_();
+    };
+};
+/**
+   * Add a checkbox to the provided row.
+   *
+   * @private
+   */
+CustomDataTable.prototype.addCheckboxToRow_ = function (row) {
+    var firstCell = row.querySelector('td');
+    var td = document.createElement('td');
+    if (firstCell) {
+        var rowCheckbox = this.createCheckbox_(row);
+        td.appendChild(rowCheckbox);
+        row.insertBefore(td, firstCell);
     } else {
-        this.btEl_.setAttribute('disabled', 'disabled');
+        row.appendChild(td);
+    }
+};
+/**
+   * Setup a electable data table by adding checkboxes as first td of each row.
+   *
+   * @private
+   */
+CustomDataTable.prototype.setupSelectableTable_ = function () {
+    var th = document.createElement('th');
+    var headerCheckbox = this.createCheckbox_();
+    th.appendChild(headerCheckbox);
+    var firstHeader = this.element_.querySelector('th');
+    firstHeader.parentElement.insertBefore(th, firstHeader);
+    var bodyRows = Array.prototype.slice.call(this.element_.querySelectorAll('tbody tr'));
+    var footRows = Array.prototype.slice.call(this.element_.querySelectorAll('tfoot tr'));
+    var rows = bodyRows.concat(footRows);
+    for (var i = 0; i < rows.length; i++) {
+        this.addCheckboxToRow_(rows[i]);
     }
 };
 /**
@@ -6142,70 +6268,12 @@ CustomDataTable.prototype.updateBt_ = function (btEl) {
    */
 CustomDataTable.prototype.init = function () {
     if (this.element_) {
-        var firstHeader = this.element_.querySelector('th');
-        var bodyRows = Array.prototype.slice.call(this.element_.querySelectorAll('tbody tr'));
-        var footRows = Array.prototype.slice.call(this.element_.querySelectorAll('tfoot tr'));
-        var rows = bodyRows.concat(footRows);
         if (this.element_.classList.contains(this.CssClasses_.SELECTABLE)) {
-            var th = document.createElement('th');
-            var headerCheckbox = this.createCheckbox_(null, rows);
-            th.appendChild(headerCheckbox);
-            firstHeader.parentElement.insertBefore(th, firstHeader);
-            for (var i = 0; i < rows.length; i++) {
-                var firstCell = rows[i].querySelector('td');
-                if (firstCell) {
-                    var td = document.createElement('td');
-                    if (rows[i].parentNode.nodeName.toUpperCase() === 'TBODY') {
-                        var rowCheckbox = this.createCheckbox_(rows[i]);
-                        td.appendChild(rowCheckbox);
-                    }
-                    rows[i].insertBefore(td, firstCell);
-                }
-            }
-            this.element_.classList.add(this.CssClasses_.IS_UPGRADED);
-            var that = this;
-            var cherry = window.cherry;
-            this.element_.__selectall = cherry.delegateEvent(this.element_, 'change', 'input[type="checkbox"]', function () {
-                var cb = this;
-                var row = cherry.getParentsUntil(this, 'tr');
-                if (row) {
-                    row = row.pop().parentNode;
-                    var isHeader = row.querySelectorAll('th').length > 0;
-                    if (isHeader) {
-                        var cell;
-                        cell = cherry.getParentsUntil(this, 'th');
-                        cell = cell.pop().parentNode;
-                        if (isHeader) {
-                            var rows = that.element_.querySelectorAll('tbody > tr');
-                            for (var i = 0; i < rows.length; i++) {
-                                if (cb.checked) {
-                                    rows[i].classList.add(that.CssClasses_.IS_SELECTED);
-                                } else {
-                                    rows[i].classList.remove(that.CssClasses_.IS_SELECTED);
-                                }
-                                var rowCb = rows[i].querySelector('td:nth-child(1) .mdl-checkbox');
-                                if (rowCb) {
-                                    if (cb.checked) {
-                                        rowCb['MaterialCheckbox'].check();
-                                    } else {
-                                        rowCb['MaterialCheckbox'].uncheck();
-                                    }
-                                }
-                            }
-                        }
-                    } else {
-                        if (cb.checked) {
-                            row.classList.add(that.CssClasses_.IS_SELECTED);
-                        } else {
-                            row.classList.remove(that.CssClasses_.IS_SELECTED);
-                        }
-                    }
-                }
-                if (that.btEl_) {
-                    that.updateBt_();
-                }
-            });
+            this.setupSelectableTable_();
         }
+        this.element_.classList.add(this.CssClasses_.IS_UPGRADED);
+        var cherry = window.cherry;
+        this.element_.__selectall = cherry.delegateEvent(this.element_, 'change', 'input[type="checkbox"]', this.onCheckboxClick_());
         if (this.element_.hasAttribute('bt-el')) {
             this.btEl_ = document.querySelector(this.element_.getAttribute('bt-el'));
             this.updateBt_();
@@ -6863,6 +6931,141 @@ componentHandler.register({
     constructor: CustomTinymce,
     classAsString: 'CustomTinymce',
     cssClass: 'custom-js-tinymce'
+});
+/**
+ * @license
+ * Copyright 2015 Google Inc. All Rights Reserved.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+/**
+   *
+   * @constructor
+   * @param {Element} element The element that will be upgraded.
+   */
+var CustomDup = function CustomDup(element) {
+    this.element_ = element;
+    // Initialize instance.
+    this.init();
+};
+window['CustomDup'] = CustomDup;
+/**
+   * Store constants in one place so they can be updated easily.
+   *
+   * @enum {string | number}
+   * @private
+   */
+CustomDup.prototype.Constant_ = {};
+/**
+   * Store strings for class names defined by this component that are used in
+   * JavaScript. This allows us to simply change it in one place should we
+   * decide to modify at a later date.
+   *
+   * @enum {string}
+   * @private
+   */
+CustomDup.prototype.CssClasses_ = { IS_UPGRADED: 'is-upgraded' };
+/**
+   * Handle bt-add event.
+   */
+CustomDup.prototype.onBtAddClicked_ = function () {
+    var that = this;
+    var cherry = window.cherry;
+    return function (ev) {
+        var html = that.template_.innerHTML;
+        var children = cherry.childElements(that.container_);
+        html = html.replace(/([$]incrIndex[$])/g, that.incIndex_);
+        html = html.replace(/([$]itemIndex[$])/g, children.length);
+        html = html.replace(/([$]random[$])/g, function () {
+            return Math.random();
+        });
+        that.incIndex_++;
+        var el = document.createElement('div');
+        el.classList.add('custom-dup-item');
+        var component = document.createElement('div');
+        component.classList.add('custom-dup-component');
+        component.innerHTML = html;
+        var bt = document.createElement('button');
+        bt.classList.add('mdl-button');
+        bt.classList.add('mdl-js-button');
+        bt.classList.add('mdl-button--raised');
+        bt.classList.add('custom-dup-bt-remove');
+        bt.innerHTML = 'Remove';
+        el.appendChild(component);
+        el.appendChild(bt);
+        that.container_.appendChild(el);
+        window['componentHandler'].upgradeElements(cherry.childElements(component));
+        window['componentHandler'].upgradeElements(bt);
+        window['componentHandler'].upgradeDom(bt);
+    };
+};
+/**
+   * Handle bt-remove event.
+   */
+CustomDup.prototype.onBtRemoveClicked_ = function () {
+    var that = this;
+    var cherry = window.cherry;
+    return function (ev) {
+        var item = this.parentNode;
+        var i = cherry.indexElement(item);
+        var m = cherry.childElements(that.container_).length - 1;
+        if (i === m && i > -1) {
+            // - its the last element
+            that.incIndex_--;
+        }
+        window['componentHandler'].downgradeElements(cherry.childElements(item));
+        item.remove();
+    };
+};
+/**
+   * Handle mdl components registered event.
+   */
+CustomDup.prototype.onComponentsRegistered_ = function () {
+    var template = this.template_;
+    window['componentHandler'].downgradeElementRecursive(template);
+    // template.remove();
+    window.removeEventListener('mdl-componentsupgraded', this.onComponentsRegistered_);
+};
+/**
+   * Initialize element.
+   */
+CustomDup.prototype.init = function () {
+    if (this.element_) {
+        var cherry = window.cherry;
+        var element_ = this.element_;
+        this.template_ = element_.querySelector('.custom-dup-template');
+        this.container_ = element_.querySelector('.custom-dup-container');
+        window.addEventListener('mdl-componentsupgraded', this.onComponentsRegistered_.bind(this));
+        this.incIndex_ = cherry.childElements(this.container_).length;
+        this.element_.__btadd = cherry.delegateEvent(this.element_, 'click', '.custom-dup-bt-add', this.onBtAddClicked_());
+        this.element_.__btrem = cherry.delegateEvent(this.element_, 'click', '.custom-dup-item > .custom-dup-bt-remove', this.onBtRemoveClicked_());
+        element_.classList.add(this.CssClasses_.IS_UPGRADED);
+    }
+};
+/**
+   * Downgrade element.
+   */
+CustomDup.prototype.mdlDowngrade_ = function () {
+    this.element_.removeEventListener('click', this.element_.__btrem);
+    this.element_.removeEventListener('click', this.element_.__btadd);
+    this.element_.classList.remove(this.CssClasses_.IS_UPGRADED);
+};
+// The component registers itself. It can assume componentHandler is available
+// in the global scope.
+componentHandler.register({
+    constructor: CustomDup,
+    classAsString: 'CustomDup',
+    cssClass: 'custom-js-dup'
 });
 /**
    * Class constructor for Select field MDL component.
