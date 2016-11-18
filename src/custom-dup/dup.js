@@ -69,23 +69,11 @@
         return Math.random();
       });
       that.incIndex_++;
-      var el = document.createElement('div');
-      el.classList.add('custom-dup-item');
-      var component = document.createElement('div');
-      component.classList.add('custom-dup-component');
-      component.innerHTML = html;
-      var bt = document.createElement('button');
-      bt.classList.add('mdl-button');
-      bt.classList.add('mdl-js-button');
-      bt.classList.add('mdl-button--raised');
-      bt.classList.add('custom-dup-bt-remove');
-      bt.innerHTML = 'Remove';
-      el.appendChild(component);
-      el.appendChild(bt);
+      var temp = document.createElement('div');
+      temp.innerHTML = html;
+      var el = temp.querySelector('.custom-dup-item');
       that.container_.appendChild(el);
-      window['componentHandler'].upgradeElements(cherry.childElements(component));
-      window['componentHandler'].upgradeElements(bt);
-      window['componentHandler'].upgradeDom(bt);
+      window['componentHandler'].upgradeElements(cherry.childElements(el));
     };
   };
 
