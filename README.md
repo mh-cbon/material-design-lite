@@ -16,7 +16,7 @@ It s not AAA compliant all browsers, but could be!
 - custom-confirmbutton: A button which shows a dialog box to require confirmation of the action.
 - custom-dup: A component which add / remove a component template.
 
-- componentHandler.downgradeElementRecursive: a method to downgrade a node recursively.
+componentHandler.downgradeElementRecursive: a method to downgrade a node recursively.
 
 
 See it in action [here](https://mh-cbon.github.io/material-design-lite/test.html)
