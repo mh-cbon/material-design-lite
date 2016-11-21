@@ -109,6 +109,7 @@ const SOURCES = [
   'node_modules/mdl-selectfield/src/selectfield/selectfield.js',
   'src/custom-chipautocomplete/chipautocomplete.js',
   'src/custom-cropper/cropper.js',
+  'src/custom-select-change-url/select_change_url.js',
   // And finally, the ripples
   'src/ripple/ripple.js'
 ];
