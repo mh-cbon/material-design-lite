@@ -64,7 +64,6 @@
    * Toggle the dialog display.
    */
   CustomExpander.prototype.toggleBox_ = function() {
-    console.log('click', this.bt_);
     window.Velocity(this.container_, 'stop', true);
     if (this.nextDir_ === 'close') {
       this.nextDir_ = 'open';
@@ -94,7 +93,7 @@
       */
       complete: function() {
         that.element_.classList.add(that.CssClasses_.IS_EXPANDED);
-        that.element_.style.height = 'auto';
+        that.container_.style.height = 'auto';
       }
     });
   };
