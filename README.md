@@ -15,6 +15,7 @@ It s not AAA compliant all browsers, but could be!
 - custom-dialog: A dialog box implementation.
 - custom-confirmbutton: A button which shows a dialog box to require confirmation of the action.
 - custom-dup: A component which add / remove a component template.
+- custom input confirm: A component to handle input confirmation (double input).
 
 componentHandler.downgradeElementRecursive: a method to downgrade a node recursively.
 
