@@ -86,6 +86,9 @@
       if (row.getAttribute('value')) {
         checkbox.value = row.getAttribute('value');
       }
+      if (row.getAttribute('name')) {
+        checkbox.setAttribute('name', row.getAttribute('name'));
+      }
       checkbox.checked = row.classList.contains(this.CssClasses_.IS_SELECTED);
     }
 
