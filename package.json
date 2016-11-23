@@ -93,5 +93,8 @@
   },
   "babel": {
     "only": "gulpfile.babel.js"
+  },
+  "dependencies": {
+    "imagesloaded": "^4.1.1"
   }
 }

@@ -20,11 +20,20 @@
     display: inline-block;
     vertical-align: text-bottom;
     img {
+      width: 48px;
+      height: 48px;
+    }
+  }
+  .custom-cropper-current-img--rounded {
+    img {
       border-radius: 50%;
     }
   }
   .mdl-textfield{
     vertical-align: text-bottom;
+  }
+  label>input[type="file"] {
+    width: 100%;
   }
 }
 .custom-cropper-dialog {

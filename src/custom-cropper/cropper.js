@@ -128,15 +128,18 @@
    */
   CustomCropper.prototype.onDialogConfirmed_ = function() {
     if (this.b64result_) {
-      this.b64result_.value = this.cropper_.getCroppedCanvas().toDataURL('image/png');
+      this.b64result_.value = this.cropper_.getCroppedCanvas({
+        width: this.b64ExportWidth,
+        height: this.b64ExportHeight,
+      }).toDataURL('image/png');
     }
     if (this.dataResult_) {
       this.dataResult_.value = JSON.stringify(this.cropper_.getData());
     }
     if (this.currentImg_) {
       this.currentImg_.src = this.cropper_.getCroppedCanvas({
-        width: this.currentImg_.offsetWidth,
-        height: this.currentImg_.offsetHeight,
+        width: this.b64ExportWidth,
+        height: this.b64ExportHeight,
       }).toDataURL('image/png');
     }
     if (this.pendingImg_) {
@@ -198,15 +201,54 @@
       this.dialogCancel_ = this.dialog_.querySelector('.custom-dialog-cancel');
 
       var cherry = window.cherry;
+      var imagesLoaded = window.imagesLoaded;
+      this.b64ExportWidth = parseInt(this.element_.getAttribute('b64-export-width'));
+      this.b64ExportHeight = parseInt(this.element_.getAttribute('b64-export-height'));
       if (this.currentImg_) {
-        this.originalCurrentImg_ = cherry.imgAsDataUrl(this.currentImg_);
+        imagesLoaded(this.currentImg_, function() {
+          that.originalCurrentImg_ = cherry.imgAsDataUrl(that.currentImg_);
+          that.b64ExportWidth = that.b64ExportWidth || that.currentImg_.offsetWidth;
+          that.b64ExportHeight = that.b64ExportHeight || that.currentImg_.offsetHeight;
+        });
       }
+
       this.cropper_ = null;
+
       this.cropperOptions_ = {
-        aspectRatio: 1,
+        aspectRatio: parseInt(this.element_.getAttribute('aspect-ratio')) || NaN,
+        movable: trueLike(this.element_.getAttribute('movable'), true),
+        scalable: trueLike(this.element_.getAttribute('scalable'), true),
+        rotatable: trueLike(this.element_.getAttribute('rotatable'), true),
+        dragMode: (this.element_.getAttribute('drag-mode')) || 'crop',
+        viewMode: parseInt(this.element_.getAttribute('view-mode')) || 0,
+        responsive: trueLike(this.element_.getAttribute('responsive'), true),
+        restore: trueLike(this.element_.getAttribute('restore'), true),
+        modal: trueLike(this.element_.getAttribute('modal'), true),
+        guides: trueLike(this.element_.getAttribute('guides'), true),
+        background: trueLike(this.element_.getAttribute('background'), true),
+        center: trueLike(this.element_.getAttribute('center'), true),
+        highlight: trueLike(this.element_.getAttribute('highlight'), true),
+        data: jsonParse(this.element_.getAttribute('cropper-data')),
+        toggleDragModeOnDblclick: trueLike(this.element_.getAttribute('toggle-dragmode-ondblcick'), true),
+        minCropBoxHeight: parseInt(this.element_.getAttribute('min-crop-box-height')) || 0,
+        minCropBoxWidth: parseInt(this.element_.getAttribute('min-crop-box-width')) || 0,
+        minCanvasHeight: parseInt(this.element_.getAttribute('min-canvas-height')) || 0,
+        minCanvasWidth: parseInt(this.element_.getAttribute('min-canvas-width')) || 0,
+        minContainerHeight: parseInt(this.element_.getAttribute('min-container-height')) || 100,
+        minContainerWidth: parseInt(this.element_.getAttribute('min-container-width')) || 200,
+        cropBoxResizable: trueLike(this.element_.getAttribute('crop-box-resizable'), true),
+        cropBoxMovable: trueLike(this.element_.getAttribute('crop-box-movable'), true),
+        zoomOnWheel: trueLike(this.element_.getAttribute('zoom-on-wheel'), true),
+        zoomOnTouch: trueLike(this.element_.getAttribute('zoom-on-touch'), true),
+        wheelZoomRatio: parseFloat(this.element_.getAttribute('wheel-zoom-ratio')) || 0.1,
+        autoCropArea: parseFloat(this.element_.getAttribute('auto-crop-area')) || 0.8,
+        autoCrop: trueLike(this.element_.getAttribute('auto-crop'), true),
+        checkCrossOrigin: trueLike(this.element_.getAttribute('check-cross-origin'), true),
+        checkOrientation: trueLike(this.element_.getAttribute('check-orientation'), true),
+        zoomable: trueLike(this.element_.getAttribute('zoomable'), true),
         preview: this.preview_,
         /**
-         * xxxxxx.
+         * Ready function show the dialog, clean up image resource.
          */
         ready: function() {
           that.dialog_['CustomDialog'].showBox_();
@@ -238,6 +280,29 @@
       this.element_.classList.add(this.CssClasses_.IS_UPGRADED);
     }
   };
+
+  /**
+  * Is is something like true ?
+  */
+  function trueLike(some, d) {
+    if (some === 'true' || some === '1') {
+      return true;
+    }
+    if (some === 'false' || some === '0') {
+      return false;
+    }
+    return d;
+  }
+  /**
+  * JSON parse no exception.
+  */
+  function jsonParse(some) {
+    try {
+      return JSON.parse(some);
+    }catch (ex) {
+      return null;
+    }
+  }
 
   /**
    * Downgrade element.

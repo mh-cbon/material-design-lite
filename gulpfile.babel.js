@@ -73,6 +73,7 @@ const SOURCES = [
   'node_modules/velocity-animate/velocity.min.js',
   'node_modules/moment/min/moment-with-locales.min.js',
   'node_modules/md-date-time-picker/dist/js/mdDateTimePicker.js',
+  'node_modules/imagesloaded/imagesloaded.pkgd.js',
   'node_modules/@fdaciuk/ajax/dist/ajax.min.js',
   'node_modules/cropperjs/dist/cropper.min.js',
   // 'node_modules/tinymce/tinymce.min.js',
@@ -291,8 +292,9 @@ gulp.task('closure', () => {
 
 // Concatenate And Minify JavaScript
 gulp.task('scripts', ['lint'], () => {
+  var escaped = /(mdlComponentHandler|imagesloaded\.pkgd|moment\.min|mdDateTimePicker)\.js/;
   return gulp.src(SOURCES)
-    .pipe($.if(/(mdlComponentHandler|moment\.min|mdDateTimePicker)\.js/, $.util.noop(), uniffe()))
+    .pipe($.if(escaped, $.util.noop(), uniffe()))
     .pipe($.sourcemaps.init())
     // Concatenate Scripts
     .pipe($.concat('material.js'))
