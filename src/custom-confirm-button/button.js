@@ -76,8 +76,11 @@
    */
   CustomConfirmButton.prototype.init = function() {
     if (this.element_) {
-      this.element_.__fn = this.showConfirm_.bind(this);
-      this.element_.addEventListener('click', this.element_.__fn);
+
+      var cherry = window.cherry;
+
+      cherry.on(this.element_, 'confirmubutton.click', this.showConfirm_).bind(this);
+
       this.element_.classList.add(this.CssClasses_.IS_UPGRADED);
     }
   };
@@ -86,8 +89,11 @@
    * Downgrade element.
    */
   CustomConfirmButton.prototype.mdlDowngrade_ = function() {
-    this.element_.removeEventListener('click', this.element_.__fn);
-    this.element_.__fn = null;
+
+    var cherry = window.cherry;
+
+    cherry.off(this.element_, 'confirmubutton.click', this.showConfirm_);
+
     this.element_.classList.remove(this.CssClasses_.IS_UPGRADED);
   };
 

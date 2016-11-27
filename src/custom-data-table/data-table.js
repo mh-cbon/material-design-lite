@@ -150,32 +150,29 @@
    *
    * @private
    */
-  CustomDataTable.prototype.onCheckboxClick_ = function() {
-    var that = this;
+  CustomDataTable.prototype.onCheckboxClick_ = function(ev) {
     var cherry = window.cherry;
-    return function() {
-      var cb = this;
-      var row = cherry.getParentsUntil(this, 'tr');
-      if (row) {
-        row = row.pop().parentNode;
-        var isHeader = row.querySelectorAll('th').length > 0;
+    var cb = ev.delegateTarget;
+    var row = cherry.getParentsUntil(cb, 'tr');
+    if (row) {
+      row = row.pop().parentNode;
+      var isHeader = row.querySelectorAll('th').length > 0;
 
-        if (isHeader) {
-          if (cb.checked) {
-            that.checkAllRows_();
-          } else {
-            that.uncheckAllRows_();
-          }
+      if (isHeader) {
+        if (cb.checked) {
+          this.checkAllRows_();
         } else {
-          if (cb.checked) {
-            row.classList.add(that.CssClasses_.IS_SELECTED);
-          } else {
-            row.classList.remove(that.CssClasses_.IS_SELECTED);
-          }
+          this.uncheckAllRows_();
+        }
+      } else {
+        if (cb.checked) {
+          row.classList.add(this.CssClasses_.IS_SELECTED);
+        } else {
+          row.classList.remove(this.CssClasses_.IS_SELECTED);
         }
       }
-      that.updateBt_();
-    };
+    }
+    this.updateBt_();
   };
 
   /**
@@ -230,10 +227,11 @@
       this.element_.classList.add(this.CssClasses_.IS_UPGRADED);
 
       var cherry = window.cherry;
-      this.element_.__selectall = cherry.delegateEvent(this.element_,
-        'change',
+      cherry.delegate(this.element_,
         'input[type="checkbox"]',
-        this.onCheckboxClick_());
+        'customdatatable.change',
+        this.onCheckboxClick_
+      ).bind(this);
 
       if (this.element_.hasAttribute('bt-el')) {
         this.btEl_ = document.querySelector(this.element_.getAttribute('bt-el'));
@@ -246,6 +244,9 @@
    * Downgrade element.
    */
   CustomDataTable.prototype.mdlDowngrade_ = function() {
+    var cherry = window.cherry;
+    cherry.undelegate(this.element_, 'customdatatable.change');
+    this.btEl_ = null;
     this.element_.removeEventListener('change', this.element_.__selectall);
     this.element_.classList.remove(this.CssClasses_.IS_UPGRADED);
   };

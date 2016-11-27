@@ -1,7 +1,7 @@
 (function(window) {
   'use strict';
 
-  if (!window.cherry || !window['cherry']) {
+  if (!window.cherry && !window['cherry']) {
     window.cherry = {};
     window['cherry'] = {};
   }
@@ -84,47 +84,6 @@
   };
   cherry.indexElement = indexElement;
   cherry['indexElement'] = indexElement;
-
-  /**
-   * Event delegation.
-   * @param  {!string} A selector string or a DomNode onto which attach the event.
-   * @param  {!string} An event name to listen to.
-   * @param  {!string} A selector of elements to listen the event for.
-   * @return {!Function} The function bound to the node, useful to unbind.
-   */
-  function delegateEvent(elSelector, eventName, selector, fn) {
-    var element;
-    if (elSelector.querySelector) {
-      element = elSelector;
-    } else {
-      element = document.querySelector(elSelector);
-    }
-
-    /**
-    * The function handler bound to the event.
-    */
-    var handler = function(event) {
-      var possibleTargets = element.querySelectorAll(selector);
-      var target = event.target;
-
-      for (var i = 0, l = possibleTargets.length; i < l; i++) {
-        var el = target;
-        var p = possibleTargets[i];
-
-        while (el && el !== element) {
-          if (el === p) {
-            return fn.call(p, event);
-          }
-
-          el = el.parentNode;
-        }
-      }
-    };
-    element.addEventListener(eventName, handler);
-    return handler;
-  }
-  cherry.delegateEvent = delegateEvent;
-  cherry['delegateEvent'] = delegateEvent;
 
   /**
    * Get all DOM element up the tree that contain a class, ID, or data attribute.

@@ -63,7 +63,7 @@
   /**
    * Toggle the dialog display.
    */
-  CustomExpander.prototype.toggleBox_ = function() {
+  CustomExpander.prototype.toggleBox_ = function(ev) {
     window.Velocity(this.container_, 'stop', true);
     if (this.nextDir_ === 'close') {
       this.nextDir_ = 'open';
@@ -129,13 +129,7 @@
       }
 
       var cherry = window.cherry;
-      this.bt_.__fn = cherry.debounce(this.toggleBox_.bind(this), 10);
-      // for some this reasons to undercover,
-      // click event is triggered twice
-      // foreach real click.
-      // debounce it until more advanced into is found.
-      // this.bt_.__fn = this.toggleBox_.bind(this);
-      this.bt_.addEventListener('click', this.bt_.__fn);
+      cherry.on(this.bt_, 'CustomExpander.click', this.toggleBox_).bind(this).debounce(10);
       this.element_.classList.add(this.CssClasses_.IS_UPGRADED);
     }
   };
@@ -144,8 +138,11 @@
    * Downgrade element.
    */
   CustomExpander.prototype.mdlDowngrade_ = function() {
-    this.bt_.removeEventListener('click', this.bt_.__fn);
-    this.bt_.__fn = null;
+    var cherry = window.cherry;
+    cherry.off(this.bt_, 'CustomExpander.click', this.toggleBox_);
+    this.nextDir_ = null;
+    this.bt_ = null;
+    this.container_ = null;
     this.element_.classList.remove(this.CssClasses_.IS_EXPANDED);
     this.element_.classList.remove(this.CssClasses_.IS_UPGRADED);
   };

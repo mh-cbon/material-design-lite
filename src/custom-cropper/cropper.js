@@ -159,15 +159,20 @@
   /**
    * xxxxxx.
    */
-  CustomCropper.prototype.onFileCleared = function() {
-    if (this.b64result_) {
-      this.b64result_.value = null;
-    }
-    if (this.dataResult_) {
-      this.dataResult_.value = null;
-    }
-    if (this.currentImg_ && this.originalCurrentImg_) {
-      this.currentImg_.src = this.originalCurrentImg_;
+  CustomCropper.prototype.onFileCleared = function(ev) {
+    if (!this.file_.files.length) {
+      ev.stopPropagation();
+      ev.stopImmediatePropagation();
+      ev.preventDefault();
+      if (this.b64result_) {
+        this.b64result_.value = null;
+      }
+      if (this.dataResult_) {
+        this.dataResult_.value = null;
+      }
+      if (this.currentImg_ && this.originalCurrentImg_) {
+        this.currentImg_.src = this.originalCurrentImg_;
+      }
     }
   };
 
@@ -187,7 +192,7 @@
       this.preview_ = this.element_.querySelector('.custom-cropper-preview');
       this.b64result_ = this.element_.querySelector('.custom-cropper-b64-result');
       this.dataResult_ = this.element_.querySelector('.custom-cropper-data-result');
-      this.clearFile_ = this.element_.querySelector('.custom-clearbutton');
+      this.btAction_ = this.element_.querySelector('.mdl-button--icon');
       this.textInput_ = this.element_.querySelector('.mdl-textfield__input');
       this.textEl_ = this.element_.querySelector('.mdl-textfield');
 
@@ -206,9 +211,11 @@
       this.b64ExportHeight = parseInt(this.element_.getAttribute('b64-export-height'));
       if (this.currentImg_) {
         imagesLoaded(this.currentImg_, function() {
-          that.originalCurrentImg_ = cherry.imgAsDataUrl(that.currentImg_);
-          that.b64ExportWidth = that.b64ExportWidth || that.currentImg_.offsetWidth;
-          that.b64ExportHeight = that.b64ExportHeight || that.currentImg_.offsetHeight;
+          if (that.currentImg_) {
+            that.originalCurrentImg_ = cherry.imgAsDataUrl(that.currentImg_);
+            that.b64ExportWidth = that.b64ExportWidth || that.currentImg_.offsetWidth;
+            that.b64ExportHeight = that.b64ExportHeight || that.currentImg_.offsetHeight;
+          }
         });
       }
 
@@ -256,30 +263,74 @@
         },
       };
 
-      this.file_.__change = this.onFileChanged.bind(this);
-      this.file_.addEventListener('change', this.file_.__change);
+      cherry.on(this.file_, 'customcropper.change', this.onFileChanged).bind(this);
+      cherry.on(this.img_, 'customcropper.load', this.onCropImgLoaded).bind(this);
+      cherry.on(this.dialogConfirm_, 'customcropper.click', this.onDialogConfirmed_).bind(this);
+      cherry.on(this.dialogClose_, 'customcropper.click', this.onDialogCanceled_).bind(this);
+      cherry.on(this.dialogCancel_, 'customcropper.click', this.onDialogCanceled_).bind(this);
+      cherry.on(this.btAction_, 'customcropper.click', this.onFileCleared).bind(this);
 
-      this.img_.__load = this.onCropImgLoaded.bind(this);
-      this.img_.addEventListener('load', this.img_.__load);
-
-      this.dialogConfirm_.__click = this.onDialogConfirmed_.bind(this);
-      this.dialogConfirm_.addEventListener('click', this.dialogConfirm_.__click);
-
-      this.dialogClose_.__click = this.onDialogCanceled_.bind(this);
-      this.dialogClose_.addEventListener('click', this.dialogClose_.__click);
-
-      this.dialogCancel_.__click = this.onDialogCanceled_.bind(this);
-      this.dialogCancel_.addEventListener('click', this.dialogCancel_.__click);
-
-      this.clearFile_.__click = this.onFileCleared.bind(this);
-      this.clearFile_.addEventListener('click', this.clearFile_.__click);
-
-      this.element_.__resize = cherry.debounce(this.updateBoxPosition_.bind(this), 100);
-      window.addEventListener('resize', this.element_.__resize);
+      cherry.on(window, 'customcropper.resize', this.updateBoxPosition_).bind(this).debounce(100);
 
       this.element_.classList.add(this.CssClasses_.IS_UPGRADED);
     }
   };
+
+  /**
+   * Downgrade element.
+   */
+  CustomCropper.prototype.mdlDowngrade_ = function() {
+
+    var cherry = window.cherry;
+
+    cherry.off(this.file_, 'customcropper.change', this.onFileChanged);
+    cherry.off(this.img_, 'customcropper.load', this.onCropImgLoaded);
+    cherry.off(this.dialogConfirm_, 'customcropper.click', this.onDialogConfirmed_);
+    cherry.off(this.dialogClose_, 'customcropper.click', this.onDialogCanceled_);
+    cherry.off(this.dialogCancel_, 'customcropper.click', this.onDialogCanceled_);
+    cherry.off(this.btAction_, 'customcropper.click', this.onFileCleared);
+
+    cherry.off(window, 'customcropper.resize', this.updateBoxPosition_);
+
+    this.file_ = null;
+    this.dialog_ = null;
+    this.componentContainer_ = null;
+    this.img_ = null;
+    this.currentImg_ = null;
+    this.preview_ = null;
+    this.b64result_ = null;
+    this.dataResult_ = null;
+    this.clearFile_ = null;
+    this.textInput_ = null;
+    this.textEl_ = null;
+
+    this.dialogContainer_ = null;
+    this.dialogActions_ = null;
+    this.dialogTtile_ = null;
+    this.dialogContent_ = null;
+    this.dialogContent_ = null;
+    this.dialogConfirm_ = null;
+    this.dialogClose_ = null;
+    this.dialogCancel_ = null;
+
+    this.b64ExportWidth = null;
+    this.b64ExportHeight = null;
+    this.originalCurrentImg_ = null;
+
+    this.cropper_ = null;
+
+    this.cropperOptions_ = null;
+
+    this.element_.classList.remove(this.CssClasses_.IS_UPGRADED);
+  };
+
+  // The component registers itself. It can assume componentHandler is available
+  // in the global scope.
+  componentHandler.register({
+    constructor: CustomCropper,
+    classAsString: 'CustomCropper',
+    cssClass: 'custom-js-cropper'
+  });
 
   /**
   * Is is something like true ?
@@ -303,41 +354,4 @@
       return null;
     }
   }
-
-  /**
-   * Downgrade element.
-   */
-  CustomCropper.prototype.mdlDowngrade_ = function() {
-
-    window.removeEventListener('resize', this.element_.__resize);
-    this.element_.__resize = null;
-
-    this.file_.removeEventListener('change', this.file_.__change);
-    this.file_.__change = null;
-
-    this.img_.removeEventListener('load', this.img_.__load);
-    this.img_.__load = null;
-
-    this.clearFile_.removeEventListener('click', this.clearFile_.__click);
-    this.clearFile_.__click = null;
-
-    this.dialogConfirm_.removeEventListener('click', this.dialogConfirm_.__click);
-    this.dialogConfirm_.__click = null;
-
-    this.dialogClose_.removeEventListener('click', this.dialogClose_.__click);
-    this.dialogClose_.__click = null;
-
-    this.dialogCancel_.removeEventListener('click', this.dialogCancel_.__click);
-    this.dialogCancel_.__click = null;
-
-    this.element_.classList.remove(this.CssClasses_.IS_UPGRADED);
-  };
-
-  // The component registers itself. It can assume componentHandler is available
-  // in the global scope.
-  componentHandler.register({
-    constructor: CustomCropper,
-    classAsString: 'CustomCropper',
-    cssClass: 'custom-js-cropper'
-  });
 })();

@@ -82,6 +82,7 @@ const SOURCES = [
   // Polyfills/dependencies
   'src/third_party/rAf.js',
   'src/third_party/vanilla.js',
+  'src/third_party/event.js',
   // Base components
   'src/button/button.js',
   'src/checkbox/checkbox.js',
@@ -293,7 +294,7 @@ gulp.task('closure', () => {
 
 // Concatenate And Minify JavaScript
 gulp.task('scripts', ['lint'], () => {
-  var escaped = /(mdlComponentHandler|imagesloaded\.pkgd|moment\.min|mdDateTimePicker)\.js/;
+  var escaped = /(mdlComponentHandler|imagesloaded\.pkgd|moment\.min|mdDateTimePicker|event|vanilla)\.js/;
   return gulp.src(SOURCES)
     .pipe($.if(escaped, $.util.noop(), uniffe()))
     .pipe($.sourcemaps.init())
@@ -384,6 +385,16 @@ gulp.task('test:visual', () => {
   });
 
   gulp.watch('test/visual/**', reload);
+});
+
+gulp.task('test:web', () => {
+  browserSync({
+    notify: false,
+    server: '.',
+    startPath: 'test/index.html'
+  });
+
+  gulp.watch('test/**', reload);
 });
 
 // ***** Landing page tasks ***** //

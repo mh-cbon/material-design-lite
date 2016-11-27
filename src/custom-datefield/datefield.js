@@ -56,6 +56,26 @@
     INPUTVALUE: 'custom-datefield__value'
   };
 
+  /**
+   * Handles input click event.
+   *
+   * @private
+   */
+  CustomDateField.prototype.onInputClick_ = function(ev) {
+    this.dialog.toggle();
+  };
+
+  /**
+   * Handles datefield ok click event.
+   *
+   * @private
+   */
+  CustomDateField.prototype.onOkClick_ = function(ev) {
+    this.input_.value = this.dialog.time.format(this.displayformat_);
+    this.value_.value = this.dialog.time.format(this.format_);
+    this.element_['MaterialTextfield'].updateClasses_();
+  };
+
   // Public methods.
 
   /**
@@ -70,8 +90,8 @@
       if (this.input_) {
 
         var displaylocale = this.element_.getAttribute('displaylocale') || 'en';
-        var displayformat = this.element_.getAttribute('displayformat') || 'ddd DD MMM YYYY';
-        var format = this.element_.getAttribute('format') || 'YYYY-MM-DDThh:mm:ssZ';
+        this.displayformat_ = this.element_.getAttribute('displayformat') || 'ddd DD MMM YYYY';
+        this.format_ = this.element_.getAttribute('format') || 'YYYY-MM-DDThh:mm:ssZ';
         var future = this.element_.getAttribute('future') || undefined;
         var past = this.element_.getAttribute('past') || undefined;
         var mode = this.element_.getAttribute('mode') || undefined;
@@ -84,33 +104,22 @@
 
         var options = {
           type: 'date',
-          init: moment.utc(this.value_.value, format),
+          init: moment.utc(this.value_.value, this.format_),
           trigger: this.input_,
-          future: future && moment(future, format) || future,
-          past: past && moment(past, format) || past,
+          future: future && moment(future, this.format_) || future,
+          past: past && moment(past, this.format_) || past,
           mode: mode,
           orientation: orientation,
           colon: colon === 'true',
         };
         var dialog = new mdDateTimePicker.default(options);
         this.dialog = dialog;
-        /**
-        * Click function handler.
-        */
-        this.input_.__click = function() {
-          dialog.toggle();
-        };
-        this.input_.addEventListener('click', this.input_.__click);
-        /**
-        * onOk function handler.
-        */
-        this.input_.__ok = function() {
-          this.input_.value = dialog.time.format(displayformat);
-          this.value_.value = dialog.time.format(format);
-          this.element_['MaterialTextfield'].updateClasses_();
-        }.bind(this);
-        this.input_.addEventListener('onOk', this.input_.__ok);
-        this.input_.value = moment(this.value_.value, format).format(displayformat);
+
+        var cherry = window.cherry;
+        cherry.on(this.input_, 'customdatefield.click', this.onInputClick_).bind(this);
+        cherry.on(this.input_, 'customdatefield.onOk', this.onOkClick_).bind(this);
+
+        this.input_.value = moment(this.value_.value, this.format_).format(this.displayformat_);
         this.element_['MaterialTextfield'].updateClasses_();
       }
     }
@@ -121,8 +130,14 @@
    */
   CustomDateField.prototype.mdlDowngrade_ = function() {
     // this.dialog.destroy();
-    this.input_.removeEventListener('click', this.input_.__click);
-    this.input_.removeEventListener('onOk', this.input_.__ok);
+    var cherry = window.cherry;
+    cherry.off(this.input_, 'customdatefield.click');
+    cherry.off(this.input_, 'customdatefield.onOk');
+    this.dialog = null;
+    this.input_ = null;
+    this.value_ = null;
+    this.displayformat_ = null;
+    this.format_ = null;
   };
 
   // The component registers itself. It can assume componentHandler is available

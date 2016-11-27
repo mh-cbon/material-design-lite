@@ -57,43 +57,40 @@
   /**
    * Handle bt-add event.
    */
-  CustomDup.prototype.onBtAddClicked_ = function() {
-    var that = this;
+  CustomDup.prototype.onBtAddClicked_ = function(ev) {
     var cherry = window.cherry;
-    return function(ev) {
-      var html = that.template_.innerHTML;
-      var children = cherry.childElements(that.container_);
-      html = html.replace(/([$]incrIndex[$])/g, that.incIndex_);
-      html = html.replace(/([$]itemIndex[$])/g, children.length);
-      html = html.replace(/([$]random[$])/g, function() {
-        return Math.random();
-      });
-      that.incIndex_++;
-      var temp = document.createElement('div');
-      temp.innerHTML = html;
-      var el = temp.querySelector('.custom-dup-item');
-      that.container_.appendChild(el);
-      window['componentHandler'].upgradeElements(cherry.childElements(el));
-    };
+
+    var html = this.template_.innerHTML;
+    var children = cherry.childElements(this.container_);
+    html = html.replace(/([$]incrIndex[$])/g, this.incIndex_);
+    html = html.replace(/([$]itemIndex[$])/g, children.length);
+    html = html.replace(/([$]random[$])/g, function() {
+      return Math.random();
+    });
+    this.incIndex_++;
+
+    var temp = document.createElement('div');
+    temp.innerHTML = html;
+
+    var el = temp.querySelector('.custom-dup-item');
+    this.container_.appendChild(el);
+    window['componentHandler'].upgradeElements(cherry.childElements(el));
   };
 
   /**
    * Handle bt-remove event.
    */
-  CustomDup.prototype.onBtRemoveClicked_ = function() {
-    var that = this;
+  CustomDup.prototype.onBtRemoveClicked_ = function(ev) {
     var cherry = window.cherry;
-    return function(ev) {
-      var item = this.parentNode;
-      var i = cherry.indexElement(item);
-      var m = cherry.childElements(that.container_).length - 1;
-      if (i === m && i > -1) {
-        // - its the last element
-        that.incIndex_--;
-      }
-      window['componentHandler'].downgradeElements(cherry.childElements(item));
-      item.remove();
-    };
+    var item = ev.delegateTarget.parentNode;
+    var i = cherry.indexElement(item);
+    var m = cherry.childElements(this.container_).length - 1;
+    if (i === m && i > -1) {
+      // - its the last element
+      this.incIndex_--;
+    }
+    window['componentHandler'].downgradeElements(cherry.childElements(item));
+    item.remove();
   };
 
   /**
@@ -116,19 +113,23 @@
       this.template_ = element_.querySelector('.custom-dup-template');
       this.container_ = element_.querySelector('.custom-dup-container');
 
-      window.addEventListener('mdl-componentsupgraded', this.onComponentsRegistered_.bind(this));
-
       this.incIndex_ = cherry.childElements(this.container_).length;
 
-      this.element_.__btadd = cherry.delegateEvent(this.element_,
-        'click',
-        '.custom-dup-bt-add',
-        this.onBtAddClicked_());
+      cherry.on(window, 'customdup.mdl-componentsupgraded', this.onComponentsRegistered_).bind(this);
 
-      this.element_.__btrem = cherry.delegateEvent(this.element_,
-        'click',
+      cherry.delegate(
+        this.element_,
+        '.custom-dup-bt-add',
+        'customdup.click',
+        this.onBtAddClicked_
+      ).bind(this);
+
+      cherry.delegate(
+        this.element_,
         '.custom-dup-item > .custom-dup-bt-remove',
-        this.onBtRemoveClicked_());
+        'customdup.click',
+        this.onBtRemoveClicked_
+      ).bind(this);
 
       element_.classList.add(this.CssClasses_.IS_UPGRADED);
     }
@@ -138,8 +139,15 @@
    * Downgrade element.
    */
   CustomDup.prototype.mdlDowngrade_ = function() {
-    this.element_.removeEventListener('click', this.element_.__btrem);
-    this.element_.removeEventListener('click', this.element_.__btadd);
+
+    var cherry = window.cherry;
+    cherry.off(window, 'customdup.mdl-componentsupgraded', this.onComponentsRegistered_);
+    cherry.undelegate(this.element_, 'customdup.click', this.onBtAddClicked_);
+    cherry.undelegate(this.element_, 'customdup.click', this.onBtRemoveClicked_);
+
+    this.incIndex_ = null;
+    this.template_ = null;
+    this.container_ = null;
     this.element_.classList.remove(this.CssClasses_.IS_UPGRADED);
   };
 

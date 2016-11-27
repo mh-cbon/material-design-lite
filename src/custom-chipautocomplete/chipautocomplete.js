@@ -61,7 +61,8 @@
    * @private
    */
   CustomChipAutocomplete.prototype.removeChip_ = function(ev) {
-    this.parentNode.remove();
+    var target = ev.delegateTarget;
+    target.parentNode.remove();
   };
 
   /**
@@ -260,20 +261,20 @@
    *
    * @private
    */
-  CustomChipAutocomplete.prototype.onResultClick_ = function() {
-    var that = this;
-    return function() {
-      if (that.isCreateResultOption_(this)) {
-        that.createNewValue_(that.input_.value);
-      } else if (!that.isNoResultOption_(this)) {
-        var option = {
-          Value: this.getAttribute('value'),
-          Text: this.querySelector('span').innerHTML,
-        };
-        that.addChip_(option);
-        that.clearComponent_();
-      }
-    };
+  CustomChipAutocomplete.prototype.onResultClick_ = function(ev) {
+    var li = ev.delegateTarget;
+    // return function() {
+    if (this.isCreateResultOption_(li)) {
+      this.createNewValue_(this.input_.value);
+    } else if (!this.isNoResultOption_(li)) {
+      var option = {
+        Value: li.getAttribute('value'),
+        Text: li.querySelector('span').innerHTML,
+      };
+      this.addChip_(option);
+      this.clearComponent_();
+    }
+    // };
   };
 
   /**
@@ -519,21 +520,12 @@
       this.results_.style.width = this.input_.offsetWidth + 'px';
 
       var cherry = window.cherry;
-      var debounce = cherry.debounce;
-      var delegateEvent = cherry.delegateEvent;
 
-      this.selected_.__click = delegateEvent(this.selected_, 'click', '.mdl-chip__action', this.removeChip_);
-
-      this.ul_.__click = delegateEvent(this.ul_, 'click', 'li', this.onResultClick_());
-
-      this.input_.__blur = debounce(this.clearComponent_.bind(this), 150);
-      this.input_.addEventListener('blur', this.input_.__blur);
-
-      this.input_.__submit = this.onInputCtrlKeys_.bind(this);
-      this.input_.addEventListener('keypress', this.input_.__submit);
-
-      this.input_.__change = debounce(this.onInputChanged.bind(this), 250);
-      this.input_.addEventListener('keypress', this.input_.__change);
+      cherry.delegate(this.selected_, '.mdl-chip__action', 'click', this.removeChip_).bind(this);
+      cherry.delegate(this.ul_, 'li', 'click', this.onResultClick_).bind(this);
+      cherry.on(this.input_, 'chipautocomplete.blur', this.clearComponent_).bind(this).debounce(150);
+      cherry.on(this.input_, 'chipautocomplete.keypress', this.onInputCtrlKeys_).bind(this);
+      cherry.on(this.input_, 'chipautocomplete.keypress', this.onInputChanged).bind(this).debounce(250);
 
       this.element_.classList.add(this.CssClasses_.IS_UPGRADED);
     }
@@ -544,23 +536,35 @@
    */
   CustomChipAutocomplete.prototype.mdlDowngrade_ = function() {
 
-    this.input_.removeEventListener('blur', this.input_.__blur);
-    this.input_.__blur = null;
+    var cherry = window.cherry;
 
-    this.input_.removeEventListener('keypress', this.input_.__change);
-    this.input_.__change = null;
-
-    this.input_.removeEventListener('keypress', this.input_.__submit);
-    this.input_.__submit = null;
-
-    this.ul_.removeEventListener('click', this.ul_.__click);
-    this.ul_.__click = null;
-
-    this.selected_.removeEventListener('click', this.selected_.__click);
-    this.selected_.__click = null;
+    cherry.off(this.input_, 'chipautocomplete.blur');
+    cherry.off(this.input_, 'chipautocomplete.keypress');
+    cherry.undelegate(this.selected_, 'li', 'click', this.onResultClick_);
+    cherry.undelegate(this.selected_, '.mdl-chip-action', 'click', this.removeChip_);
 
     this.textfield_.appendChild(this.results_);
     this.element_.classList.remove(this.CssClasses_.IS_UPGRADED);
+
+    this.textfield_ = null;
+    this.input_ = null;
+    this.error_ = null;
+    this.results_ = null;
+    this.ul_ = null;
+    this.selected_ = null;
+
+    this.urlPlaceholder_ = null;
+    this.urlCompleter_ = null;
+    this.completerArgs_ = null;
+
+    this.urlCreator_ = null;
+    this.creatorArgs_ = null;
+
+    this.txtCreateResult_ = null;
+    this.txtNoResults_ = null;
+    this.txtRemoteUnreachable_ = null;
+    this.chipName_ = null;
+
   };
 
   // The component registers itself. It can assume componentHandler is available

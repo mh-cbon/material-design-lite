@@ -28,8 +28,6 @@
    */
   var CustomInputConfirm = function CustomInputConfirm(element) {
     this.element_ = element;
-    this.bt_ = null;
-    this.container_ = null;
 
     // Initialize instance.
     this.init();
@@ -71,8 +69,8 @@
    */
   CustomInputConfirm.prototype.init = function() {
     if (this.element_) {
-      this.element_.__change = this.onChange_.bind(this);
-      this.element_.addEventListener('keypress', this.element_.__change);
+      var cherry = window.cherry;
+      cherry.on(this.element_, 'CustomInputConfirm.keypress', this.onChange_).bind(this).debounce(10);
       this.element_.classList.add(this.CssClasses_.IS_UPGRADED);
     }
   };
@@ -81,8 +79,8 @@
    * Downgrade element.
    */
   CustomInputConfirm.prototype.mdlDowngrade_ = function() {
-    this.element_.removeEventListener('keypress', this.element_.__change);
-    this.element_.__change = null;
+    var cherry = window.cherry;
+    cherry.off(this.element_, 'CustomInputConfirm.keypress', this.onChange_);
     this.element_.classList.remove(this.CssClasses_.IS_UPGRADED);
   };
 

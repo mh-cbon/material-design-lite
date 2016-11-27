@@ -99,18 +99,12 @@
       this.confirm_ = this.element_.querySelector('.custom-dialog-confirm');
       this.cancel_ = this.element_.querySelector('.custom-dialog-cancel');
 
-      this.close_.__fn = this.closeBox_.bind(this);
-      this.close_.addEventListener('click', this.close_.__fn);
-
-      this.confirm_.__fn = this.closeBox_.bind(this);
-      this.confirm_.addEventListener('click', this.confirm_.__fn);
-
-      this.cancel_.__fn = this.closeBox_.bind(this);
-      this.cancel_.addEventListener('click', this.cancel_.__fn);
-
       var cherry = window.cherry;
-      this.container_.__resize = cherry.debounce(this.updateBoxPosition_.bind(this), 100);
-      window.addEventListener('resize', this.container_.__resize);
+      cherry.on(this.close_, 'customdialog.click', this.closeBox_).bind(this);
+      cherry.on(this.confirm_, 'customdialog.click', this.closeBox_).bind(this);
+      cherry.on(this.cancel_, 'customdialog.click', this.closeBox_).bind(this);
+
+      cherry.on(window, 'customdialog.resize', this.updateBoxPosition_).bind(this).debounce(100);
 
       this.placeholder_ = document.createElement('input');
       this.placeholder_.setAttribute('type', 'hidden');
@@ -125,19 +119,20 @@
    */
   CustomDialog.prototype.mdlDowngrade_ = function() {
 
-    this.close_.removeEventListener('click', this.close_.__fn);
-    this.close_.__fn = null;
-
-    this.confirm_.removeEventListener('click', this.confirm_.__fn);
-    this.confirm_.__fn = null;
-
-    this.cancel_.removeEventListener('click', this.cancel_.__fn);
-    this.cancel_.__fn = null;
-
-    window.removeEventListener('resize', this.container_.__resize);
-    this.container_.__resize = null;
+    var cherry = window.cherry;
+    cherry.off(this.close_, 'customdialog.click');
+    cherry.off(this.confirm_, 'customdialog.click');
+    cherry.off(this.cancel_, 'customdialog.click');
+    cherry.off(window, 'customdialog.resize', this.updateBoxPosition_);
 
     this.placeholder_.remove();
+
+    this.container_ = null;
+    this.close_ = null;
+    this.confirm_ = null;
+    this.cancel_ = null;
+    this.placeholder_ = null;
+
     this.element_.classList.remove(this.CssClasses_.IS_UPGRADED);
   };
 

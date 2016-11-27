@@ -72,8 +72,8 @@
    */
   CustomSelectChangeUrl.prototype.init = function() {
     if (this.element_) {
-      this.element_.__changeurl = this.changeUrl_.bind(this);
-      this.element_.addEventListener('change', this.element_.__changeurl);
+      var cherry = window.cherry;
+      cherry.on(this.element_, 'CustomSelectChangeUrl.change', this.changeUrl_).bind(this);
     }
   };
 
@@ -81,8 +81,8 @@
    * Downgrade element.
    */
   CustomSelectChangeUrl.prototype.mdlDowngrade_ = function() {
-    this.element_.removeEventListener('change', this.element_.__changeurl);
-    this.element_.__changeurl = null;
+    var cherry = window.cherry;
+    cherry.off(this.element_, 'CustomSelectChangeUrl.change', this.changeUrl_);
   };
 
   // The component registers itself. It can assume componentHandler is available

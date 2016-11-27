@@ -66,43 +66,40 @@
   };
 
   /**
+   * Handles clear click event.
+   */
+  CustomInputFile.prototype.onClearClicked_ = function(ev) {
+    ev.preventDefault();
+    this.fileinput_.value = null;
+    this.textinput_.value = '';
+    this.element_['MaterialTextfield'].updateClasses_();
+  };
+
+  /**
+   * Handles file change event.
+   */
+  CustomInputFile.prototype.onFileChanged_ = function(ev) {
+    if (this.fileinput_.files.length) {
+      this.textinput_.value = joinFileNames(this.fileinput_.files);
+    } else {
+      this.textinput_.value = '';
+    }
+    this.element_['MaterialTextfield'].updateClasses_();
+  };
+
+  /**
    * Initialize element.
    */
   CustomInputFile.prototype.init = function() {
     if (this.element_) {
-      var element_ = this.element_;
       this.textinput_ = this.element_.querySelector('input[type="text"]');
       this.fileinput_ = this.element_.querySelector('input[type="file"]');
       this.clear_ = this.element_.querySelector('.custom-clearbutton');
 
-      var file = this.fileinput_;
-      var text = this.textinput_;
+      var cherry = window.cherry;
 
-      this.clear_.__click = function(ev) {
-        ev.stopPropagation();
-        // ev.stopImmediatePropagation();
-        ev.preventDefault();
-        file.value = null;
-        text.value = '';
-        element_['MaterialTextfield'].updateClasses_();
-      }.bind(this);
-      this.clear_.addEventListener('click', this.clear_.__click);
-
-      var label = this.element_.querySelector('.mdl-textfield__label');
-      if (label) {
-        // var originalLabel = label.innerHTML;
-        this.fileinput_.__change = function(ev) {
-          if (file.files.length) {
-            // label.innerHTML = joinFileNames(file.files);
-            text.value = joinFileNames(file.files);
-          } else {
-            // label.innerHTML = originalLabel;
-            text.value = '';
-          }
-          element_['MaterialTextfield'].updateClasses_();
-        }.bind(this);
-        this.fileinput_.addEventListener('change', this.fileinput_.__change);
-      }
+      cherry.on(this.clear_, 'CustomInputFile.click', this.onClearClicked_).bind(this);
+      cherry.on(this.fileinput_, 'CustomInputFile.change', this.onFileChanged_).bind(this);
 
       this.element_.classList.add(this.CssClasses_.IS_UPGRADED);
     }
@@ -112,10 +109,13 @@
    * Downgrade element.
    */
   CustomInputFile.prototype.mdlDowngrade_ = function() {
-    this.clear_.removeEventListener('click', this.textinput_.__click);
-    this.clear_.__click = null;
-    this.fileinput_.removeEventListener('change', this.fileinput_.__change);
-    this.fileinput_.__change = null;
+    var cherry = window.cherry;
+    cherry.off(this.clear_, 'CustomInputFile.click', this.onClearClicked_);
+    cherry.off(this.fileinput_, 'CustomInputFile.change', this.onFileChanged_);
+
+    this.textinput_ = null;
+    this.fileinput_ = null;
+    this.clear_ = null;
     this.element_.classList.remove(this.CssClasses_.IS_UPGRADED);
   };
 
