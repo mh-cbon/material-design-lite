@@ -87,17 +87,17 @@
         </tr>
       </thead>
       <tbody>
-        <tr value="r">
+        <tr value="r" name="some">
           <td class="mdl-data-table__cell--non-numeric">Acrylic (Transparent)</td>
           <td>25</td>
           <td>$2.90</td>
         </tr>
-        <tr value="t">
+        <tr value="t" name="some">
           <td class="mdl-data-table__cell--non-numeric">Plywood (Birch)</td>
           <td>50</td>
           <td>$1.25</td>
         </tr>
-        <tr value="yy">
+        <tr value="yy" name="some">
           <td class="mdl-data-table__cell--non-numeric">Laminate (Gold on Blue)</td>
           <td>10</td>
           <td>$2.35</td>
@@ -167,7 +167,7 @@
   </label>
 
   <div class="custom-expander-container">
-    <div class="mdl-textfield is-invalid">
+    <div class="mdl-textfield is-invalid custom-input-confirm custom-js-input-confirm">
       <div class="mdl-textfield mdl-js-textfield">
         <input class="mdl-textfield__input" type="text" id="sample1">
         <label class="mdl-textfield__label" for="sample1">Text...</label>
@@ -417,11 +417,64 @@
 <hr/>
 
 <div class="custom-cropper custom-js-cropper"
+  aspect-ratio="1"
+  b64-export-width="96"
+  b64-export-height="96"
   >
 
-  <!-- <div class="custom-cropper-current-img">
+  <div class="custom-cropper-current-img custom-cropper-current-img--rounded">
     <img src="avatar-1.png" />
-  </div> -->
+  </div>
+
+  <input class="custom-cropper-b64-result" type="hidden" name="the name you need" />
+  <input class="custom-cropper-data-result" type="hidden" name="the name you need" />
+
+  <div class="mdl-textfield mdl-js-textfield custom-inputfile custom-js-inputfile
+              is-invalid mdl-textfield--floating-label">
+    <input class="mdl-textfield__input" type="text"
+        id="inputfile2" value="" readonly="readonly" />
+
+    <label>
+      <div class="mdl-button mdl-button--icon">
+        <i class="material-icons">attach_file</i>
+        <i class="material-icons custom-clearbutton">clear</i>
+      </div>
+      <input type="file" />
+    </label>
+
+    <label class="mdl-textfield__label" for="inputfile2">Choose a file</label>
+    <span class="mdl-textfield__error">beep boop</span>
+  </div>
+
+  <div class="custom-cropper-dialog custom-js-dialog custom-dialog">
+    <div class="custom-dialog-bg mdl-color--grey"></div>
+    <div class="custom-dialog-container mdl-dialog mdl-color--white">
+      <h4 class="mdl-dialog__title">Title of the dialog</h4>
+      <div class="mdl-dialog__content">
+        <div class="custom-cropper-component-container">
+          <img src="" class="custom-cropper-dialog-img" />
+        </div>
+        <div class="custom-cropper-preview">
+          <img />
+        </div>
+      </div>
+      <div class="mdl-dialog__actions">
+        <button type="button" class="mdl-button custom-dialog-confirm">OK</button>
+        <button type="button" class="mdl-button custom-dialog-cancel">CANCEL</button>
+      </div>
+      <button type="button" class="mdl-button custom-dialog-close">
+        <i class="material-icons">close</i>
+      </button>
+    </div>
+  </div>
+
+</div>
+
+<hr/>
+
+<div class="custom-cropper custom-js-cropper"
+  aspect-ratio="1"
+  >
 
   <input class="custom-cropper-b64-result" type="hidden" name="the name you need" />
   <input class="custom-cropper-data-result" type="hidden" name="the name you need" />
@@ -557,6 +610,40 @@
   </button>
 
 </div>
+
+<hr/>
+
+<div class="mdl-selectfield mdl-js-selectfield custom-js-select-change-url">
+  <select id="gender" class="mdl-selectfield__select">
+    <option value="/test.html">Change value to change url</option>
+    <option value="/test.html?opt1">option 1</option>
+    <option value="/test.html?opt2">option 2</option>
+  </select>
+  <label class="mdl-selectfield__label" for="gender">User gender</label>
+  <span class="mdl-selectfield__error">Select a value</span>
+</div>
+
+<hr/>
+
+<div class="custom-js-select-change-url">
+  <div class="mdl-selectfield mdl-js-selectfield">
+    <select id="gender" class="mdl-selectfield__select">
+      <option value="/test.html">Change value to change url</option>
+      <option value="/test.html?opt1">option 1</option>
+      <option value="/test.html?opt2">option 2</option>
+    </select>
+    <label class="mdl-selectfield__label" for="gender">User gender</label>
+    <span class="mdl-selectfield__error">Select a value</span>
+  </div>
+</div>
+
+<hr/>
+
+<select id="gender" class="custom-js-select-change-url">
+  <option value="/test.html">Change value to change url</option>
+  <option value="/test.html?opt1">option 1</option>
+  <option value="/test.html?opt2">option 2</option>
+</select>
 
 <hr/>
 

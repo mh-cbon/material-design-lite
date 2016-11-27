@@ -2054,6 +2054,494 @@ doy:4}}),kg.defineLocale("zh-hk",{months:"一月_二月_三月_四月_五月_六
 	exports.default = mdDateTimePicker;
 });
 
+/*!
+ * imagesLoaded PACKAGED v4.1.1
+ * JavaScript is all like "You images are done yet or what?"
+ * MIT License
+ */
+
+/**
+ * EvEmitter v1.0.3
+ * Lil' event emitter
+ * MIT License
+ */
+
+/* jshint unused: true, undef: true, strict: true */
+
+( function( global, factory ) {
+  // universal module definition
+  /* jshint strict: false */ /* globals define, module, window */
+  if ( typeof define == 'function' && define.amd ) {
+    // AMD - RequireJS
+    define( 'ev-emitter/ev-emitter',factory );
+  } else if ( typeof module == 'object' && module.exports ) {
+    // CommonJS - Browserify, Webpack
+    module.exports = factory();
+  } else {
+    // Browser globals
+    global.EvEmitter = factory();
+  }
+
+}( typeof window != 'undefined' ? window : this, function() {
+
+
+
+function EvEmitter() {}
+
+var proto = EvEmitter.prototype;
+
+proto.on = function( eventName, listener ) {
+  if ( !eventName || !listener ) {
+    return;
+  }
+  // set events hash
+  var events = this._events = this._events || {};
+  // set listeners array
+  var listeners = events[ eventName ] = events[ eventName ] || [];
+  // only add once
+  if ( listeners.indexOf( listener ) == -1 ) {
+    listeners.push( listener );
+  }
+
+  return this;
+};
+
+proto.once = function( eventName, listener ) {
+  if ( !eventName || !listener ) {
+    return;
+  }
+  // add event
+  this.on( eventName, listener );
+  // set once flag
+  // set onceEvents hash
+  var onceEvents = this._onceEvents = this._onceEvents || {};
+  // set onceListeners object
+  var onceListeners = onceEvents[ eventName ] = onceEvents[ eventName ] || {};
+  // set flag
+  onceListeners[ listener ] = true;
+
+  return this;
+};
+
+proto.off = function( eventName, listener ) {
+  var listeners = this._events && this._events[ eventName ];
+  if ( !listeners || !listeners.length ) {
+    return;
+  }
+  var index = listeners.indexOf( listener );
+  if ( index != -1 ) {
+    listeners.splice( index, 1 );
+  }
+
+  return this;
+};
+
+proto.emitEvent = function( eventName, args ) {
+  var listeners = this._events && this._events[ eventName ];
+  if ( !listeners || !listeners.length ) {
+    return;
+  }
+  var i = 0;
+  var listener = listeners[i];
+  args = args || [];
+  // once stuff
+  var onceListeners = this._onceEvents && this._onceEvents[ eventName ];
+
+  while ( listener ) {
+    var isOnce = onceListeners && onceListeners[ listener ];
+    if ( isOnce ) {
+      // remove listener
+      // remove before trigger to prevent recursion
+      this.off( eventName, listener );
+      // unset once flag
+      delete onceListeners[ listener ];
+    }
+    // trigger listener
+    listener.apply( this, args );
+    // get next listener
+    i += isOnce ? 0 : 1;
+    listener = listeners[i];
+  }
+
+  return this;
+};
+
+return EvEmitter;
+
+}));
+
+/*!
+ * imagesLoaded v4.1.1
+ * JavaScript is all like "You images are done yet or what?"
+ * MIT License
+ */
+
+( function( window, factory ) { 'use strict';
+  // universal module definition
+
+  /*global define: false, module: false, require: false */
+
+  if ( typeof define == 'function' && define.amd ) {
+    // AMD
+    define( [
+      'ev-emitter/ev-emitter'
+    ], function( EvEmitter ) {
+      return factory( window, EvEmitter );
+    });
+  } else if ( typeof module == 'object' && module.exports ) {
+    // CommonJS
+    module.exports = factory(
+      window,
+      require('ev-emitter')
+    );
+  } else {
+    // browser global
+    window.imagesLoaded = factory(
+      window,
+      window.EvEmitter
+    );
+  }
+
+})( window,
+
+// --------------------------  factory -------------------------- //
+
+function factory( window, EvEmitter ) {
+
+
+
+var $ = window.jQuery;
+var console = window.console;
+
+// -------------------------- helpers -------------------------- //
+
+// extend objects
+function extend( a, b ) {
+  for ( var prop in b ) {
+    a[ prop ] = b[ prop ];
+  }
+  return a;
+}
+
+// turn element or nodeList into an array
+function makeArray( obj ) {
+  var ary = [];
+  if ( Array.isArray( obj ) ) {
+    // use object if already an array
+    ary = obj;
+  } else if ( typeof obj.length == 'number' ) {
+    // convert nodeList to array
+    for ( var i=0; i < obj.length; i++ ) {
+      ary.push( obj[i] );
+    }
+  } else {
+    // array of single index
+    ary.push( obj );
+  }
+  return ary;
+}
+
+// -------------------------- imagesLoaded -------------------------- //
+
+/**
+ * @param {Array, Element, NodeList, String} elem
+ * @param {Object or Function} options - if function, use as callback
+ * @param {Function} onAlways - callback function
+ */
+function ImagesLoaded( elem, options, onAlways ) {
+  // coerce ImagesLoaded() without new, to be new ImagesLoaded()
+  if ( !( this instanceof ImagesLoaded ) ) {
+    return new ImagesLoaded( elem, options, onAlways );
+  }
+  // use elem as selector string
+  if ( typeof elem == 'string' ) {
+    elem = document.querySelectorAll( elem );
+  }
+
+  this.elements = makeArray( elem );
+  this.options = extend( {}, this.options );
+
+  if ( typeof options == 'function' ) {
+    onAlways = options;
+  } else {
+    extend( this.options, options );
+  }
+
+  if ( onAlways ) {
+    this.on( 'always', onAlways );
+  }
+
+  this.getImages();
+
+  if ( $ ) {
+    // add jQuery Deferred object
+    this.jqDeferred = new $.Deferred();
+  }
+
+  // HACK check async to allow time to bind listeners
+  setTimeout( function() {
+    this.check();
+  }.bind( this ));
+}
+
+ImagesLoaded.prototype = Object.create( EvEmitter.prototype );
+
+ImagesLoaded.prototype.options = {};
+
+ImagesLoaded.prototype.getImages = function() {
+  this.images = [];
+
+  // filter & find items if we have an item selector
+  this.elements.forEach( this.addElementImages, this );
+};
+
+/**
+ * @param {Node} element
+ */
+ImagesLoaded.prototype.addElementImages = function( elem ) {
+  // filter siblings
+  if ( elem.nodeName == 'IMG' ) {
+    this.addImage( elem );
+  }
+  // get background image on element
+  if ( this.options.background === true ) {
+    this.addElementBackgroundImages( elem );
+  }
+
+  // find children
+  // no non-element nodes, #143
+  var nodeType = elem.nodeType;
+  if ( !nodeType || !elementNodeTypes[ nodeType ] ) {
+    return;
+  }
+  var childImgs = elem.querySelectorAll('img');
+  // concat childElems to filterFound array
+  for ( var i=0; i < childImgs.length; i++ ) {
+    var img = childImgs[i];
+    this.addImage( img );
+  }
+
+  // get child background images
+  if ( typeof this.options.background == 'string' ) {
+    var children = elem.querySelectorAll( this.options.background );
+    for ( i=0; i < children.length; i++ ) {
+      var child = children[i];
+      this.addElementBackgroundImages( child );
+    }
+  }
+};
+
+var elementNodeTypes = {
+  1: true,
+  9: true,
+  11: true
+};
+
+ImagesLoaded.prototype.addElementBackgroundImages = function( elem ) {
+  var style = getComputedStyle( elem );
+  if ( !style ) {
+    // Firefox returns null if in a hidden iframe https://bugzil.la/548397
+    return;
+  }
+  // get url inside url("...")
+  var reURL = /url\((['"])?(.*?)\1\)/gi;
+  var matches = reURL.exec( style.backgroundImage );
+  while ( matches !== null ) {
+    var url = matches && matches[2];
+    if ( url ) {
+      this.addBackground( url, elem );
+    }
+    matches = reURL.exec( style.backgroundImage );
+  }
+};
+
+/**
+ * @param {Image} img
+ */
+ImagesLoaded.prototype.addImage = function( img ) {
+  var loadingImage = new LoadingImage( img );
+  this.images.push( loadingImage );
+};
+
+ImagesLoaded.prototype.addBackground = function( url, elem ) {
+  var background = new Background( url, elem );
+  this.images.push( background );
+};
+
+ImagesLoaded.prototype.check = function() {
+  var _this = this;
+  this.progressedCount = 0;
+  this.hasAnyBroken = false;
+  // complete if no images
+  if ( !this.images.length ) {
+    this.complete();
+    return;
+  }
+
+  function onProgress( image, elem, message ) {
+    // HACK - Chrome triggers event before object properties have changed. #83
+    setTimeout( function() {
+      _this.progress( image, elem, message );
+    });
+  }
+
+  this.images.forEach( function( loadingImage ) {
+    loadingImage.once( 'progress', onProgress );
+    loadingImage.check();
+  });
+};
+
+ImagesLoaded.prototype.progress = function( image, elem, message ) {
+  this.progressedCount++;
+  this.hasAnyBroken = this.hasAnyBroken || !image.isLoaded;
+  // progress event
+  this.emitEvent( 'progress', [ this, image, elem ] );
+  if ( this.jqDeferred && this.jqDeferred.notify ) {
+    this.jqDeferred.notify( this, image );
+  }
+  // check if completed
+  if ( this.progressedCount == this.images.length ) {
+    this.complete();
+  }
+
+  if ( this.options.debug && console ) {
+    console.log( 'progress: ' + message, image, elem );
+  }
+};
+
+ImagesLoaded.prototype.complete = function() {
+  var eventName = this.hasAnyBroken ? 'fail' : 'done';
+  this.isComplete = true;
+  this.emitEvent( eventName, [ this ] );
+  this.emitEvent( 'always', [ this ] );
+  if ( this.jqDeferred ) {
+    var jqMethod = this.hasAnyBroken ? 'reject' : 'resolve';
+    this.jqDeferred[ jqMethod ]( this );
+  }
+};
+
+// --------------------------  -------------------------- //
+
+function LoadingImage( img ) {
+  this.img = img;
+}
+
+LoadingImage.prototype = Object.create( EvEmitter.prototype );
+
+LoadingImage.prototype.check = function() {
+  // If complete is true and browser supports natural sizes,
+  // try to check for image status manually.
+  var isComplete = this.getIsImageComplete();
+  if ( isComplete ) {
+    // report based on naturalWidth
+    this.confirm( this.img.naturalWidth !== 0, 'naturalWidth' );
+    return;
+  }
+
+  // If none of the checks above matched, simulate loading on detached element.
+  this.proxyImage = new Image();
+  this.proxyImage.addEventListener( 'load', this );
+  this.proxyImage.addEventListener( 'error', this );
+  // bind to image as well for Firefox. #191
+  this.img.addEventListener( 'load', this );
+  this.img.addEventListener( 'error', this );
+  this.proxyImage.src = this.img.src;
+};
+
+LoadingImage.prototype.getIsImageComplete = function() {
+  return this.img.complete && this.img.naturalWidth !== undefined;
+};
+
+LoadingImage.prototype.confirm = function( isLoaded, message ) {
+  this.isLoaded = isLoaded;
+  this.emitEvent( 'progress', [ this, this.img, message ] );
+};
+
+// ----- events ----- //
+
+// trigger specified handler for event type
+LoadingImage.prototype.handleEvent = function( event ) {
+  var method = 'on' + event.type;
+  if ( this[ method ] ) {
+    this[ method ]( event );
+  }
+};
+
+LoadingImage.prototype.onload = function() {
+  this.confirm( true, 'onload' );
+  this.unbindEvents();
+};
+
+LoadingImage.prototype.onerror = function() {
+  this.confirm( false, 'onerror' );
+  this.unbindEvents();
+};
+
+LoadingImage.prototype.unbindEvents = function() {
+  this.proxyImage.removeEventListener( 'load', this );
+  this.proxyImage.removeEventListener( 'error', this );
+  this.img.removeEventListener( 'load', this );
+  this.img.removeEventListener( 'error', this );
+};
+
+// -------------------------- Background -------------------------- //
+
+function Background( url, element ) {
+  this.url = url;
+  this.element = element;
+  this.img = new Image();
+}
+
+// inherit LoadingImage prototype
+Background.prototype = Object.create( LoadingImage.prototype );
+
+Background.prototype.check = function() {
+  this.img.addEventListener( 'load', this );
+  this.img.addEventListener( 'error', this );
+  this.img.src = this.url;
+  // check if image is already complete
+  var isComplete = this.getIsImageComplete();
+  if ( isComplete ) {
+    this.confirm( this.img.naturalWidth !== 0, 'naturalWidth' );
+    this.unbindEvents();
+  }
+};
+
+Background.prototype.unbindEvents = function() {
+  this.img.removeEventListener( 'load', this );
+  this.img.removeEventListener( 'error', this );
+};
+
+Background.prototype.confirm = function( isLoaded, message ) {
+  this.isLoaded = isLoaded;
+  this.emitEvent( 'progress', [ this, this.element, message ] );
+};
+
+// -------------------------- jQuery -------------------------- //
+
+ImagesLoaded.makeJQueryPlugin = function( jQuery ) {
+  jQuery = jQuery || window.jQuery;
+  if ( !jQuery ) {
+    return;
+  }
+  // set local variable
+  $ = jQuery;
+  // $().imagesLoaded()
+  $.fn.imagesLoaded = function( options, callback ) {
+    var instance = new ImagesLoaded( this, options, callback );
+    return instance.jqDeferred.promise( $(this) );
+  };
+};
+// try making plugin
+ImagesLoaded.makeJQueryPlugin();
+
+// --------------------------  -------------------------- //
+
+return ImagesLoaded;
+
+});
+
+
 /**!
  * ajax - v2.1.2
  * Ajax module in Vanilla JS
@@ -2599,264 +3087,790 @@ window.addEventListener('load', function() {
   }
 });
 
-if (!window.cherry || !window['cherry']) {
+(function(window) {
+  'use strict';
+
+  if (!window.cherry && !window['cherry']) {
     window.cherry = {};
     window['cherry'] = {};
-}
-var cherry = window.cherry || window['cherry'];
-/**
+  }
+
+  var cherry = window.cherry || window['cherry'];
+
+  /**
    * debounce a function.
    * @param  {!Function} The function to debounce.
    * @param  {!Integer} The delay before the function is invoked.
    * @return {!Function} The debounced function.
    */
-var debounce = function (fn, delay) {
+  var debounce = function(fn, delay) {
     var timer = null;
-    return function () {
-        var context = this;
-        var args = arguments;
-        clearTimeout(timer);
-        timer = setTimeout(function () {
-            fn.apply(context, args);
-        }, delay);
+    return function() {
+      var context = this;
+      var args = arguments;
+      clearTimeout(timer);
+      timer = setTimeout(function() {
+        fn.apply(context, args);
+      }, delay);
     };
-};
-cherry.debounce = debounce;
-cherry['debounce'] = debounce;
-/**
+  };
+  cherry.debounce = debounce;
+  cherry['debounce'] = debounce;
+
+  /**
    * outerHeight polyfill.
    * @param  {!DomElement} The element we want the outer heihgt of.
    * @return {!Integer} The value of the height in pixel.
    */
-var outerHeight = function (el) {
+  var outerHeight = function(el) {
     var s = el.offsetHeight;
     var style = getComputedStyle(el);
     s += parseInt(style.marginTop) + parseInt(style.marginBottom);
     return s;
-};
-cherry.outerHeight = outerHeight;
-cherry['outerHeight'] = outerHeight;
-/**
+  };
+  cherry.outerHeight = outerHeight;
+  cherry['outerHeight'] = outerHeight;
+
+  /**
    * innerHeight polyfill.
    * @param  {!DomElement} The element we want the outer heihgt of.
    * @return {!Integer} The value of the height in pixel.
    */
-var innerHeight = function (el) {
+  var innerHeight = function(el) {
     var s = el.offsetHeight;
     var style = getComputedStyle(el);
     s -= parseInt(style.paddingTop) + parseInt(style.paddingBottom);
     return s;
-};
-cherry.innerHeight = innerHeight;
-cherry['innerHeight'] = innerHeight;
-/**
+  };
+  cherry.innerHeight = innerHeight;
+  cherry['innerHeight'] = innerHeight;
+
+  /**
    * Get child element nodes only.
    * @param  {!DomElement} The parent element.
    * @return {!DomNodes} The list of dom child nodes.
    */
-var childElements = function (el) {
+  var childElements = function(el) {
     var ret = [];
     var els = el.childNodes;
     for (var i = 0; i < els.length; i++) {
-        if (els[i].nodeType === 1) {
-            ret.push(els[i]);
-        }
+      if (els[i].nodeType === 1) {
+        ret.push(els[i]);
+      }
     }
     return ret;
-};
-cherry.childElements = childElements;
-cherry['childElements'] = childElements;
-/**
+  };
+  cherry.childElements = childElements;
+  cherry['childElements'] = childElements;
+
+  /**
    * Get index of given node within parent node.
    * @param  {!DomElement} The element.
    * @return {!int} The index.
    */
-var indexElement = function (el) {
+  var indexElement = function(el) {
     return [].slice.call(el.parentNode.children).indexOf(el);
-};
-cherry.indexElement = indexElement;
-cherry['indexElement'] = indexElement;
-/**
-   * Event delegation.
-   * @param  {!string} A selector string or a DomNode onto which attach the event.
-   * @param  {!string} An event name to listen to.
-   * @param  {!string} A selector of elements to listen the event for.
-   * @return {!Function} The function bound to the node, useful to unbind.
-   */
-function delegateEvent(elSelector, eventName, selector, fn) {
-    var element;
-    if (elSelector.querySelector) {
-        element = elSelector;
-    } else {
-        element = document.querySelector(elSelector);
-    }
-    /**
-    * The function handler bound to the event.
-    */
-    var handler = function (event) {
-        var possibleTargets = element.querySelectorAll(selector);
-        var target = event.target;
-        for (var i = 0, l = possibleTargets.length; i < l; i++) {
-            var el = target;
-            var p = possibleTargets[i];
-            while (el && el !== element) {
-                if (el === p) {
-                    return fn.call(p, event);
-                }
-                el = el.parentNode;
-            }
-        }
-    };
-    element.addEventListener(eventName, handler);
-    return handler;
-}
-cherry.delegateEvent = delegateEvent;
-cherry['delegateEvent'] = delegateEvent;
-/**
+  };
+  cherry.indexElement = indexElement;
+  cherry['indexElement'] = indexElement;
+
+  /**
    * Get all DOM element up the tree that contain a class, ID, or data attribute.
    *
    * @param  {!Node} elem The base element
    * @param  {!string} selector The class, id, data attribute, or tag to look for
    * @return {!Array} Null if no match
    */
-var getParents = function (elem, selector) {
+  var getParents = function(elem, selector) {
+
     var parents = [];
     var firstChar;
     if (selector) {
-        firstChar = selector.charAt(0);
+      firstChar = selector.charAt(0);
     }
+
     // Get matches
     for (true; elem && elem !== document; elem = elem.parentNode) {
-        if (selector) {
-            // If selector is a class
-            if (firstChar === '.') {
-                if (elem.classList.contains(selector.substr(1))) {
-                    parents.push(elem);
-                }
-            }
-            // If selector is an ID
-            if (firstChar === '#') {
-                if (elem.id === selector.substr(1)) {
-                    parents.push(elem);
-                }
-            }
-            // If selector is a data attribute
-            if (firstChar === '[') {
-                if (elem.hasAttribute(selector.substr(1, selector.length - 1))) {
-                    parents.push(elem);
-                }
-            }
-            // If selector is a tag
-            if (elem.tagName.toLowerCase() === selector) {
-                parents.push(elem);
-            }
-        } else {
+      if (selector) {
+
+        // If selector is a class
+        if (firstChar === '.') {
+          if (elem.classList.contains(selector.substr(1))) {
             parents.push(elem);
+          }
         }
+
+        // If selector is an ID
+        if (firstChar === '#') {
+          if (elem.id === selector.substr(1)) {
+            parents.push(elem);
+          }
+        }
+
+        // If selector is a data attribute
+        if (firstChar === '[') {
+          if (elem.hasAttribute(selector.substr(1, selector.length - 1))) {
+            parents.push(elem);
+          }
+        }
+
+        // If selector is a tag
+        if (elem.tagName.toLowerCase() === selector) {
+          parents.push(elem);
+        }
+
+      } else {
+        parents.push(elem);
+      }
     }
+
     // Return parents if any exist
     if (parents.length > 0) {
-        return parents;
+      return parents;
     }
     return null;
-};
-cherry.getParents = getParents;
-cherry['getParents'] = getParents;
-/**
+  };
+  cherry.getParents = getParents;
+  cherry['getParents'] = getParents;
+
+  /**
    * Get all DOM element up the tree that contain a class, ID, or data attribute.
    *
    * @param  {!Node} elem The base element
    * @param  {!string} selector The class, id, data attribute, or tag to look for
    * @return {!Array} Null if no match
    */
-var getParentsUntil = function (elem, parent, selector) {
+  var getParentsUntil = function(elem, parent, selector) {
+
     var parentType = null;
     var selectorType = null;
     var parents = [];
     if (parent) {
-        parentType = parent.charAt(0);
+      parentType = parent.charAt(0);
     }
     if (selector) {
-        selectorType = selector.charAt(0);
+      selectorType = selector.charAt(0);
     }
+
     // Get matches
     for (true; elem && elem !== document; elem = elem.parentNode) {
-        // Check if parent has been reached
-        if (parent) {
-            // If parent is a class
-            if (parentType === '.') {
-                if (elem.classList.contains(parent.substr(1))) {
-                    break;
-                }
-            }
-            // If parent is an ID
-            if (parentType === '#') {
-                if (elem.id === parent.substr(1)) {
-                    break;
-                }
-            }
-            // If parent is a data attribute
-            if (parentType === '[') {
-                if (elem.hasAttribute(parent.substr(1, parent.length - 1))) {
-                    break;
-                }
-            }
-            // If parent is a tag
-            if (elem.tagName.toLowerCase() === parent) {
-                break;
-            }
+
+      // Check if parent has been reached
+      if (parent) {
+
+        // If parent is a class
+        if (parentType === '.') {
+          if (elem.classList.contains(parent.substr(1))) {
+            break;
+          }
         }
-        if (selector) {
-            // If selector is a class
-            if (selectorType === '.') {
-                if (elem.classList.contains(selector.substr(1))) {
-                    parents.push(elem);
-                }
-            }
-            // If selector is an ID
-            if (selectorType === '#') {
-                if (elem.id === selector.substr(1)) {
-                    parents.push(elem);
-                }
-            }
-            // If selector is a data attribute
-            if (selectorType === '[') {
-                if (elem.hasAttribute(selector.substr(1, selector.length - 1))) {
-                    parents.push(elem);
-                }
-            }
-            // If selector is a tag
-            if (elem.tagName.toLowerCase() === selector) {
-                parents.push(elem);
-            }
-        } else {
+
+        // If parent is an ID
+        if (parentType === '#') {
+          if (elem.id === parent.substr(1)) {
+            break;
+          }
+        }
+
+        // If parent is a data attribute
+        if (parentType === '[') {
+          if (elem.hasAttribute(parent.substr(1, parent.length - 1))) {
+            break;
+          }
+        }
+
+        // If parent is a tag
+        if (elem.tagName.toLowerCase() === parent) {
+          break;
+        }
+
+      }
+
+      if (selector) {
+
+        // If selector is a class
+        if (selectorType === '.') {
+          if (elem.classList.contains(selector.substr(1))) {
             parents.push(elem);
+          }
         }
+
+        // If selector is an ID
+        if (selectorType === '#') {
+          if (elem.id === selector.substr(1)) {
+            parents.push(elem);
+          }
+        }
+
+        // If selector is a data attribute
+        if (selectorType === '[') {
+          if (elem.hasAttribute(selector.substr(1, selector.length - 1))) {
+            parents.push(elem);
+          }
+        }
+
+        // If selector is a tag
+        if (elem.tagName.toLowerCase() === selector) {
+          parents.push(elem);
+        }
+
+      } else {
+        parents.push(elem);
+      }
+
     }
+
     // Return parents if any exist
     if (parents.length > 0) {
-        return parents;
+      return parents;
     }
+
     return null;
-};
-cherry.getParentsUntil = getParentsUntil;
-cherry['getParentsUntil'] = getParentsUntil;
-/**
+  };
+  cherry.getParentsUntil = getParentsUntil;
+  cherry['getParentsUntil'] = getParentsUntil;
+
+  /**
    * Get image as data url value.
    *
    * @param  {!Node} elem The base element
    * @return {!string} Data url of the image.
    */
-var imgAsDataUrl = function (img) {
+  var imgAsDataUrl = function(img) {
     var canvas = document.createElement('canvas');
     var ctx = canvas.getContext('2d');
-    ctx.canvas.width = img.offsetWidth;
+    ctx.canvas.width  = img.offsetWidth;
     ctx.canvas.height = img.offsetHeight;
     ctx.drawImage(img, 0, 0, img.offsetWidth, img.offsetHeight);
     return canvas.toDataURL('image/png');
-};
-cherry.imgAsDataUrl = imgAsDataUrl;
-cherry['imgAsDataUrl'] = imgAsDataUrl;
+  };
+  cherry.imgAsDataUrl = imgAsDataUrl;
+  cherry['imgAsDataUrl'] = imgAsDataUrl;
+
+})(window);
+
+(function(window) {
+  'use strict';
+
+  if (!window.cherry && !window['cherry']) {
+    window.cherry = {};
+    window['cherry'] = {};
+  }
+
+  var cherry = window.cherry || window['cherry'];
+
+  /**
+  * Given the event names 'click',
+  * 'ns.click', returns 'click'
+  * @param {string} eventName The name of the event.
+  * @returns {string}
+  * @private
+  */
+  function getEventName(some) {
+    var k = some.split(/[.]/);
+    return k[k.length - 1];
+  }
+
+  /**
+  * Tells if an event name is namespaced like
+  * 'ns.click'
+  * @param {string} eventName The name of the event.
+  * @returns {boolean}
+  * @private
+  */
+  function isNamespaced(some) {
+    var k = some.split(/./);
+    return k.length > 1;
+  }
+
+  /**
+  * Take a selector string, or a DomNode, returns a DomNode.
+  * @param {string|DomNode} some A selector to a node, or the node itself.
+  * @returns {DomNode}
+  * @private
+  */
+  function getElement(some) {
+    var element;
+    if (some && some.querySelector) {
+      element = some;
+    } else if (some === window) {
+      element = window;
+    } else {
+      element = document.querySelector(some);
+    }
+    return element;
+  }
+
+  /**
+  * Create an event suitable for dispatch.
+  * @param {eventType} eventType A type of event.
+  * @returns {CustomEvent}
+  * @private
+  */
+  function createEvent_(eventType, opts) {
+    if ('CustomEvent' in window && typeof window.CustomEvent === 'function') {
+      return new CustomEvent(eventType, opts);
+    } else {
+      var ev = document.createEvent('Events');
+      ev.initEvent(eventType, opts.bubbles, opts.cancelable);
+      for (var n in opts) {
+        if (n !== 'bubbles' && n !== 'cancelable') {
+          ev[n] = opts[n];
+        }
+      }
+      return ev;
+    }
+  }
+
+  /**
+  * Create a new instance of EventManager for the given node.
+  * @param {DomNode} node A DomNode.
+  * @returns {EventManager}
+  */
+  function EventManager(node) {
+    this.domNode = node;
+    this.userEventHandlers = {};
+    this.subscribedDomEvents = {};
+  }
+  EventManager.prototype.userEventHandlers = {}; /* eventName => [handlers...] */
+  EventManager.prototype.domNode = null;
+  EventManager.prototype.subscribedDomEvents = {};
+
+  /**
+  * Tell if current EventManager instance is managing given target node.
+  * @param {DomNode} target A DomNode.
+  * @returns {boolean}
+  */
+  EventManager.prototype.isNode = function(target) {
+    return this.domNode === target;
+  };
+
+  /**
+  * Subscribe this EventManager to a dom event.
+  * @param {string} eventName The name of the event.
+  */
+  EventManager.prototype.subscribeToDomEvent = function(eventName) {
+    eventName = getEventName(eventName);
+    if (!this.subscribedDomEvents[eventName]) {
+      var that = this;
+      /**
+      * xx
+      */
+      this.subscribedDomEvents[eventName] = function(ev) {
+        var p = ev.stopImmediatePropagation;
+        /**
+        * Replacement of original stopImmediatePropagation
+        * to catch and mark stopped event.
+        */
+        ev.stopImmediatePropagation = function() {
+          ev.__HasStopped = true;
+          p.call(ev);
+        };
+        if (!ev.onlyThisEventName) {
+          that.triggerForEventName(eventName, ev);
+        } else {
+          that.triggerForEventName(ev.onlyThisEventName, ev);
+        }
+      };
+      this.domNode.addEventListener(eventName, this.subscribedDomEvents[eventName]);
+    }
+  };
+
+  /**
+  * Unsubscribe this EventManager to a dom event.
+  * @param {string} eventName The name of the event.
+  */
+  EventManager.prototype.unsubscribeToDomEvent = function(eventName) {
+    eventName = getEventName(eventName);
+    if (this.subscribedDomEvents[eventName]) {
+      this.domNode.removeEventListener(eventName, this.subscribedDomEvents[eventName]);
+      this.subscribedDomEvents[eventName] = null;
+    }
+  };
+
+  /**
+  * Add a susbcription to given event.
+  * @param {string} eventName The name of the event.
+  * @param {string} handler The effective function bound to the dom.
+  * @param {string} userFn The original function handler for a delegated event.
+  * @param {string} delegationSelector The target of a delegated event.
+  * @param {Object} The user event handler object.
+  */
+  EventManager.prototype.addUserEventHandler = function(eventName, handler, userFn, delegationSelector) {
+    this.subscribeToDomEvent(eventName);
+    if (!this.userEventHandlers[eventName]) {
+      this.userEventHandlers[eventName] = [];
+    }
+    var ret = {
+      effectiveHandler: handler,
+      delegationSelector: delegationSelector,
+      userHandler: userFn,
+      debouncedHandler: null,
+      scope: null,
+      /**
+      * Set the scope of the handler
+      */
+      bind: function(t) {
+        ret.scope = t;
+        return ret;
+      },
+      /**
+      * Set the scope of the handler
+      */
+      debounce: function(delay) {
+        ret.debouncedHandler = cherry.debounce(ret.userHandler || ret.effectiveHandler, delay);
+        return ret;
+      }
+    };
+    this.userEventHandlers[eventName].push(ret);
+    return ret;
+  };
+
+  /**
+  * Remove a susbcription to given event.
+  * @param {string} eventName The name of the event.
+  * @param {string} handler The effective function, or the use function handler.
+  * @param {string} delegationSelector The target of a delegated event.
+  */
+  EventManager.prototype.removeUserEventHandler = function(eventName, handler, delegationSelector) {
+    if (this.userEventHandlers[eventName]) {
+      if (!handler) {
+        this.userEventHandlers[eventName] = [];
+      } else {
+        var i = -1;
+        this.userEventHandlers[eventName].forEach(function(o, index) {
+          if (delegationSelector && o.delegationSelector === delegationSelector &&
+              o.userHandler && o.userHandler === handler) {
+            i = index;
+          } else if (delegationSelector && o.delegationSelector === delegationSelector && !handler) {
+            i = index;
+          } else if (o.userHandler && o.userHandler === handler) {
+            i = index;
+          } else if (!o.userHandler && o.effectiveHandler === handler) {
+            i = index;
+          }
+        });
+        if (i > -1) {
+          this.userEventHandlers[eventName].splice(i, 1);
+        }
+      }
+      var remaining = this.getAllRelatedUserEventHandlers(eventName);
+      if (remaining.length === 0) {
+        this.unsubscribeToDomEvent(eventName);
+      }
+    }
+  };
+
+  /**
+  * Given an eventName, namespaced or not, returns all handlers
+  * related to the Dom Event.
+  * @param {string} eventName The name of the event.
+  * @returns {Array} The list of handlers found.
+  */
+  EventManager.prototype.getAllRelatedUserEventHandlers = function(eventName) {
+    var ret = [];
+    var t = this.userEventHandlers;
+    eventName = getEventName(eventName);
+    /**
+    * Lookup for all handlers related to a dom event.
+    */
+    Object.keys(t).forEach(function(name) {
+      if (name.substr(-eventName.length) === eventName) {
+        ret = ret.concat(t[name]);
+      }
+    });
+    return ret;
+  };
+
+  /**
+  * Given an eventName, namespaced or not, returns handlers attached to it.
+  * @param {string} eventName The name of the event.
+  * @returns {Array} The list of handlers found.
+  */
+  EventManager.prototype.getUserEventHandlers = function(eventName) {
+    if (isNamespaced(eventName) === false) {
+      return this.userEventHandlers[eventName];
+    } else {
+      var ret = [];
+      var t = this.userEventHandlers;
+      /**
+      * xx
+      */
+      Object.keys(t).forEach(function(name) {
+        if (name.substr(-eventName.length) === eventName) {
+          ret = ret.concat(t[name]);
+        }
+      });
+      return ret;
+    }
+  };
+
+  /**
+  * Triggers given event name against this instance of event manager.
+  * @param {string} eventName The name of the event.
+  * @param {Event} ev The event object.
+  */
+  EventManager.prototype.triggerForEventName = function(eventName, ev) {
+    var eventHandlers = this.getUserEventHandlers(eventName);
+    eventHandlers.forEach(function(o) {
+      // there should be some test for cancelled event right here.
+      if (!ev.__HasStopped) {
+        var fn = (o.debouncedHandler || o.effectiveHandler);
+        if (o.scope !== null) {
+          fn.call(o.scope, ev);
+        } else {
+          fn(ev);
+        }
+      }
+    });
+  };
+
+  /**
+  * Tells if this instance of event manager is empty, useless.
+  * @returns {Bool}
+  */
+  EventManager.prototype.IsEmpty = function() {
+    var total = 0;
+    var t = this.userEventHandlers;
+    Object.keys(t).forEach(function(evName) {
+      total += t[evName].length;
+    });
+    return total === 0;
+  };
+
+  /**
+  * Clear all subscriptions to dom or user events.
+  */
+  EventManager.prototype.Clear = function() {
+    var that = this;
+    Object.keys(this.userEventHandlers).forEach(function(evName) {
+      that.unsubscribeToDomEvent(evName);
+    });
+    this.userEventHandlers = [];
+  };
+
+  // registry is a global registry of all events currently managed.
+  var registry = [];
+
+  /**
+  * Add a new EventManager instance for given node to the registry.
+  * @param {DomNode} targetNode The node to manage.
+  * @returns {EventManager}
+  */
+  registry.AddNewItem = function(targetNode) {
+    var ret = new EventManager(targetNode);
+    registry.push(ret);
+    return ret;
+  };
+
+  /**
+  * Get an existing EventManager for the given node.
+  * @param {DomNode} targetNode The node to manage.
+  * @returns {EventManager|null}
+  */
+  registry.GetItem = function(targetNode) {
+    var f = null;
+    registry.forEach(function(item) {
+      if (item.isNode(targetNode)) {
+        f = item;
+      }
+    });
+    return f;
+  };
+
+  /**
+  * Removes an existing EventManager for the given node.
+  * @param {DomNode} targetNode The node to manage.
+  * @returns {EventManager|null}
+  */
+  registry.RemoveItem = function(targetNode) {
+    var f = -1;
+    registry.forEach(function(item, index) {
+      if (item.isNode(targetNode)) {
+        f = index;
+      }
+    });
+    if (f > -1) {
+      registry.splice(f, 1);
+    }
+  };
+
+  /**
+  * Clear all registred EventManager instances and reset the registry.
+  */
+  registry.Reset = function() {
+    registry.forEach(function(item, index) {
+      item.Clear();
+    });
+    registry.splice(0, registry.length);
+  };
+
+  cherry.__registry = registry;
+
+  /**
+  * Susbcribe given evHandler for evName on the provided targetNode.
+  * @param {DomNode} targetNode The node listen.
+  * @param {string} evName The name of the event.
+  * @param {Function} evHandler The event handler callback.
+  * @param {Object} The user event handler object.
+  */
+  var on = function(targetNode, evName, evHandler) {
+    targetNode = getElement(targetNode);
+    var item = registry.GetItem(targetNode);
+    if (!item) {
+      item = registry.AddNewItem(targetNode);
+    }
+    return item.addUserEventHandler(evName, evHandler);
+  };
+  cherry.on = on;
+  cherry['on'] = on;
+
+  /**
+  * Susbcribe given evHandler for evName on the provided targetNode,
+  * for one trigger only.
+  * @param {DomNode} targetNode The node listen.
+  * @param {string} evName The name of the event.
+  * @param {Function} evHandler The event handler callback.
+  * @param {Object} The user event handler object.
+  */
+  var once = function(targetNode, evName, evHandler) {
+    targetNode = getElement(targetNode);
+    /**
+    * the handler that is unsubscribing the event handler once the event fired.
+    */
+    var handler = function(ev) {
+      evHandler.call(this, ev);
+      off(targetNode, evName, handler);
+    };
+    return on(targetNode, evName, handler);
+  };
+  cherry.once = once;
+  cherry['once'] = once;
+
+  /**
+  * Unsusbcribe given evHandler for evName on the provided targetNode.
+  * @param {DomNode} targetNode The node to listen.
+  * @param {string} evName The name of the event.
+  * @param {Function} evHandler The event handler callback.
+  */
+  var off = function(targetNode, evName, evHandler) {
+    targetNode = getElement(targetNode);
+    var item = registry.GetItem(targetNode);
+    if (item) {
+      item.removeUserEventHandler(evName, evHandler);
+      if (item.IsEmpty()) {
+        registry.RemoveItem(targetNode);
+      }
+    }
+  };
+  cherry.off = off;
+  cherry['off'] = off;
+
+  /**
+  * Delegate events of evName to the provided userHandler
+  * for the selector within rootNode.
+  * @param {DomNode} rootNode The rootNode to bind.
+  * @param {string} selector The elemnts to listen for.
+  * @param {string} evName The name of the event.
+  * @param {Function} userHandler The event handler callback.
+  * @param {Object} The user event handler object.
+  */
+  var delegate = function(rootNode, selector, evName, userHandler) {
+    rootNode = getElement(rootNode);
+
+    /**
+    * The function handler bound to the event.
+    */
+    var effectiveHandler = function(event) {
+      var possibleTargets = rootNode.querySelectorAll(selector);
+      var target = event.target;
+
+      for (var i = 0, l = possibleTargets.length; i < l; i++) {
+        var el = target;
+        var p = possibleTargets[i];
+
+        while (el && el !== rootNode) {
+          if (el === p) {
+            event.delegateTarget = p;
+            // this should be the same as userEventHandler scope, if any was provided.
+            return userHandler.call(this, event);
+          }
+          el = el.parentNode;
+        }
+      }
+    };
+
+    var item = registry.GetItem(rootNode);
+    if (!item) {
+      item = registry.AddNewItem(rootNode);
+    }
+    return item.addUserEventHandler(evName, effectiveHandler, userHandler, selector);
+  };
+  cherry.delegate = delegate;
+  cherry['delegate'] = delegate;
+
+  /**
+  * Delegate events of evName to the provided userHandler
+  * for the selector within rootNode.
+  * You can also use
+  *   cherry.undelegate(rootNode, selector)
+  *   cherry.undelegate(rootNode, evName)
+  *   cherry.undelegate(rootNode, evName, handler)
+  * @param {DomNode} rootNode The node listen.
+  * @param {string} evName The name of the event.
+  * @param {Function} evName The event handler callback.
+  */
+  var undelegate = function(rootNode, selector, evName, evHandler) {
+    rootNode = getElement(rootNode);
+    var item = registry.GetItem(rootNode);
+    if (item) {
+      if (!evName && !evHandler) {
+        evName = selector;
+        selector = null;
+      } else if (evName.apply) {
+        evHandler = evName;
+        evName = selector;
+        selector = null;
+      }
+      item.removeUserEventHandler(evName, evHandler, selector);
+      if (item.IsEmpty()) {
+        registry.RemoveItem(rootNode);
+      }
+    }
+  };
+  cherry.undelegate = undelegate;
+  cherry['undelegate'] = undelegate;
+
+  /**
+  * Triggers given event evName on targetNode with the provided opts.
+  * if opts is null, it is set to an object.
+  * if opts will have bubble:true and cancellable:true properties
+  * set by default if they are not provided.
+  * @param {DomNode} targetNode The node to trigger the event.
+  * @param {string} evName The name of the event.
+  * @param {Object} opts The event options.
+  */
+  var trigger = function(targetNode, evName, opts) {
+    if (!opts) {
+      opts = {};
+    }
+    if (opts['bubbles'] === undefined) {
+      opts.bubbles = true;
+    }
+    if (opts['cancelable'] === undefined) {
+      opts.cancelable = true;
+    }
+    var ev = createEvent_(getEventName(evName), opts);
+    if (isNamespaced(evName)) {
+      ev.onlyThisEventName = evName;
+    }
+    getElement(targetNode).dispatchEvent(ev);
+  };
+  cherry.trigger = trigger;
+  cherry['trigger'] = trigger;
+
+})(window);
+
 /**
  * @license
  * Copyright 2015 Google Inc. All Rights Reserved.
@@ -6147,6 +7161,9 @@ CustomDataTable.prototype.createCheckbox_ = function (row) {
         if (row.getAttribute('value')) {
             checkbox.value = row.getAttribute('value');
         }
+        if (row.getAttribute('name')) {
+            checkbox.setAttribute('name', row.getAttribute('name'));
+        }
         checkbox.checked = row.classList.contains(this.CssClasses_.IS_SELECTED);
     }
     label.appendChild(checkbox);
@@ -6203,31 +7220,28 @@ CustomDataTable.prototype.uncheckAllRows_ = function () {
    *
    * @private
    */
-CustomDataTable.prototype.onCheckboxClick_ = function () {
-    var that = this;
+CustomDataTable.prototype.onCheckboxClick_ = function (ev) {
     var cherry = window.cherry;
-    return function () {
-        var cb = this;
-        var row = cherry.getParentsUntil(this, 'tr');
-        if (row) {
-            row = row.pop().parentNode;
-            var isHeader = row.querySelectorAll('th').length > 0;
-            if (isHeader) {
-                if (cb.checked) {
-                    that.checkAllRows_();
-                } else {
-                    that.uncheckAllRows_();
-                }
+    var cb = ev.delegateTarget;
+    var row = cherry.getParentsUntil(cb, 'tr');
+    if (row) {
+        row = row.pop().parentNode;
+        var isHeader = row.querySelectorAll('th').length > 0;
+        if (isHeader) {
+            if (cb.checked) {
+                this.checkAllRows_();
             } else {
-                if (cb.checked) {
-                    row.classList.add(that.CssClasses_.IS_SELECTED);
-                } else {
-                    row.classList.remove(that.CssClasses_.IS_SELECTED);
-                }
+                this.uncheckAllRows_();
+            }
+        } else {
+            if (cb.checked) {
+                row.classList.add(this.CssClasses_.IS_SELECTED);
+            } else {
+                row.classList.remove(this.CssClasses_.IS_SELECTED);
             }
         }
-        that.updateBt_();
-    };
+    }
+    this.updateBt_();
 };
 /**
    * Add a checkbox to the provided row.
@@ -6273,7 +7287,7 @@ CustomDataTable.prototype.init = function () {
         }
         this.element_.classList.add(this.CssClasses_.IS_UPGRADED);
         var cherry = window.cherry;
-        this.element_.__selectall = cherry.delegateEvent(this.element_, 'change', 'input[type="checkbox"]', this.onCheckboxClick_());
+        cherry.delegate(this.element_, 'input[type="checkbox"]', 'customdatatable.change', this.onCheckboxClick_).bind(this);
         if (this.element_.hasAttribute('bt-el')) {
             this.btEl_ = document.querySelector(this.element_.getAttribute('bt-el'));
             this.updateBt_();
@@ -6284,6 +7298,9 @@ CustomDataTable.prototype.init = function () {
    * Downgrade element.
    */
 CustomDataTable.prototype.mdlDowngrade_ = function () {
+    var cherry = window.cherry;
+    cherry.undelegate(this.element_, 'customdatatable.change');
+    this.btEl_ = null;
     this.element_.removeEventListener('change', this.element_.__selectall);
     this.element_.classList.remove(this.CssClasses_.IS_UPGRADED);
 };
@@ -6378,15 +7395,11 @@ CustomDialog.prototype.init = function () {
         this.close_ = this.element_.querySelector('.custom-dialog-close');
         this.confirm_ = this.element_.querySelector('.custom-dialog-confirm');
         this.cancel_ = this.element_.querySelector('.custom-dialog-cancel');
-        this.close_.__fn = this.closeBox_.bind(this);
-        this.close_.addEventListener('click', this.close_.__fn);
-        this.confirm_.__fn = this.closeBox_.bind(this);
-        this.confirm_.addEventListener('click', this.confirm_.__fn);
-        this.cancel_.__fn = this.closeBox_.bind(this);
-        this.cancel_.addEventListener('click', this.cancel_.__fn);
         var cherry = window.cherry;
-        this.container_.__resize = cherry.debounce(this.updateBoxPosition_.bind(this), 100);
-        window.addEventListener('resize', this.container_.__resize);
+        cherry.on(this.close_, 'customdialog.click', this.closeBox_).bind(this);
+        cherry.on(this.confirm_, 'customdialog.click', this.closeBox_).bind(this);
+        cherry.on(this.cancel_, 'customdialog.click', this.closeBox_).bind(this);
+        cherry.on(window, 'customdialog.resize', this.updateBoxPosition_).bind(this).debounce(100);
         this.placeholder_ = document.createElement('input');
         this.placeholder_.setAttribute('type', 'hidden');
         this.element_.parentNode.insertBefore(this.placeholder_, this.element_);
@@ -6397,15 +7410,17 @@ CustomDialog.prototype.init = function () {
    * Downgrade element.
    */
 CustomDialog.prototype.mdlDowngrade_ = function () {
-    this.close_.removeEventListener('click', this.close_.__fn);
-    this.close_.__fn = null;
-    this.confirm_.removeEventListener('click', this.confirm_.__fn);
-    this.confirm_.__fn = null;
-    this.cancel_.removeEventListener('click', this.cancel_.__fn);
-    this.cancel_.__fn = null;
-    window.removeEventListener('resize', this.container_.__resize);
-    this.container_.__resize = null;
+    var cherry = window.cherry;
+    cherry.off(this.close_, 'customdialog.click');
+    cherry.off(this.confirm_, 'customdialog.click');
+    cherry.off(this.cancel_, 'customdialog.click');
+    cherry.off(window, 'customdialog.resize', this.updateBoxPosition_);
     this.placeholder_.remove();
+    this.container_ = null;
+    this.close_ = null;
+    this.confirm_ = null;
+    this.cancel_ = null;
+    this.placeholder_ = null;
     this.element_.classList.remove(this.CssClasses_.IS_UPGRADED);
 };
 // The component registers itself. It can assume componentHandler is available
@@ -6479,8 +7494,8 @@ CustomConfirmButton.prototype.showConfirm_ = function (ev) {
    */
 CustomConfirmButton.prototype.init = function () {
     if (this.element_) {
-        this.element_.__fn = this.showConfirm_.bind(this);
-        this.element_.addEventListener('click', this.element_.__fn);
+        var cherry = window.cherry;
+        cherry.on(this.element_, 'confirmubutton.click', this.showConfirm_).bind(this);
         this.element_.classList.add(this.CssClasses_.IS_UPGRADED);
     }
 };
@@ -6488,8 +7503,8 @@ CustomConfirmButton.prototype.init = function () {
    * Downgrade element.
    */
 CustomConfirmButton.prototype.mdlDowngrade_ = function () {
-    this.element_.removeEventListener('click', this.element_.__fn);
-    this.element_.__fn = null;
+    var cherry = window.cherry;
+    cherry.off(this.element_, 'confirmubutton.click', this.showConfirm_);
     this.element_.classList.remove(this.CssClasses_.IS_UPGRADED);
 };
 // The component registers itself. It can assume componentHandler is available
@@ -6554,8 +7569,7 @@ CustomExpander.prototype.CssClasses_ = {
 /**
    * Toggle the dialog display.
    */
-CustomExpander.prototype.toggleBox_ = function () {
-    console.log('click', this.bt_);
+CustomExpander.prototype.toggleBox_ = function (ev) {
     window.Velocity(this.container_, 'stop', true);
     if (this.nextDir_ === 'close') {
         this.nextDir_ = 'open';
@@ -6582,7 +7596,7 @@ CustomExpander.prototype.showBox_ = function () {
       */
         complete: function () {
             that.element_.classList.add(that.CssClasses_.IS_EXPANDED);
-            that.element_.style.height = 'auto';
+            that.container_.style.height = 'auto';
         }
     });
 };
@@ -6612,13 +7626,7 @@ CustomExpander.prototype.init = function () {
             this.nextDir_ = 'close';
         }
         var cherry = window.cherry;
-        this.bt_.__fn = cherry.debounce(this.toggleBox_.bind(this), 10);
-        // for some this reasons to undercover,
-        // click event is triggered twice
-        // foreach real click.
-        // debounce it until more advanced into is found.
-        // this.bt_.__fn = this.toggleBox_.bind(this);
-        this.bt_.addEventListener('click', this.bt_.__fn);
+        cherry.on(this.bt_, 'CustomExpander.click', this.toggleBox_).bind(this).debounce(10);
         this.element_.classList.add(this.CssClasses_.IS_UPGRADED);
     }
 };
@@ -6626,8 +7634,11 @@ CustomExpander.prototype.init = function () {
    * Downgrade element.
    */
 CustomExpander.prototype.mdlDowngrade_ = function () {
-    this.bt_.removeEventListener('click', this.bt_.__fn);
-    this.bt_.__fn = null;
+    var cherry = window.cherry;
+    cherry.off(this.bt_, 'CustomExpander.click', this.toggleBox_);
+    this.nextDir_ = null;
+    this.bt_ = null;
+    this.container_ = null;
     this.element_.classList.remove(this.CssClasses_.IS_EXPANDED);
     this.element_.classList.remove(this.CssClasses_.IS_UPGRADED);
 };
@@ -6688,6 +7699,24 @@ CustomDateField.prototype.CssClasses_ = {
     INPUT: 'mdl-textfield__input',
     INPUTVALUE: 'custom-datefield__value'
 };
+/**
+   * Handles input click event.
+   *
+   * @private
+   */
+CustomDateField.prototype.onInputClick_ = function (ev) {
+    this.dialog.toggle();
+};
+/**
+   * Handles datefield ok click event.
+   *
+   * @private
+   */
+CustomDateField.prototype.onOkClick_ = function (ev) {
+    this.input_.value = this.dialog.time.format(this.displayformat_);
+    this.value_.value = this.dialog.time.format(this.format_);
+    this.element_['MaterialTextfield'].updateClasses_();
+};
 // Public methods.
 /**
    * Initialize element.
@@ -6698,8 +7727,8 @@ CustomDateField.prototype.init = function () {
         this.value_ = this.element_.querySelector('.' + this.CssClasses_.INPUTVALUE);
         if (this.input_) {
             var displaylocale = this.element_.getAttribute('displaylocale') || 'en';
-            var displayformat = this.element_.getAttribute('displayformat') || 'ddd DD MMM YYYY';
-            var format = this.element_.getAttribute('format') || 'YYYY-MM-DDThh:mm:ssZ';
+            this.displayformat_ = this.element_.getAttribute('displayformat') || 'ddd DD MMM YYYY';
+            this.format_ = this.element_.getAttribute('format') || 'YYYY-MM-DDThh:mm:ssZ';
             var future = this.element_.getAttribute('future') || undefined;
             var past = this.element_.getAttribute('past') || undefined;
             var mode = this.element_.getAttribute('mode') || undefined;
@@ -6710,33 +7739,20 @@ CustomDateField.prototype.init = function () {
             var mdDateTimePicker = window.mdDateTimePicker;
             var options = {
                 type: 'date',
-                init: moment.utc(this.value_.value, format),
+                init: moment.utc(this.value_.value, this.format_),
                 trigger: this.input_,
-                future: future && moment(future, format) || future,
-                past: past && moment(past, format) || past,
+                future: future && moment(future, this.format_) || future,
+                past: past && moment(past, this.format_) || past,
                 mode: mode,
                 orientation: orientation,
                 colon: colon === 'true'
             };
             var dialog = new mdDateTimePicker.default(options);
             this.dialog = dialog;
-            /**
-        * Click function handler.
-        */
-            this.input_.__click = function () {
-                dialog.toggle();
-            };
-            this.input_.addEventListener('click', this.input_.__click);
-            /**
-        * onOk function handler.
-        */
-            this.input_.__ok = function () {
-                this.input_.value = dialog.time.format(displayformat);
-                this.value_.value = dialog.time.format(format);
-                this.element_['MaterialTextfield'].updateClasses_();
-            }.bind(this);
-            this.input_.addEventListener('onOk', this.input_.__ok);
-            this.input_.value = moment(this.value_.value, format).format(displayformat);
+            var cherry = window.cherry;
+            cherry.on(this.input_, 'customdatefield.click', this.onInputClick_).bind(this);
+            cherry.on(this.input_, 'customdatefield.onOk', this.onOkClick_).bind(this);
+            this.input_.value = moment(this.value_.value, this.format_).format(this.displayformat_);
             this.element_['MaterialTextfield'].updateClasses_();
         }
     }
@@ -6746,8 +7762,14 @@ CustomDateField.prototype.init = function () {
    */
 CustomDateField.prototype.mdlDowngrade_ = function () {
     // this.dialog.destroy();
-    this.input_.removeEventListener('click', this.input_.__click);
-    this.input_.removeEventListener('onOk', this.input_.__ok);
+    var cherry = window.cherry;
+    cherry.off(this.input_, 'customdatefield.click');
+    cherry.off(this.input_, 'customdatefield.onOk');
+    this.dialog = null;
+    this.input_ = null;
+    this.value_ = null;
+    this.displayformat_ = null;
+    this.format_ = null;
 };
 // The component registers itself. It can assume componentHandler is available
 // in the global scope.
@@ -6811,40 +7833,36 @@ var joinFileNames = function (files) {
     return ret.join(', ');
 };
 /**
+   * Handles clear click event.
+   */
+CustomInputFile.prototype.onClearClicked_ = function (ev) {
+    ev.preventDefault();
+    this.fileinput_.value = null;
+    this.textinput_.value = '';
+    this.element_['MaterialTextfield'].updateClasses_();
+};
+/**
+   * Handles file change event.
+   */
+CustomInputFile.prototype.onFileChanged_ = function (ev) {
+    if (this.fileinput_.files.length) {
+        this.textinput_.value = joinFileNames(this.fileinput_.files);
+    } else {
+        this.textinput_.value = '';
+    }
+    this.element_['MaterialTextfield'].updateClasses_();
+};
+/**
    * Initialize element.
    */
 CustomInputFile.prototype.init = function () {
     if (this.element_) {
-        var element_ = this.element_;
         this.textinput_ = this.element_.querySelector('input[type="text"]');
         this.fileinput_ = this.element_.querySelector('input[type="file"]');
         this.clear_ = this.element_.querySelector('.custom-clearbutton');
-        var file = this.fileinput_;
-        var text = this.textinput_;
-        this.clear_.__click = function (ev) {
-            ev.stopPropagation();
-            // ev.stopImmediatePropagation();
-            ev.preventDefault();
-            file.value = null;
-            text.value = '';
-            element_['MaterialTextfield'].updateClasses_();
-        }.bind(this);
-        this.clear_.addEventListener('click', this.clear_.__click);
-        var label = this.element_.querySelector('.mdl-textfield__label');
-        if (label) {
-            // var originalLabel = label.innerHTML;
-            this.fileinput_.__change = function (ev) {
-                if (file.files.length) {
-                    // label.innerHTML = joinFileNames(file.files);
-                    text.value = joinFileNames(file.files);
-                } else {
-                    // label.innerHTML = originalLabel;
-                    text.value = '';
-                }
-                element_['MaterialTextfield'].updateClasses_();
-            }.bind(this);
-            this.fileinput_.addEventListener('change', this.fileinput_.__change);
-        }
+        var cherry = window.cherry;
+        cherry.on(this.clear_, 'CustomInputFile.click', this.onClearClicked_).bind(this);
+        cherry.on(this.fileinput_, 'CustomInputFile.change', this.onFileChanged_).bind(this);
         this.element_.classList.add(this.CssClasses_.IS_UPGRADED);
     }
 };
@@ -6852,10 +7870,12 @@ CustomInputFile.prototype.init = function () {
    * Downgrade element.
    */
 CustomInputFile.prototype.mdlDowngrade_ = function () {
-    this.clear_.removeEventListener('click', this.textinput_.__click);
-    this.clear_.__click = null;
-    this.fileinput_.removeEventListener('change', this.fileinput_.__change);
-    this.fileinput_.__change = null;
+    var cherry = window.cherry;
+    cherry.off(this.clear_, 'CustomInputFile.click', this.onClearClicked_);
+    cherry.off(this.fileinput_, 'CustomInputFile.change', this.onFileChanged_);
+    this.textinput_ = null;
+    this.fileinput_ = null;
+    this.clear_ = null;
     this.element_.classList.remove(this.CssClasses_.IS_UPGRADED);
 };
 // The component registers itself. It can assume componentHandler is available
@@ -6978,42 +7998,36 @@ CustomDup.prototype.CssClasses_ = { IS_UPGRADED: 'is-upgraded' };
 /**
    * Handle bt-add event.
    */
-CustomDup.prototype.onBtAddClicked_ = function () {
-    var that = this;
+CustomDup.prototype.onBtAddClicked_ = function (ev) {
     var cherry = window.cherry;
-    return function (ev) {
-        var html = that.template_.innerHTML;
-        var children = cherry.childElements(that.container_);
-        html = html.replace(/([$]incrIndex[$])/g, that.incIndex_);
-        html = html.replace(/([$]itemIndex[$])/g, children.length);
-        html = html.replace(/([$]random[$])/g, function () {
-            return Math.random();
-        });
-        that.incIndex_++;
-        var temp = document.createElement('div');
-        temp.innerHTML = html;
-        var el = temp.querySelector('.custom-dup-item');
-        that.container_.appendChild(el);
-        window['componentHandler'].upgradeElements(cherry.childElements(el));
-    };
+    var html = this.template_.innerHTML;
+    var children = cherry.childElements(this.container_);
+    html = html.replace(/([$]incrIndex[$])/g, this.incIndex_);
+    html = html.replace(/([$]itemIndex[$])/g, children.length);
+    html = html.replace(/([$]random[$])/g, function () {
+        return Math.random();
+    });
+    this.incIndex_++;
+    var temp = document.createElement('div');
+    temp.innerHTML = html;
+    var el = temp.querySelector('.custom-dup-item');
+    this.container_.appendChild(el);
+    window['componentHandler'].upgradeElements(cherry.childElements(el));
 };
 /**
    * Handle bt-remove event.
    */
-CustomDup.prototype.onBtRemoveClicked_ = function () {
-    var that = this;
+CustomDup.prototype.onBtRemoveClicked_ = function (ev) {
     var cherry = window.cherry;
-    return function (ev) {
-        var item = this.parentNode;
-        var i = cherry.indexElement(item);
-        var m = cherry.childElements(that.container_).length - 1;
-        if (i === m && i > -1) {
-            // - its the last element
-            that.incIndex_--;
-        }
-        window['componentHandler'].downgradeElements(cherry.childElements(item));
-        item.remove();
-    };
+    var item = ev.delegateTarget.parentNode;
+    var i = cherry.indexElement(item);
+    var m = cherry.childElements(this.container_).length - 1;
+    if (i === m && i > -1) {
+        // - its the last element
+        this.incIndex_--;
+    }
+    window['componentHandler'].downgradeElements(cherry.childElements(item));
+    item.remove();
 };
 /**
    * Handle mdl components registered event.
@@ -7033,10 +8047,10 @@ CustomDup.prototype.init = function () {
         var element_ = this.element_;
         this.template_ = element_.querySelector('.custom-dup-template');
         this.container_ = element_.querySelector('.custom-dup-container');
-        window.addEventListener('mdl-componentsupgraded', this.onComponentsRegistered_.bind(this));
         this.incIndex_ = cherry.childElements(this.container_).length;
-        this.element_.__btadd = cherry.delegateEvent(this.element_, 'click', '.custom-dup-bt-add', this.onBtAddClicked_());
-        this.element_.__btrem = cherry.delegateEvent(this.element_, 'click', '.custom-dup-item > .custom-dup-bt-remove', this.onBtRemoveClicked_());
+        cherry.on(window, 'customdup.mdl-componentsupgraded', this.onComponentsRegistered_).bind(this);
+        cherry.delegate(this.element_, '.custom-dup-bt-add', 'customdup.click', this.onBtAddClicked_).bind(this);
+        cherry.delegate(this.element_, '.custom-dup-item > .custom-dup-bt-remove', 'customdup.click', this.onBtRemoveClicked_).bind(this);
         element_.classList.add(this.CssClasses_.IS_UPGRADED);
     }
 };
@@ -7044,8 +8058,13 @@ CustomDup.prototype.init = function () {
    * Downgrade element.
    */
 CustomDup.prototype.mdlDowngrade_ = function () {
-    this.element_.removeEventListener('click', this.element_.__btrem);
-    this.element_.removeEventListener('click', this.element_.__btadd);
+    var cherry = window.cherry;
+    cherry.off(window, 'customdup.mdl-componentsupgraded', this.onComponentsRegistered_);
+    cherry.undelegate(this.element_, 'customdup.click', this.onBtAddClicked_);
+    cherry.undelegate(this.element_, 'customdup.click', this.onBtRemoveClicked_);
+    this.incIndex_ = null;
+    this.template_ = null;
+    this.container_ = null;
     this.element_.classList.remove(this.CssClasses_.IS_UPGRADED);
 };
 // The component registers itself. It can assume componentHandler is available
@@ -7282,7 +8301,8 @@ CustomChipAutocomplete.prototype.CssClasses_ = { IS_UPGRADED: 'is-upgraded' };
    * @private
    */
 CustomChipAutocomplete.prototype.removeChip_ = function (ev) {
-    this.parentNode.remove();
+    var target = ev.delegateTarget;
+    target.parentNode.remove();
 };
 /**
    * Hide results list.
@@ -7461,20 +8481,19 @@ CustomChipAutocomplete.prototype.showResults_ = function () {
    *
    * @private
    */
-CustomChipAutocomplete.prototype.onResultClick_ = function () {
-    var that = this;
-    return function () {
-        if (that.isCreateResultOption_(this)) {
-            that.createNewValue_(that.input_.value);
-        } else if (!that.isNoResultOption_(this)) {
-            var option = {
-                Value: this.getAttribute('value'),
-                Text: this.querySelector('span').innerHTML
-            };
-            that.addChip_(option);
-            that.clearComponent_();
-        }
-    };
+CustomChipAutocomplete.prototype.onResultClick_ = function (ev) {
+    var li = ev.delegateTarget;
+    // return function() {
+    if (this.isCreateResultOption_(li)) {
+        this.createNewValue_(this.input_.value);
+    } else if (!this.isNoResultOption_(li)) {
+        var option = {
+            Value: li.getAttribute('value'),
+            Text: li.querySelector('span').innerHTML
+        };
+        this.addChip_(option);
+        this.clearComponent_();
+    }    // };
 };
 /**
    * Hide the results list.
@@ -7693,16 +8712,11 @@ CustomChipAutocomplete.prototype.init = function () {
         document.body.appendChild(this.results_);
         this.results_.style.width = this.input_.offsetWidth + 'px';
         var cherry = window.cherry;
-        var debounce = cherry.debounce;
-        var delegateEvent = cherry.delegateEvent;
-        this.selected_.__click = delegateEvent(this.selected_, 'click', '.mdl-chip__action', this.removeChip_);
-        this.ul_.__click = delegateEvent(this.ul_, 'click', 'li', this.onResultClick_());
-        this.input_.__blur = debounce(this.clearComponent_.bind(this), 150);
-        this.input_.addEventListener('blur', this.input_.__blur);
-        this.input_.__submit = this.onInputCtrlKeys_.bind(this);
-        this.input_.addEventListener('keypress', this.input_.__submit);
-        this.input_.__change = debounce(this.onInputChanged.bind(this), 250);
-        this.input_.addEventListener('keypress', this.input_.__change);
+        cherry.delegate(this.selected_, '.mdl-chip__action', 'click', this.removeChip_).bind(this);
+        cherry.delegate(this.ul_, 'li', 'click', this.onResultClick_).bind(this);
+        cherry.on(this.input_, 'chipautocomplete.blur', this.clearComponent_).bind(this).debounce(150);
+        cherry.on(this.input_, 'chipautocomplete.keypress', this.onInputCtrlKeys_).bind(this);
+        cherry.on(this.input_, 'chipautocomplete.keypress', this.onInputChanged).bind(this).debounce(250);
         this.element_.classList.add(this.CssClasses_.IS_UPGRADED);
     }
 };
@@ -7710,18 +8724,28 @@ CustomChipAutocomplete.prototype.init = function () {
    * Downgrade element.
    */
 CustomChipAutocomplete.prototype.mdlDowngrade_ = function () {
-    this.input_.removeEventListener('blur', this.input_.__blur);
-    this.input_.__blur = null;
-    this.input_.removeEventListener('keypress', this.input_.__change);
-    this.input_.__change = null;
-    this.input_.removeEventListener('keypress', this.input_.__submit);
-    this.input_.__submit = null;
-    this.ul_.removeEventListener('click', this.ul_.__click);
-    this.ul_.__click = null;
-    this.selected_.removeEventListener('click', this.selected_.__click);
-    this.selected_.__click = null;
+    var cherry = window.cherry;
+    cherry.off(this.input_, 'chipautocomplete.blur');
+    cherry.off(this.input_, 'chipautocomplete.keypress');
+    cherry.undelegate(this.selected_, 'li', 'click', this.onResultClick_);
+    cherry.undelegate(this.selected_, '.mdl-chip-action', 'click', this.removeChip_);
     this.textfield_.appendChild(this.results_);
     this.element_.classList.remove(this.CssClasses_.IS_UPGRADED);
+    this.textfield_ = null;
+    this.input_ = null;
+    this.error_ = null;
+    this.results_ = null;
+    this.ul_ = null;
+    this.selected_ = null;
+    this.urlPlaceholder_ = null;
+    this.urlCompleter_ = null;
+    this.completerArgs_ = null;
+    this.urlCreator_ = null;
+    this.creatorArgs_ = null;
+    this.txtCreateResult_ = null;
+    this.txtNoResults_ = null;
+    this.txtRemoteUnreachable_ = null;
+    this.chipName_ = null;
 };
 // The component registers itself. It can assume componentHandler is available
 // in the global scope.
@@ -7836,15 +8860,18 @@ CustomCropper.prototype.updateBoxHeight_ = function () {
    */
 CustomCropper.prototype.onDialogConfirmed_ = function () {
     if (this.b64result_) {
-        this.b64result_.value = this.cropper_.getCroppedCanvas().toDataURL('image/png');
+        this.b64result_.value = this.cropper_.getCroppedCanvas({
+            width: this.b64ExportWidth,
+            height: this.b64ExportHeight
+        }).toDataURL('image/png');
     }
     if (this.dataResult_) {
         this.dataResult_.value = JSON.stringify(this.cropper_.getData());
     }
     if (this.currentImg_) {
         this.currentImg_.src = this.cropper_.getCroppedCanvas({
-            width: this.currentImg_.offsetWidth,
-            height: this.currentImg_.offsetHeight
+            width: this.b64ExportWidth,
+            height: this.b64ExportHeight
         }).toDataURL('image/png');
     }
     if (this.pendingImg_) {
@@ -7862,15 +8889,20 @@ CustomCropper.prototype.onDialogCanceled_ = function () {
 /**
    * xxxxxx.
    */
-CustomCropper.prototype.onFileCleared = function () {
-    if (this.b64result_) {
-        this.b64result_.value = null;
-    }
-    if (this.dataResult_) {
-        this.dataResult_.value = null;
-    }
-    if (this.currentImg_ && this.originalCurrentImg_) {
-        this.currentImg_.src = this.originalCurrentImg_;
+CustomCropper.prototype.onFileCleared = function (ev) {
+    if (!this.file_.files.length) {
+        ev.stopPropagation();
+        ev.stopImmediatePropagation();
+        ev.preventDefault();
+        if (this.b64result_) {
+            this.b64result_.value = null;
+        }
+        if (this.dataResult_) {
+            this.dataResult_.value = null;
+        }
+        if (this.currentImg_ && this.originalCurrentImg_) {
+            this.currentImg_.src = this.originalCurrentImg_;
+        }
     }
 };
 /**
@@ -7887,7 +8919,7 @@ CustomCropper.prototype.init = function () {
         this.preview_ = this.element_.querySelector('.custom-cropper-preview');
         this.b64result_ = this.element_.querySelector('.custom-cropper-b64-result');
         this.dataResult_ = this.element_.querySelector('.custom-cropper-data-result');
-        this.clearFile_ = this.element_.querySelector('.custom-clearbutton');
+        this.btAction_ = this.element_.querySelector('.mdl-button--icon');
         this.textInput_ = this.element_.querySelector('.mdl-textfield__input');
         this.textEl_ = this.element_.querySelector('.mdl-textfield');
         this.dialogContainer_ = this.dialog_.querySelector('.custom-dialog-container');
@@ -7899,35 +8931,67 @@ CustomCropper.prototype.init = function () {
         this.dialogClose_ = this.dialog_.querySelector('.custom-dialog-close');
         this.dialogCancel_ = this.dialog_.querySelector('.custom-dialog-cancel');
         var cherry = window.cherry;
+        var imagesLoaded = window.imagesLoaded;
+        this.b64ExportWidth = parseInt(this.element_.getAttribute('b64-export-width'));
+        this.b64ExportHeight = parseInt(this.element_.getAttribute('b64-export-height'));
         if (this.currentImg_) {
-            this.originalCurrentImg_ = cherry.imgAsDataUrl(this.currentImg_);
+            imagesLoaded(this.currentImg_, function () {
+                if (that.currentImg_) {
+                    that.originalCurrentImg_ = cherry.imgAsDataUrl(that.currentImg_);
+                    that.b64ExportWidth = that.b64ExportWidth || that.currentImg_.offsetWidth;
+                    that.b64ExportHeight = that.b64ExportHeight || that.currentImg_.offsetHeight;
+                }
+            });
         }
         this.cropper_ = null;
         this.cropperOptions_ = {
-            aspectRatio: 1,
+            aspectRatio: parseInt(this.element_.getAttribute('aspect-ratio')) || NaN,
+            movable: trueLike(this.element_.getAttribute('movable'), true),
+            scalable: trueLike(this.element_.getAttribute('scalable'), true),
+            rotatable: trueLike(this.element_.getAttribute('rotatable'), true),
+            dragMode: this.element_.getAttribute('drag-mode') || 'crop',
+            viewMode: parseInt(this.element_.getAttribute('view-mode')) || 0,
+            responsive: trueLike(this.element_.getAttribute('responsive'), true),
+            restore: trueLike(this.element_.getAttribute('restore'), true),
+            modal: trueLike(this.element_.getAttribute('modal'), true),
+            guides: trueLike(this.element_.getAttribute('guides'), true),
+            background: trueLike(this.element_.getAttribute('background'), true),
+            center: trueLike(this.element_.getAttribute('center'), true),
+            highlight: trueLike(this.element_.getAttribute('highlight'), true),
+            data: jsonParse(this.element_.getAttribute('cropper-data')),
+            toggleDragModeOnDblclick: trueLike(this.element_.getAttribute('toggle-dragmode-ondblcick'), true),
+            minCropBoxHeight: parseInt(this.element_.getAttribute('min-crop-box-height')) || 0,
+            minCropBoxWidth: parseInt(this.element_.getAttribute('min-crop-box-width')) || 0,
+            minCanvasHeight: parseInt(this.element_.getAttribute('min-canvas-height')) || 0,
+            minCanvasWidth: parseInt(this.element_.getAttribute('min-canvas-width')) || 0,
+            minContainerHeight: parseInt(this.element_.getAttribute('min-container-height')) || 100,
+            minContainerWidth: parseInt(this.element_.getAttribute('min-container-width')) || 200,
+            cropBoxResizable: trueLike(this.element_.getAttribute('crop-box-resizable'), true),
+            cropBoxMovable: trueLike(this.element_.getAttribute('crop-box-movable'), true),
+            zoomOnWheel: trueLike(this.element_.getAttribute('zoom-on-wheel'), true),
+            zoomOnTouch: trueLike(this.element_.getAttribute('zoom-on-touch'), true),
+            wheelZoomRatio: parseFloat(this.element_.getAttribute('wheel-zoom-ratio')) || 0.1,
+            autoCropArea: parseFloat(this.element_.getAttribute('auto-crop-area')) || 0.8,
+            autoCrop: trueLike(this.element_.getAttribute('auto-crop'), true),
+            checkCrossOrigin: trueLike(this.element_.getAttribute('check-cross-origin'), true),
+            checkOrientation: trueLike(this.element_.getAttribute('check-orientation'), true),
+            zoomable: trueLike(this.element_.getAttribute('zoomable'), true),
             preview: this.preview_,
             /**
-         * xxxxxx.
+         * Ready function show the dialog, clean up image resource.
          */
             ready: function () {
                 that.dialog_['CustomDialog'].showBox_();
                 window.URL.revokeObjectURL(that.img_.src);
             }
         };
-        this.file_.__change = this.onFileChanged.bind(this);
-        this.file_.addEventListener('change', this.file_.__change);
-        this.img_.__load = this.onCropImgLoaded.bind(this);
-        this.img_.addEventListener('load', this.img_.__load);
-        this.dialogConfirm_.__click = this.onDialogConfirmed_.bind(this);
-        this.dialogConfirm_.addEventListener('click', this.dialogConfirm_.__click);
-        this.dialogClose_.__click = this.onDialogCanceled_.bind(this);
-        this.dialogClose_.addEventListener('click', this.dialogClose_.__click);
-        this.dialogCancel_.__click = this.onDialogCanceled_.bind(this);
-        this.dialogCancel_.addEventListener('click', this.dialogCancel_.__click);
-        this.clearFile_.__click = this.onFileCleared.bind(this);
-        this.clearFile_.addEventListener('click', this.clearFile_.__click);
-        this.element_.__resize = cherry.debounce(this.updateBoxPosition_.bind(this), 100);
-        window.addEventListener('resize', this.element_.__resize);
+        cherry.on(this.file_, 'customcropper.change', this.onFileChanged).bind(this);
+        cherry.on(this.img_, 'customcropper.load', this.onCropImgLoaded).bind(this);
+        cherry.on(this.dialogConfirm_, 'customcropper.click', this.onDialogConfirmed_).bind(this);
+        cherry.on(this.dialogClose_, 'customcropper.click', this.onDialogCanceled_).bind(this);
+        cherry.on(this.dialogCancel_, 'customcropper.click', this.onDialogCanceled_).bind(this);
+        cherry.on(this.btAction_, 'customcropper.click', this.onFileCleared).bind(this);
+        cherry.on(window, 'customcropper.resize', this.updateBoxPosition_).bind(this).debounce(100);
         this.element_.classList.add(this.CssClasses_.IS_UPGRADED);
     }
 };
@@ -7935,20 +8999,38 @@ CustomCropper.prototype.init = function () {
    * Downgrade element.
    */
 CustomCropper.prototype.mdlDowngrade_ = function () {
-    window.removeEventListener('resize', this.element_.__resize);
-    this.element_.__resize = null;
-    this.file_.removeEventListener('change', this.file_.__change);
-    this.file_.__change = null;
-    this.img_.removeEventListener('load', this.img_.__load);
-    this.img_.__load = null;
-    this.clearFile_.removeEventListener('click', this.clearFile_.__click);
-    this.clearFile_.__click = null;
-    this.dialogConfirm_.removeEventListener('click', this.dialogConfirm_.__click);
-    this.dialogConfirm_.__click = null;
-    this.dialogClose_.removeEventListener('click', this.dialogClose_.__click);
-    this.dialogClose_.__click = null;
-    this.dialogCancel_.removeEventListener('click', this.dialogCancel_.__click);
-    this.dialogCancel_.__click = null;
+    var cherry = window.cherry;
+    cherry.off(this.file_, 'customcropper.change', this.onFileChanged);
+    cherry.off(this.img_, 'customcropper.load', this.onCropImgLoaded);
+    cherry.off(this.dialogConfirm_, 'customcropper.click', this.onDialogConfirmed_);
+    cherry.off(this.dialogClose_, 'customcropper.click', this.onDialogCanceled_);
+    cherry.off(this.dialogCancel_, 'customcropper.click', this.onDialogCanceled_);
+    cherry.off(this.btAction_, 'customcropper.click', this.onFileCleared);
+    cherry.off(window, 'customcropper.resize', this.updateBoxPosition_);
+    this.file_ = null;
+    this.dialog_ = null;
+    this.componentContainer_ = null;
+    this.img_ = null;
+    this.currentImg_ = null;
+    this.preview_ = null;
+    this.b64result_ = null;
+    this.dataResult_ = null;
+    this.clearFile_ = null;
+    this.textInput_ = null;
+    this.textEl_ = null;
+    this.dialogContainer_ = null;
+    this.dialogActions_ = null;
+    this.dialogTtile_ = null;
+    this.dialogContent_ = null;
+    this.dialogContent_ = null;
+    this.dialogConfirm_ = null;
+    this.dialogClose_ = null;
+    this.dialogCancel_ = null;
+    this.b64ExportWidth = null;
+    this.b64ExportHeight = null;
+    this.originalCurrentImg_ = null;
+    this.cropper_ = null;
+    this.cropperOptions_ = null;
     this.element_.classList.remove(this.CssClasses_.IS_UPGRADED);
 };
 // The component registers itself. It can assume componentHandler is available
@@ -7957,6 +9039,184 @@ componentHandler.register({
     constructor: CustomCropper,
     classAsString: 'CustomCropper',
     cssClass: 'custom-js-cropper'
+});
+/**
+  * Is is something like true ?
+  */
+function trueLike(some, d) {
+    if (some === 'true' || some === '1') {
+        return true;
+    }
+    if (some === 'false' || some === '0') {
+        return false;
+    }
+    return d;
+}
+/**
+  * JSON parse no exception.
+  */
+function jsonParse(some) {
+    try {
+        return JSON.parse(some);
+    } catch (ex) {
+        return null;
+    }
+}
+/**
+ * @license
+ * Copyright 2015 Google Inc. All Rights Reserved.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+/**
+   * Class constructor for Data Table Card MDL component.
+   * Implements MDL component design pattern defined at:
+   * https://github.com/jasonmayes/mdl-component-design-pattern
+   *
+   * @constructor
+   * @param {Element} element The element that will be upgraded.
+   */
+var CustomInputConfirm = function CustomInputConfirm(element) {
+    this.element_ = element;
+    // Initialize instance.
+    this.init();
+};
+window['CustomInputConfirm'] = CustomInputConfirm;
+/**
+   * Store constants in one place so they can be updated easily.
+   *
+   * @enum {string | number}
+   * @private
+   */
+CustomInputConfirm.prototype.Constant_ = {};
+/**
+   * Store strings for class names defined by this component that are used in
+   * JavaScript. This allows us to simply change it in one place should we
+   * decide to modify at a later date.
+   *
+   * @enum {string}
+   * @private
+   */
+CustomInputConfirm.prototype.CssClasses_ = { IS_UPGRADED: 'is-upgraded' };
+/**
+   * Handle on change event of underlyig textfield.
+   */
+CustomInputConfirm.prototype.onChange_ = function () {
+    this.element_.classList.remove('is-invalid');
+};
+/**
+   * Initialize element.
+   */
+CustomInputConfirm.prototype.init = function () {
+    if (this.element_) {
+        var cherry = window.cherry;
+        cherry.on(this.element_, 'CustomInputConfirm.keypress', this.onChange_).bind(this).debounce(10);
+        this.element_.classList.add(this.CssClasses_.IS_UPGRADED);
+    }
+};
+/**
+   * Downgrade element.
+   */
+CustomInputConfirm.prototype.mdlDowngrade_ = function () {
+    var cherry = window.cherry;
+    cherry.off(this.element_, 'CustomInputConfirm.keypress', this.onChange_);
+    this.element_.classList.remove(this.CssClasses_.IS_UPGRADED);
+};
+// The component registers itself. It can assume componentHandler is available
+// in the global scope.
+componentHandler.register({
+    constructor: CustomInputConfirm,
+    classAsString: 'CustomInputConfirm',
+    cssClass: 'custom-js-input-confirm'
+});
+/**
+ * @license
+ * Copyright 2015 Google Inc. All Rights Reserved.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+/**
+   * Class constructor for Data Table Card MDL component.
+   * Implements MDL component design pattern defined at:
+   * https://github.com/jasonmayes/mdl-component-design-pattern
+   *
+   * @constructor
+   * @param {Element} element The element that will be upgraded.
+   */
+var CustomSelectChangeUrl = function CustomSelectChangeUrl(element) {
+    this.element_ = element;
+    // Initialize instance.
+    this.init();
+};
+window['CustomSelectChangeUrl'] = CustomSelectChangeUrl;
+/**
+   * Store constants in one place so they can be updated easily.
+   *
+   * @enum {string | number}
+   * @private
+   */
+CustomSelectChangeUrl.prototype.Constant_ = {};
+/**
+   * Store strings for class names defined by this component that are used in
+   * JavaScript. This allows us to simply change it in one place should we
+   * decide to modify at a later date.
+   *
+   * @enum {string}
+   * @private
+   */
+CustomSelectChangeUrl.prototype.CssClasses_ = {};
+/**
+   * Change url.
+   */
+CustomSelectChangeUrl.prototype.changeUrl_ = function (ev) {
+    var select = ev.target || ev.srcElement;
+    var opt = select[select.selectedIndex];
+    if (opt && opt.value) {
+        window.location.href = opt.value;
+    }
+};
+/**
+   * Initialize element.
+   */
+CustomSelectChangeUrl.prototype.init = function () {
+    if (this.element_) {
+        var cherry = window.cherry;
+        cherry.on(this.element_, 'CustomSelectChangeUrl.change', this.changeUrl_).bind(this);
+    }
+};
+/**
+   * Downgrade element.
+   */
+CustomSelectChangeUrl.prototype.mdlDowngrade_ = function () {
+    var cherry = window.cherry;
+    cherry.off(this.element_, 'CustomSelectChangeUrl.change', this.changeUrl_);
+};
+// The component registers itself. It can assume componentHandler is available
+// in the global scope.
+componentHandler.register({
+    constructor: CustomSelectChangeUrl,
+    classAsString: 'CustomSelectChangeUrl',
+    cssClass: 'custom-js-select-change-url'
 });
 /**
  * @license
