@@ -3392,11 +3392,11 @@ window.addEventListener('load', function() {
   function getElement(some) {
     var element;
     if (some && some.querySelector) {
-      element = some;
+      element = [some];
     } else if (some === window) {
-      element = window;
+      element = [window];
     } else {
-      element = document.querySelector(some);
+      element = document.querySelectorAll(some);
     }
     return element;
   }
@@ -3501,6 +3501,7 @@ window.addEventListener('load', function() {
     if (!this.userEventHandlers[eventName]) {
       this.userEventHandlers[eventName] = [];
     }
+    var that = this;
     var ret = {
       effectiveHandler: handler,
       delegationSelector: delegationSelector,
@@ -3515,10 +3516,19 @@ window.addEventListener('load', function() {
         return ret;
       },
       /**
-      * Set the scope of the handler
+      * Debounce the event handler.
       */
       debounce: function(delay) {
         ret.debouncedHandler = cherry.debounce(ret.userHandler || ret.effectiveHandler, delay);
+        return ret;
+      },
+      /**
+      * Set event handler to trigger in first.
+      */
+      first: function() {
+        var i = that.userEventHandlers[eventName].indexOf(ret);
+        that.userEventHandlers[eventName].splice(i, 1);
+        that.userEventHandlers[eventName].unshift(ret);
         return ret;
       }
     };
@@ -3649,7 +3659,59 @@ window.addEventListener('load', function() {
     this.userEventHandlers = [];
   };
 
+  /**
+  * An UserEventHandlerProxy is a proxy object
+  * to manipulate multiple instances of UserEventHandlers
+  * as one.
+  */
+  function UserEventHandlerProxy() {
+    this.items = [];
+  }
+  /**
+  * Add an instance of UserEventHandler to this proxy.
+  * @param {UserEventHandler} eventHandler An UserEventHandler instance.
+  * @returns {UserEventHandlerProxy}
+  */
+  UserEventHandlerProxy.prototype.add = function(eventHandler) {
+    this.items.push(eventHandler);
+    return this;
+  };
+  /**
+  * Set the scope the event handler function will consume.
+  * @param {Object} scope The scope to apply to the event handler.
+  * @returns {UserEventHandlerProxy}
+  */
+  UserEventHandlerProxy.prototype.bind = function(scope) {
+    this.items.forEach(function(item) {
+      item.bind(scope);
+    });
+    return this;
+  };
+  /**
+  * Debounce an event handler.
+  * @param {int} delay The delay to apply.
+  * @returns {UserEventHandlerProxy}
+  */
+  UserEventHandlerProxy.prototype.debounce = function(delay) {
+    this.items.forEach(function(item) {
+      item.debounce(delay);
+    });
+    return this;
+  };
+  /**
+  * Set the event to run first in the event queue.
+  * @returns {UserEventHandlerProxy}
+  */
+  UserEventHandlerProxy.prototype.first = function() {
+    this.items.forEach(function(item) {
+      item.first();
+    });
+    return this;
+  };
+
   // registry is a global registry of all events currently managed.
+  // ideally there is no such global registry,
+  // the data could be bound to the domnode itself.
   var registry = [];
 
   /**
@@ -3714,13 +3776,19 @@ window.addEventListener('load', function() {
   * @param {Function} evHandler The event handler callback.
   * @param {Object} The user event handler object.
   */
-  var on = function(targetNode, evName, evHandler) {
-    targetNode = getElement(targetNode);
-    var item = registry.GetItem(targetNode);
-    if (!item) {
-      item = registry.AddNewItem(targetNode);
+  var on = function(selector, evName, evHandler) {
+    var ret = new UserEventHandlerProxy();
+    var targetNodes = getElement(selector);
+    for (var i = 0; i < targetNodes.length; i++) {
+      var targetNode = targetNodes[i];
+      var nodeEventManager = registry.GetItem(targetNode);
+      if (!nodeEventManager) {
+        nodeEventManager = registry.AddNewItem(targetNode);
+      }
+      var userEventHandler = nodeEventManager.addUserEventHandler(evName, evHandler);
+      ret.add(userEventHandler);
     }
-    return item.addUserEventHandler(evName, evHandler);
+    return ret;
   };
   cherry.on = on;
   cherry['on'] = on;
@@ -3728,21 +3796,20 @@ window.addEventListener('load', function() {
   /**
   * Susbcribe given evHandler for evName on the provided targetNode,
   * for one trigger only.
-  * @param {DomNode} targetNode The node listen.
+  * @param {DomNode} selector The node listen.
   * @param {string} evName The name of the event.
   * @param {Function} evHandler The event handler callback.
   * @param {Object} The user event handler object.
   */
-  var once = function(targetNode, evName, evHandler) {
-    targetNode = getElement(targetNode);
+  var once = function(selector, evName, evHandler) {
     /**
     * the handler that is unsubscribing the event handler once the event fired.
     */
     var handler = function(ev) {
       evHandler.call(this, ev);
-      off(targetNode, evName, handler);
+      off(selector, evName, handler);
     };
-    return on(targetNode, evName, handler);
+    return on(selector, evName, handler);
   };
   cherry.once = once;
   cherry['once'] = once;
@@ -3753,13 +3820,16 @@ window.addEventListener('load', function() {
   * @param {string} evName The name of the event.
   * @param {Function} evHandler The event handler callback.
   */
-  var off = function(targetNode, evName, evHandler) {
-    targetNode = getElement(targetNode);
-    var item = registry.GetItem(targetNode);
-    if (item) {
-      item.removeUserEventHandler(evName, evHandler);
-      if (item.IsEmpty()) {
-        registry.RemoveItem(targetNode);
+  var off = function(selector, evName, evHandler) {
+    var targetNodes = getElement(selector);
+    for (var i = 0; i < targetNodes.length; i++) {
+      var targetNode = targetNodes[i];
+      var nodeEventManager = registry.GetItem(targetNode);
+      if (nodeEventManager) {
+        nodeEventManager.removeUserEventHandler(evName, evHandler);
+        if (nodeEventManager.IsEmpty()) {
+          registry.RemoveItem(targetNode);
+        }
       }
     }
   };
@@ -3769,19 +3839,39 @@ window.addEventListener('load', function() {
   /**
   * Delegate events of evName to the provided userHandler
   * for the selector within rootNode.
-  * @param {DomNode} rootNode The rootNode to bind.
+  * @param {DomNode} rootSelector The rootNode to bind.
   * @param {string} selector The elemnts to listen for.
   * @param {string} evName The name of the event.
   * @param {Function} userHandler The event handler callback.
   * @param {Object} The user event handler object.
   */
-  var delegate = function(rootNode, selector, evName, userHandler) {
-    rootNode = getElement(rootNode);
+  var delegate = function(rootSelector, selector, evName, userHandler) {
+    var rootNodes = getElement(rootSelector);
 
-    /**
-    * The function handler bound to the event.
-    */
-    var effectiveHandler = function(event) {
+    var ret = new UserEventHandlerProxy();
+    for (var i = 0; i < rootNodes.length; i++) {
+      var rootNode = rootNodes[i];
+
+      var nodeEventManager = registry.GetItem(rootNode);
+      if (!nodeEventManager) {
+        nodeEventManager = registry.AddNewItem(rootNode);
+      }
+
+      var effectiveHandler = createEffectiveHandler(rootNode, selector, userHandler);
+      var userEventHandler = nodeEventManager.addUserEventHandler(
+        evName, effectiveHandler, userHandler, selector);
+      ret.add(userEventHandler);
+    }
+    return ret;
+  };
+  cherry.delegate = delegate;
+  cherry['delegate'] = delegate;
+
+  /**
+  * Create a function to handle delegated events.
+  */
+  var createEffectiveHandler = function(rootNode, selector, userHandler) {
+    return function(event) {
       var possibleTargets = rootNode.querySelectorAll(selector);
       var target = event.target;
 
@@ -3799,15 +3889,7 @@ window.addEventListener('load', function() {
         }
       }
     };
-
-    var item = registry.GetItem(rootNode);
-    if (!item) {
-      item = registry.AddNewItem(rootNode);
-    }
-    return item.addUserEventHandler(evName, effectiveHandler, userHandler, selector);
   };
-  cherry.delegate = delegate;
-  cherry['delegate'] = delegate;
 
   /**
   * Delegate events of evName to the provided userHandler
@@ -3816,25 +3898,28 @@ window.addEventListener('load', function() {
   *   cherry.undelegate(rootNode, selector)
   *   cherry.undelegate(rootNode, evName)
   *   cherry.undelegate(rootNode, evName, handler)
-  * @param {DomNode} rootNode The node listen.
+  * @param {DomNode} rootSelector The node listen.
   * @param {string} evName The name of the event.
   * @param {Function} evName The event handler callback.
   */
-  var undelegate = function(rootNode, selector, evName, evHandler) {
-    rootNode = getElement(rootNode);
-    var item = registry.GetItem(rootNode);
-    if (item) {
-      if (!evName && !evHandler) {
-        evName = selector;
-        selector = null;
-      } else if (evName.apply) {
-        evHandler = evName;
-        evName = selector;
-        selector = null;
-      }
-      item.removeUserEventHandler(evName, evHandler, selector);
-      if (item.IsEmpty()) {
-        registry.RemoveItem(rootNode);
+  var undelegate = function(rootSelector, selector, evName, evHandler) {
+    if (!evName && !evHandler) {
+      evName = selector;
+      selector = null;
+    } else if (evName.apply) {
+      evHandler = evName;
+      evName = selector;
+      selector = null;
+    }
+    var rootNodes = getElement(rootSelector);
+    for (var i = 0; i < rootNodes.length; i++) {
+      var rootNode = rootNodes[i];
+      var nodeEventManager = registry.GetItem(rootNode);
+      if (nodeEventManager) {
+        nodeEventManager.removeUserEventHandler(evName, evHandler, selector);
+        if (nodeEventManager.IsEmpty()) {
+          registry.RemoveItem(rootNode);
+        }
       }
     }
   };
@@ -3846,11 +3931,11 @@ window.addEventListener('load', function() {
   * if opts is null, it is set to an object.
   * if opts will have bubble:true and cancellable:true properties
   * set by default if they are not provided.
-  * @param {DomNode} targetNode The node to trigger the event.
+  * @param {DomNode} selector The node to trigger the event.
   * @param {string} evName The name of the event.
   * @param {Object} opts The event options.
   */
-  var trigger = function(targetNode, evName, opts) {
+  var trigger = function(selector, evName, opts) {
     if (!opts) {
       opts = {};
     }
@@ -3864,7 +3949,9 @@ window.addEventListener('load', function() {
     if (isNamespaced(evName)) {
       ev.onlyThisEventName = evName;
     }
-    getElement(targetNode).dispatchEvent(ev);
+    getElement(selector).forEach(function(node) {
+      node.dispatchEvent(ev);
+    });
   };
   cherry.trigger = trigger;
   cherry['trigger'] = trigger;
@@ -7380,11 +7467,46 @@ CustomDialog.prototype.closeBox_ = function () {
     this.placeholder_.parentNode.insertBefore(this.element_, this.placeholder_);
 };
 /**
+   * Cancel the dialog.
+   */
+CustomDialog.prototype.cancelClicked_ = function () {
+    this.pendingBt_ = null;
+    this.closeBox_();
+};
+/**
+   * Confirm the dialog.
+   */
+CustomDialog.prototype.confirmClicked_ = function () {
+    this.nextOp_ = 'run_click';
+    this.closeBox_();
+    this.pendingBt_.click();
+};
+/**
    * Update the dialog positionning.
    */
 CustomDialog.prototype.updateBoxPosition_ = function () {
-    this.container_.style.marginTop = '-' + this.container_.offsetHeight / 2 + 'px';
-    this.container_.style.marginLeft = '-' + this.container_.offsetWidth / 2 + 'px';
+    if (this.element_.classList.contains('show') || this.element_.classList.contains('beforeshow')) {
+        this.container_.style.marginTop = '-' + this.container_.offsetHeight / 2 + 'px';
+        this.container_.style.marginLeft = '-' + this.container_.offsetWidth / 2 + 'px';
+    }
+};
+/**
+   * Hnadles button click event.
+   */
+CustomDialog.prototype.onBtClicked_ = function (ev) {
+    if (this.pendingBt_ === null) {
+        ev.preventDefault();
+        ev.stopImmediatePropagation();
+        ev.stopPropagation();
+        var bt = ev.target;
+        if (bt.getAttribute('disabled') === 'disabled') {
+            return;
+        }
+        this.pendingBt_ = bt;
+        this.showBox_();
+    } else {
+        this.pendingBt_ = null;
+    }
 };
 /**
    * Initialize element.
@@ -7395,11 +7517,16 @@ CustomDialog.prototype.init = function () {
         this.close_ = this.element_.querySelector('.custom-dialog-close');
         this.confirm_ = this.element_.querySelector('.custom-dialog-confirm');
         this.cancel_ = this.element_.querySelector('.custom-dialog-cancel');
+        this.btSelector_ = this.element_.getAttribute('on-button-click');
         var cherry = window.cherry;
-        cherry.on(this.close_, 'customdialog.click', this.closeBox_).bind(this);
-        cherry.on(this.confirm_, 'customdialog.click', this.closeBox_).bind(this);
-        cherry.on(this.cancel_, 'customdialog.click', this.closeBox_).bind(this);
+        cherry.on(this.close_, 'customdialog.click', this.cancelClicked_).bind(this);
+        cherry.on(this.confirm_, 'customdialog.click', this.confirmClicked_).bind(this);
+        cherry.on(this.cancel_, 'customdialog.click', this.cancelClicked_).bind(this);
         cherry.on(window, 'customdialog.resize', this.updateBoxPosition_).bind(this).debounce(100);
+        if (this.btSelector_) {
+            this.pendingBt_ = null;
+            cherry.on(this.btSelector_, 'customdialog.click', this.onBtClicked_).bind(this).first();
+        }
         this.placeholder_ = document.createElement('input');
         this.placeholder_.setAttribute('type', 'hidden');
         this.element_.parentNode.insertBefore(this.placeholder_, this.element_);
@@ -7415,12 +7542,18 @@ CustomDialog.prototype.mdlDowngrade_ = function () {
     cherry.off(this.confirm_, 'customdialog.click');
     cherry.off(this.cancel_, 'customdialog.click');
     cherry.off(window, 'customdialog.resize', this.updateBoxPosition_);
+    if (this.btSelector_) {
+        cherry.off(this.btSelector_, 'customdialog.click', this.onBtClicked_);
+    }
+    this.placeholder_.parentNode.insertBefore(this.element_, this.placeholder_);
     this.placeholder_.remove();
     this.container_ = null;
+    this.pendingBt_ = null;
     this.close_ = null;
     this.confirm_ = null;
     this.cancel_ = null;
     this.placeholder_ = null;
+    this.btSelector_ = null;
     this.element_.classList.remove(this.CssClasses_.IS_UPGRADED);
 };
 // The component registers itself. It can assume componentHandler is available
@@ -7429,91 +7562,6 @@ componentHandler.register({
     constructor: CustomDialog,
     classAsString: 'CustomDialog',
     cssClass: 'custom-js-dialog'
-});
-/**
- * @license
- * Copyright 2015 Google Inc. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-/**
-   * Class constructor for Button MDL component.
-   * Implements MDL component design pattern defined at:
-   * https://github.com/jasonmayes/mdl-component-design-pattern
-   *
-   * @param {HTMLElement} element The element that will be upgraded.
-   */
-var CustomConfirmButton = function CustomConfirmButton(element) {
-    this.element_ = element;
-    // Initialize instance.
-    this.init();
-};
-window['CustomConfirmButton'] = CustomConfirmButton;
-/**
-   * Store constants in one place so they can be updated easily.
-   *
-   * @enum {string | number}
-   * @private
-   */
-CustomConfirmButton.prototype.Constant_ = {};
-/**
-   * Store strings for class names defined by this component that are used in
-   * JavaScript. This allows us to simply change it in one place should we
-   * decide to modify at a later date.
-   *
-   * @enum {string}
-   * @private
-   */
-CustomConfirmButton.prototype.CssClasses_ = { IS_UPGRADED: 'is-upgraded' };
-/**
-   * Handle blur of element.
-   *
-   * @param {Event} event The event that fired.
-   * @private
-   */
-CustomConfirmButton.prototype.showConfirm_ = function (ev) {
-    var target = this.element_.getAttribute('confirm');
-    var confirm = document.querySelector(target);
-    if (confirm && confirm.CustomDialog) {
-        confirm.CustomDialog.showBox_();
-    }
-};
-// Public methods.
-/**
-   * Initialize element.
-   */
-CustomConfirmButton.prototype.init = function () {
-    if (this.element_) {
-        var cherry = window.cherry;
-        cherry.on(this.element_, 'confirmubutton.click', this.showConfirm_).bind(this);
-        this.element_.classList.add(this.CssClasses_.IS_UPGRADED);
-    }
-};
-/**
-   * Downgrade element.
-   */
-CustomConfirmButton.prototype.mdlDowngrade_ = function () {
-    var cherry = window.cherry;
-    cherry.off(this.element_, 'confirmubutton.click', this.showConfirm_);
-    this.element_.classList.remove(this.CssClasses_.IS_UPGRADED);
-};
-// The component registers itself. It can assume componentHandler is available
-// in the global scope.
-componentHandler.register({
-    constructor: CustomConfirmButton,
-    classAsString: 'CustomConfirmButton',
-    cssClass: 'custom-js-confirm-button',
-    widget: true
 });
 /**
  * @license
@@ -8073,6 +8121,179 @@ componentHandler.register({
     constructor: CustomDup,
     classAsString: 'CustomDup',
     cssClass: 'custom-js-dup'
+});
+/**
+ * @license
+ * Copyright 2015 Google Inc. All Rights Reserved.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+/**
+   * Class constructor for Data Table Card MDL component.
+   * Implements MDL component design pattern defined at:
+   * https://github.com/jasonmayes/mdl-component-design-pattern
+   *
+   * @constructor
+   * @param {Element} element The element that will be upgraded.
+   */
+var CustomRightPanelOver = function CustomRightPanelOver(element) {
+    this.element_ = element;
+    this.placeholder_ = null;
+    this.container_ = null;
+    this.close_ = null;
+    this.confirm_ = null;
+    this.cancel_ = null;
+    // Initialize instance.
+    this.init();
+};
+window['CustomRightPanelOver'] = CustomRightPanelOver;
+/**
+   * Store constants in one place so they can be updated easily.
+   *
+   * @enum {string | number}
+   * @private
+   */
+CustomRightPanelOver.prototype.Constant_ = {};
+/**
+   * Store strings for class names defined by this component that are used in
+   * JavaScript. This allows us to simply change it in one place should we
+   * decide to modify at a later date.
+   *
+   * @enum {string}
+   * @private
+   */
+CustomRightPanelOver.prototype.CssClasses_ = { IS_UPGRADED: 'is-upgraded' };
+/**
+   * Show the dialog.
+   */
+CustomRightPanelOver.prototype.showBox_ = function () {
+    var cherry = window.cherry;
+    this.element_.classList.add('show');
+    document.body.classList.add('custom-rightpanelover-noscroll');
+    cherry.once(this.container_, 'transitionend', this.addFrame_).bind(this);
+    setTimeout(function () {
+        this.loader_.classList.add('show');
+        this.overlayLoader_.classList.add('show');
+        this.overlay_.classList.add('show');
+        this.container_.classList.add('show');
+        this.spinner_.classList.add('is-active');
+    }.bind(this), 100);
+};
+/**
+   * Add iframe.
+   */
+CustomRightPanelOver.prototype.addFrame_ = function () {
+    var cherry = window.cherry;
+    this.iframe_.setAttribute('src', this.href_);
+    cherry.once(this.iframe_, 'load', this.frameLoaded_).bind(this);
+    this.container_.appendChild(this.iframe_);
+};
+/**
+   * Update the view once frame is ready.
+   */
+CustomRightPanelOver.prototype.frameLoaded_ = function () {
+    this.container_.classList.add('loaded');
+    this.loader_.classList.remove('show');
+    this.overlayLoader_.classList.remove('show');
+    this.spinner_.classList.remove('is-active');
+};
+/**
+   * Hide the dialog.
+   */
+CustomRightPanelOver.prototype.closeBox_ = function () {
+    var cherry = window.cherry;
+    cherry.off(this.iframe_, 'load', this.frameLoaded_);
+    cherry.once(this.overlay_, 'transitionend', function () {
+        document.body.classList.remove('custom-rightpanelover-noscroll');
+        this.element_.classList.remove('show');
+        this.container_.classList.remove('loaded');
+        this.container_.classList.remove('show');
+        this.container_.classList.remove('hide');
+        this.iframe_.setAttribute('src', '');
+    }).bind(this);
+    this.container_.classList.add('hide');
+    this.overlay_.classList.remove('show');
+};
+/**
+   * Handles bg overlay double click event.
+   */
+CustomRightPanelOver.prototype.onOverLayDblClicked_ = function () {
+    this.frameLoaded_();
+    this.closeBox_();
+};
+/**
+   * Handles button click event.
+   */
+CustomRightPanelOver.prototype.onBtClicked_ = function (ev) {
+    ev.preventDefault();
+    ev.stopImmediatePropagation();
+    ev.stopPropagation();
+    var bt = ev.target;
+    if (bt.getAttribute('disabled') === 'disabled') {
+        return;
+    }
+    this.href_ = bt.getAttribute('href');
+    this.showBox_();
+};
+/**
+   * Initialize element.
+   */
+CustomRightPanelOver.prototype.init = function () {
+    if (this.element_) {
+        this.container_ = this.element_.querySelector('.custom-rightpanelover-container');
+        this.overlay_ = this.element_.querySelector('.custom-rightpanelover-overlay');
+        this.overlayLoader_ = this.element_.querySelector('.custom-rightpanelover-overlay-loader');
+        this.loader_ = this.element_.querySelector('.custom-rightpanelover-loader');
+        this.spinner_ = this.loader_.querySelector('.mdl-spinner');
+        this.frame_ = null;
+        this.iframe_ = document.createElement('iframe');
+        this.btSelector_ = this.element_.getAttribute('on-button-click');
+        var cherry = window.cherry;
+        // cherry.on(window, 'CustomRightPanelOver.resize', this.updateBoxPosition_).bind(this).debounce(100);
+        cherry.on(this.overlay_, 'CustomRightPanelOver.dblclick', this.onOverLayDblClicked_).bind(this);
+        if (this.btSelector_) {
+            cherry.on(this.btSelector_, 'CustomRightPanelOver.click', this.onBtClicked_).bind(this).first();
+        }
+        this.placeholder_ = document.createElement('input');
+        this.placeholder_.setAttribute('type', 'hidden');
+        this.element_.parentNode.insertBefore(this.placeholder_, this.element_);
+        document.body.appendChild(this.element_);
+        this.element_.classList.add(this.CssClasses_.IS_UPGRADED);
+    }
+};
+/**
+   * Downgrade element.
+   */
+CustomRightPanelOver.prototype.mdlDowngrade_ = function () {
+    var cherry = window.cherry;
+    // cherry.off(window, 'CustomRightPanelOver.resize', this.updateBoxPosition_);
+    if (this.btSelector_) {
+        cherry.off(this.btSelector_, 'CustomRightPanelOver.click', this.onBtClicked_);
+    }
+    this.placeholder_.parentNode.insertBefore(this.element_, this.placeholder_);
+    this.placeholder_.remove();
+    this.iframe_ = null;
+    this.container_ = null;
+    this.placeholder_ = null;
+    this.btSelector_ = null;
+    this.element_.classList.remove(this.CssClasses_.IS_UPGRADED);
+};
+// The component registers itself. It can assume componentHandler is available
+// in the global scope.
+componentHandler.register({
+    constructor: CustomRightPanelOver,
+    classAsString: 'CustomRightPanelOver',
+    cssClass: 'custom-js-rightpanelover'
 });
 /**
    * Class constructor for Select field MDL component.
