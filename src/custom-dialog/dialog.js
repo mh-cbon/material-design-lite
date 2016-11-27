@@ -95,7 +95,9 @@
   CustomDialog.prototype.confirmClicked_ = function() {
     this.nextOp_ = 'run_click';
     this.closeBox_();
-    this.pendingBt_.click();
+    if (this.pendingBt_) {
+      this.pendingBt_.click();
+    }
   };
 
   /**
