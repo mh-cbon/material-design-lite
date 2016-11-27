@@ -13008,6 +13008,12 @@ _:-ms-input-placeholder, :root .mdl-slider.mdl-slider.is-upgraded {
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+.custom-chipautocomplete {
+  width: 300px;
+  max-width: 100%; }
+  .custom-chipautocomplete .mdl-textfield {
+    width: 100%; }
+
 .custom-chipautocomplete-results {
   position: absolute;
   right: 0px;

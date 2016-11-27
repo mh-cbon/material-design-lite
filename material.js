@@ -8346,12 +8346,12 @@ CustomChipAutocomplete.prototype.fetchResults_ = function (text) {
     request.then(function (response) {
         var results = response;
         if (!results.length) {
-            if (that.urlCreator_) {
+            if (that.urlCreator_ && text) {
                 results.unshift(that.makeCreateResultOption_());
             } else {
                 results.unshift(that.makeNoResultOption_());
             }
-        } else if (results.length && !that.resultsContainsText_(results, text)) {
+        } else if (results.length && text && !that.resultsContainsText_(results, text)) {
             if (that.urlCreator_) {
                 results.unshift(that.makeCreateResultOption_());
             }
@@ -8685,6 +8685,14 @@ CustomChipAutocomplete.prototype.onInputChanged = function (ev) {
     }
 };
 /**
+   * Show some results when input gets the focus.
+   *
+   * @private
+   */
+CustomChipAutocomplete.prototype.onInputFocus = function (ev) {
+    this.fetchResults_('');
+};
+/**
    * Initialize element.
    */
 CustomChipAutocomplete.prototype.init = function () {
@@ -8715,6 +8723,7 @@ CustomChipAutocomplete.prototype.init = function () {
         cherry.delegate(this.selected_, '.mdl-chip__action', 'click', this.removeChip_).bind(this);
         cherry.delegate(this.ul_, 'li', 'click', this.onResultClick_).bind(this);
         cherry.on(this.input_, 'chipautocomplete.blur', this.clearComponent_).bind(this).debounce(150);
+        cherry.on(this.input_, 'chipautocomplete.focus', this.onInputFocus).bind(this);
         cherry.on(this.input_, 'chipautocomplete.keypress', this.onInputCtrlKeys_).bind(this);
         cherry.on(this.input_, 'chipautocomplete.keypress', this.onInputChanged).bind(this).debounce(250);
         this.element_.classList.add(this.CssClasses_.IS_UPGRADED);
