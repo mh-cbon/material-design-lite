@@ -41,11 +41,11 @@
   function getElement(some) {
     var element;
     if (some && some.querySelector) {
-      element = some;
+      element = [some];
     } else if (some === window) {
-      element = window;
+      element = [window];
     } else {
-      element = document.querySelector(some);
+      element = document.querySelectorAll(some);
     }
     return element;
   }
@@ -150,6 +150,7 @@
     if (!this.userEventHandlers[eventName]) {
       this.userEventHandlers[eventName] = [];
     }
+    var that = this;
     var ret = {
       effectiveHandler: handler,
       delegationSelector: delegationSelector,
@@ -164,10 +165,19 @@
         return ret;
       },
       /**
-      * Set the scope of the handler
+      * Debounce the event handler.
       */
       debounce: function(delay) {
         ret.debouncedHandler = cherry.debounce(ret.userHandler || ret.effectiveHandler, delay);
+        return ret;
+      },
+      /**
+      * Set event handler to trigger in first.
+      */
+      first: function() {
+        var i = that.userEventHandlers[eventName].indexOf(ret);
+        that.userEventHandlers[eventName].splice(i, 1);
+        that.userEventHandlers[eventName].unshift(ret);
         return ret;
       }
     };
@@ -298,7 +308,59 @@
     this.userEventHandlers = [];
   };
 
+  /**
+  * An UserEventHandlerProxy is a proxy object
+  * to manipulate multiple instances of UserEventHandlers
+  * as one.
+  */
+  function UserEventHandlerProxy() {
+    this.items = [];
+  }
+  /**
+  * Add an instance of UserEventHandler to this proxy.
+  * @param {UserEventHandler} eventHandler An UserEventHandler instance.
+  * @returns {UserEventHandlerProxy}
+  */
+  UserEventHandlerProxy.prototype.add = function(eventHandler) {
+    this.items.push(eventHandler);
+    return this;
+  };
+  /**
+  * Set the scope the event handler function will consume.
+  * @param {Object} scope The scope to apply to the event handler.
+  * @returns {UserEventHandlerProxy}
+  */
+  UserEventHandlerProxy.prototype.bind = function(scope) {
+    this.items.forEach(function(item) {
+      item.bind(scope);
+    });
+    return this;
+  };
+  /**
+  * Debounce an event handler.
+  * @param {int} delay The delay to apply.
+  * @returns {UserEventHandlerProxy}
+  */
+  UserEventHandlerProxy.prototype.debounce = function(delay) {
+    this.items.forEach(function(item) {
+      item.debounce(delay);
+    });
+    return this;
+  };
+  /**
+  * Set the event to run first in the event queue.
+  * @returns {UserEventHandlerProxy}
+  */
+  UserEventHandlerProxy.prototype.first = function() {
+    this.items.forEach(function(item) {
+      item.first();
+    });
+    return this;
+  };
+
   // registry is a global registry of all events currently managed.
+  // ideally there is no such global registry,
+  // the data could be bound to the domnode itself.
   var registry = [];
 
   /**
@@ -363,13 +425,19 @@
   * @param {Function} evHandler The event handler callback.
   * @param {Object} The user event handler object.
   */
-  var on = function(targetNode, evName, evHandler) {
-    targetNode = getElement(targetNode);
-    var item = registry.GetItem(targetNode);
-    if (!item) {
-      item = registry.AddNewItem(targetNode);
+  var on = function(selector, evName, evHandler) {
+    var ret = new UserEventHandlerProxy();
+    var targetNodes = getElement(selector);
+    for (var i = 0; i < targetNodes.length; i++) {
+      var targetNode = targetNodes[i];
+      var nodeEventManager = registry.GetItem(targetNode);
+      if (!nodeEventManager) {
+        nodeEventManager = registry.AddNewItem(targetNode);
+      }
+      var userEventHandler = nodeEventManager.addUserEventHandler(evName, evHandler);
+      ret.add(userEventHandler);
     }
-    return item.addUserEventHandler(evName, evHandler);
+    return ret;
   };
   cherry.on = on;
   cherry['on'] = on;
@@ -377,21 +445,20 @@
   /**
   * Susbcribe given evHandler for evName on the provided targetNode,
   * for one trigger only.
-  * @param {DomNode} targetNode The node listen.
+  * @param {DomNode} selector The node listen.
   * @param {string} evName The name of the event.
   * @param {Function} evHandler The event handler callback.
   * @param {Object} The user event handler object.
   */
-  var once = function(targetNode, evName, evHandler) {
-    targetNode = getElement(targetNode);
+  var once = function(selector, evName, evHandler) {
     /**
     * the handler that is unsubscribing the event handler once the event fired.
     */
     var handler = function(ev) {
       evHandler.call(this, ev);
-      off(targetNode, evName, handler);
+      off(selector, evName, handler);
     };
-    return on(targetNode, evName, handler);
+    return on(selector, evName, handler);
   };
   cherry.once = once;
   cherry['once'] = once;
@@ -402,13 +469,16 @@
   * @param {string} evName The name of the event.
   * @param {Function} evHandler The event handler callback.
   */
-  var off = function(targetNode, evName, evHandler) {
-    targetNode = getElement(targetNode);
-    var item = registry.GetItem(targetNode);
-    if (item) {
-      item.removeUserEventHandler(evName, evHandler);
-      if (item.IsEmpty()) {
-        registry.RemoveItem(targetNode);
+  var off = function(selector, evName, evHandler) {
+    var targetNodes = getElement(selector);
+    for (var i = 0; i < targetNodes.length; i++) {
+      var targetNode = targetNodes[i];
+      var nodeEventManager = registry.GetItem(targetNode);
+      if (nodeEventManager) {
+        nodeEventManager.removeUserEventHandler(evName, evHandler);
+        if (nodeEventManager.IsEmpty()) {
+          registry.RemoveItem(targetNode);
+        }
       }
     }
   };
@@ -418,19 +488,39 @@
   /**
   * Delegate events of evName to the provided userHandler
   * for the selector within rootNode.
-  * @param {DomNode} rootNode The rootNode to bind.
+  * @param {DomNode} rootSelector The rootNode to bind.
   * @param {string} selector The elemnts to listen for.
   * @param {string} evName The name of the event.
   * @param {Function} userHandler The event handler callback.
   * @param {Object} The user event handler object.
   */
-  var delegate = function(rootNode, selector, evName, userHandler) {
-    rootNode = getElement(rootNode);
+  var delegate = function(rootSelector, selector, evName, userHandler) {
+    var rootNodes = getElement(rootSelector);
 
-    /**
-    * The function handler bound to the event.
-    */
-    var effectiveHandler = function(event) {
+    var ret = new UserEventHandlerProxy();
+    for (var i = 0; i < rootNodes.length; i++) {
+      var rootNode = rootNodes[i];
+
+      var nodeEventManager = registry.GetItem(rootNode);
+      if (!nodeEventManager) {
+        nodeEventManager = registry.AddNewItem(rootNode);
+      }
+
+      var effectiveHandler = createEffectiveHandler(rootNode, selector, userHandler);
+      var userEventHandler = nodeEventManager.addUserEventHandler(
+        evName, effectiveHandler, userHandler, selector);
+      ret.add(userEventHandler);
+    }
+    return ret;
+  };
+  cherry.delegate = delegate;
+  cherry['delegate'] = delegate;
+
+  /**
+  * Create a function to handle delegated events.
+  */
+  var createEffectiveHandler = function(rootNode, selector, userHandler) {
+    return function(event) {
       var possibleTargets = rootNode.querySelectorAll(selector);
       var target = event.target;
 
@@ -448,15 +538,7 @@
         }
       }
     };
-
-    var item = registry.GetItem(rootNode);
-    if (!item) {
-      item = registry.AddNewItem(rootNode);
-    }
-    return item.addUserEventHandler(evName, effectiveHandler, userHandler, selector);
   };
-  cherry.delegate = delegate;
-  cherry['delegate'] = delegate;
 
   /**
   * Delegate events of evName to the provided userHandler
@@ -465,25 +547,28 @@
   *   cherry.undelegate(rootNode, selector)
   *   cherry.undelegate(rootNode, evName)
   *   cherry.undelegate(rootNode, evName, handler)
-  * @param {DomNode} rootNode The node listen.
+  * @param {DomNode} rootSelector The node listen.
   * @param {string} evName The name of the event.
   * @param {Function} evName The event handler callback.
   */
-  var undelegate = function(rootNode, selector, evName, evHandler) {
-    rootNode = getElement(rootNode);
-    var item = registry.GetItem(rootNode);
-    if (item) {
-      if (!evName && !evHandler) {
-        evName = selector;
-        selector = null;
-      } else if (evName.apply) {
-        evHandler = evName;
-        evName = selector;
-        selector = null;
-      }
-      item.removeUserEventHandler(evName, evHandler, selector);
-      if (item.IsEmpty()) {
-        registry.RemoveItem(rootNode);
+  var undelegate = function(rootSelector, selector, evName, evHandler) {
+    if (!evName && !evHandler) {
+      evName = selector;
+      selector = null;
+    } else if (evName.apply) {
+      evHandler = evName;
+      evName = selector;
+      selector = null;
+    }
+    var rootNodes = getElement(rootSelector);
+    for (var i = 0; i < rootNodes.length; i++) {
+      var rootNode = rootNodes[i];
+      var nodeEventManager = registry.GetItem(rootNode);
+      if (nodeEventManager) {
+        nodeEventManager.removeUserEventHandler(evName, evHandler, selector);
+        if (nodeEventManager.IsEmpty()) {
+          registry.RemoveItem(rootNode);
+        }
       }
     }
   };
@@ -495,11 +580,11 @@
   * if opts is null, it is set to an object.
   * if opts will have bubble:true and cancellable:true properties
   * set by default if they are not provided.
-  * @param {DomNode} targetNode The node to trigger the event.
+  * @param {DomNode} selector The node to trigger the event.
   * @param {string} evName The name of the event.
   * @param {Object} opts The event options.
   */
-  var trigger = function(targetNode, evName, opts) {
+  var trigger = function(selector, evName, opts) {
     if (!opts) {
       opts = {};
     }
@@ -513,7 +598,9 @@
     if (isNamespaced(evName)) {
       ev.onlyThisEventName = evName;
     }
-    getElement(targetNode).dispatchEvent(ev);
+    getElement(selector).forEach(function(node) {
+      node.dispatchEvent(ev);
+    });
   };
   cherry.trigger = trigger;
   cherry['trigger'] = trigger;

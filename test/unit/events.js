@@ -799,4 +799,70 @@ describe('events', function () {
     cherry.__registry.Reset();
   });
 
+  // multiple node selectors
+  it('should be able to add an event for a selector', function () {
+    var div = document.createElement("div");
+    var bt1 = document.createElement("button");
+    bt1.classList.add("bt");
+    var bt2 = document.createElement("button");
+    bt2.classList.add("bt");
+    div.appendChild(bt1);
+    div.appendChild(bt2);
+    document.body.appendChild(div);
+
+    var res = 0;
+    var handler = function () {
+      res++;
+    };
+    cherry.on('.bt', 'click', handler);
+    bt1.click();
+    bt2.click();
+    expect(res).to.be.equal(2);
+
+    cherry.__registry.Reset();
+    div.remove();
+  });
+
+  it.skip('should be able to once events for a selector', function () {
+  });
+
+  it.skip('should be able to add event delegation for a selector', function () {
+  });
+
+  it.skip('should be able to trigger events for a selector', function () {
+  });
+
+  it('should be able to add a namespaced event for a selector', function () {
+    var div = document.createElement("div");
+    var bt1 = document.createElement("button");
+    bt1.classList.add("bt");
+    var bt2 = document.createElement("button");
+    bt2.classList.add("bt");
+    div.appendChild(bt1);
+    div.appendChild(bt2);
+    document.body.appendChild(div);
+
+    var res = 0;
+    var handler = function () {
+      res++;
+    };
+    cherry.on('.bt', 'ns.click', handler);
+    bt1.click();
+    bt2.click();
+    expect(res).to.be.equal(2);
+
+    cherry.__registry.Reset();
+    div.remove();
+  });
+
+  // first
+  it.skip('should be able to set an event first in the queue', function () {
+  });
+
+  it.skip('should be able to set an once event first in the queue', function () {
+  });
+
+  it.skip('should be able to set a delegated event first in the queue', function () {
+  });
+
 });
