@@ -102,12 +102,14 @@
    * Update the dialog positionning.
    */
   CustomDialog.prototype.updateBoxPosition_ = function() {
-    this.container_.style.marginTop = '-' + (this.container_.offsetHeight / 2) + 'px';
-    this.container_.style.marginLeft = '-' + (this.container_.offsetWidth / 2) + 'px';
+    if (this.element_.classList.contains('show') || this.element_.classList.contains('beforeshow')) {
+      this.container_.style.marginTop = '-' + (this.container_.offsetHeight / 2) + 'px';
+      this.container_.style.marginLeft = '-' + (this.container_.offsetWidth / 2) + 'px';
+    }
   };
 
   /**
-   * Update the dialog positionning.
+   * Hnadles button click event.
    */
   CustomDialog.prototype.onBtClicked_ = function(ev) {
     if (this.pendingBt_ === null) {
@@ -170,8 +172,11 @@
     cherry.off(this.confirm_, 'customdialog.click');
     cherry.off(this.cancel_, 'customdialog.click');
     cherry.off(window, 'customdialog.resize', this.updateBoxPosition_);
-    cherry.off(this.btSelector_, 'customdialog.click', this.onBtClicked_);
+    if (this.btSelector_) {
+      cherry.off(this.btSelector_, 'customdialog.click', this.onBtClicked_);
+    }
 
+    this.placeholder_.parentNode.insertBefore(this.element_, this.placeholder_);
     this.placeholder_.remove();
 
     this.container_ = null;

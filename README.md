@@ -15,6 +15,7 @@ It s not AAA compliant all browsers, but could be!
 - custom-dialog: A dialog box implementation.
 - custom-dup: A component which add / remove a component template.
 - custom input confirm: A component to handle input confirmation (double input).
+- custom right panel over: A component which displays a web page in a right panel over the existing content.
 
 componentHandler.downgradeElementRecursive: a method to downgrade a node recursively.
 
