@@ -48,7 +48,7 @@
 
 </div>
 
-<div class="custom-js-dialog custom-dialog">
+<div class="custom-js-dialog custom-dialog" on-button-click="#bt-action">
   <div class="custom-dialog-bg mdl-color--grey"></div>
   <div class="custom-dialog-container mdl-dialog mdl-color--white">
     <h4 class="mdl-dialog__title">Title of the dialog</h4>
@@ -56,8 +56,7 @@
       <p>Text of the dialog</p>
     </div>
     <div class="mdl-dialog__actions">
-      <button type="submit" class="mdl-button custom-dialog-confirm"
-      form="form1">OK</button>
+      <button type="button" class="mdl-button custom-dialog-confirm">OK</button>
       <button type="button" class="mdl-button custom-dialog-cancel">CANCEL</button>
     </div>
     <button type="button" class="mdl-button custom-dialog-close">
@@ -114,11 +113,45 @@
   <input type="hidden" name="legume" value="tomate" />
 </form>
 
-<!-- Colored raised button -->
-<button class="mdl-button custom-js-confirm-button mdl-js-button mdl-button--raised mdl-button--colored"
-  confirm=".custom-dialog">
+<button class="mdl-button mdl-js-button mdl-button--raised mdl-button--colored bt-with-dialog" form="form1">
   Button
 </button>
+
+<br/><br/>
+
+<button class="mdl-button mdl-js-button mdl-button--raised mdl-button--colored bt-with-dialog" form="form1" disabled="disabled">
+  Button disabled
+</button>
+
+<br/><br/>
+
+<a href="?dialog_confirmed=true" class="bt-with-dialog">
+  link
+</a>
+
+<br/><br/>
+
+<a href="?dialog_confirmed=true" class="bt-with-dialog" disabled="disabled">
+  link disabled
+</a>
+
+<div class="custom-js-dialog custom-dialog" on-button-click=".bt-with-dialog">
+  <div class="custom-dialog-bg mdl-color--grey"></div>
+  <div class="custom-dialog-container mdl-dialog mdl-color--white">
+    <h4 class="mdl-dialog__title">Title of the dialog</h4>
+    <div class="mdl-dialog__content">
+      <p>Text of the dialog</p>
+    </div>
+    <div class="mdl-dialog__actions">
+      <button type="submit" class="mdl-button custom-dialog-confirm"
+      form="form1">OK</button>
+      <button type="button" class="mdl-button custom-dialog-cancel">CANCEL</button>
+    </div>
+    <button type="button" class="mdl-button custom-dialog-close">
+      <i class="material-icons">close</i>
+    </button>
+  </div>
+</div>
 
 <hr/>
 

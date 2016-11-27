@@ -13,7 +13,6 @@ It s not AAA compliant all browsers, but could be!
 - custom-datatable: Improved data table which can enable/disable a button, set checkbox values.
 - custom-expander: Easily expand nodes with css classes.
 - custom-dialog: A dialog box implementation.
-- custom-confirmbutton: A button which shows a dialog box to require confirmation of the action.
 - custom-dup: A component which add / remove a component template.
 - custom input confirm: A component to handle input confirmation (double input).
 

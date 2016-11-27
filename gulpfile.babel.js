@@ -571,6 +571,7 @@ function watch() {
     ['scripts', 'demos', 'components', reload]);
   gulp.watch(['src/**/*.{scss,css}'],
     ['styles', 'styles-grid', 'styletemplates', reload]);
+  gulp.watch(['demo/*'], ['demofork', reload]);
   gulp.watch(['src/**/*.html'], ['pages', reload]);
   gulp.watch(['src/**/*.{svg,png,jpg}'], ['images', reload]);
   gulp.watch(['src/**/README.md'], ['pages', reload]);

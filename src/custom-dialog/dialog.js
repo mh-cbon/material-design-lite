@@ -82,11 +82,50 @@
   };
 
   /**
+   * Cancel the dialog.
+   */
+  CustomDialog.prototype.cancelClicked_ = function() {
+    this.pendingBt_ = null;
+    this.closeBox_();
+  };
+
+  /**
+   * Confirm the dialog.
+   */
+  CustomDialog.prototype.confirmClicked_ = function() {
+    this.nextOp_ = 'run_click';
+    this.closeBox_();
+    this.pendingBt_.click();
+  };
+
+  /**
    * Update the dialog positionning.
    */
   CustomDialog.prototype.updateBoxPosition_ = function() {
     this.container_.style.marginTop = '-' + (this.container_.offsetHeight / 2) + 'px';
     this.container_.style.marginLeft = '-' + (this.container_.offsetWidth / 2) + 'px';
+  };
+
+  /**
+   * Update the dialog positionning.
+   */
+  CustomDialog.prototype.onBtClicked_ = function(ev) {
+    if (this.pendingBt_ === null) {
+      ev.preventDefault();
+      ev.stopImmediatePropagation();
+      ev.stopPropagation();
+
+      var bt = ev.target;
+      if (bt.getAttribute('disabled') === 'disabled') {
+        return;
+      }
+
+      this.pendingBt_ = bt;
+      this.showBox_();
+
+    } else {
+      this.pendingBt_ = null;
+    }
   };
 
   /**
@@ -99,12 +138,19 @@
       this.confirm_ = this.element_.querySelector('.custom-dialog-confirm');
       this.cancel_ = this.element_.querySelector('.custom-dialog-cancel');
 
+      this.btSelector_ = this.element_.getAttribute('on-button-click');
+
       var cherry = window.cherry;
-      cherry.on(this.close_, 'customdialog.click', this.closeBox_).bind(this);
-      cherry.on(this.confirm_, 'customdialog.click', this.closeBox_).bind(this);
-      cherry.on(this.cancel_, 'customdialog.click', this.closeBox_).bind(this);
+      cherry.on(this.close_, 'customdialog.click', this.cancelClicked_).bind(this);
+      cherry.on(this.confirm_, 'customdialog.click', this.confirmClicked_).bind(this);
+      cherry.on(this.cancel_, 'customdialog.click', this.cancelClicked_).bind(this);
 
       cherry.on(window, 'customdialog.resize', this.updateBoxPosition_).bind(this).debounce(100);
+
+      if (this.btSelector_) {
+        this.pendingBt_ = null;
+        cherry.on(this.btSelector_, 'customdialog.click', this.onBtClicked_).bind(this).first();
+      }
 
       this.placeholder_ = document.createElement('input');
       this.placeholder_.setAttribute('type', 'hidden');
@@ -124,14 +170,17 @@
     cherry.off(this.confirm_, 'customdialog.click');
     cherry.off(this.cancel_, 'customdialog.click');
     cherry.off(window, 'customdialog.resize', this.updateBoxPosition_);
+    cherry.off(this.btSelector_, 'customdialog.click', this.onBtClicked_);
 
     this.placeholder_.remove();
 
     this.container_ = null;
+    this.pendingBt_ = null;
     this.close_ = null;
     this.confirm_ = null;
     this.cancel_ = null;
     this.placeholder_ = null;
+    this.btSelector_ = null;
 
     this.element_.classList.remove(this.CssClasses_.IS_UPGRADED);
   };
