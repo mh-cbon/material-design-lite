@@ -163,12 +163,11 @@
 
     var cherry = window.cherry;
     cherry.off(this.element_, 'CustomLoaderOver.tansitionend');
+    clearTimeout(this.pendingHide_);
 
     cherry.trigger(this.spinner_, 'disable');
     this.spinner_ = null;
 
-    this.element_.classList.remove('beforehide');
-    this.element_.classList.remove('beforeshow');
     this.element_.classList.remove('show');
 
     this.placeholder_.parentNode.insertBefore(this.element_, this.placeholder_);
