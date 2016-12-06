@@ -119,7 +119,7 @@ describe('CustomFormAjax', function () {
     el.innerHTML = templatesLoader.get('FormAjax');
 
     var form = el.querySelector('.custom-js-form-ajax');
-    form.setAttribute('action', '/form-ajax.json?Return=form_failure');
+    form.setAttribute('action', 'ajax/form-ajax-form_failure.json');
     var bt = el.querySelector('button');
     componentHandler.upgradeElements(el);
 
@@ -162,7 +162,6 @@ describe('CustomFormAjax', function () {
     bt.click();
 
     setTimeout(function() {
-
       expect(events).to.be.eql(['pre-submit', 'post-submit', 'validation-success']);
       componentHandler.downgradeElementRecursive(el);
       el.remove();
@@ -176,7 +175,7 @@ describe('CustomFormAjax', function () {
     el.innerHTML = templatesLoader.get('FormAjax');
 
     var form = el.querySelector('.custom-js-form-ajax');
-    form.setAttribute('action', '/form-ajax.json?Return=form_failure');
+    form.setAttribute('action', 'ajax/form-ajax-form_failure.json');
     var bt = el.querySelector('button');
     componentHandler.upgradeElements(el);
 
@@ -194,7 +193,6 @@ describe('CustomFormAjax', function () {
     bt.click();
 
     setTimeout(function() {
-
       expect(events).to.be.eql(['pre-submit', 'post-submit', 'validation-fail']);
       componentHandler.downgradeElementRecursive(el);
       el.remove();
@@ -208,7 +206,7 @@ describe('CustomFormAjax', function () {
     el.innerHTML = templatesLoader.get('FormAjax');
 
     var form = el.querySelector('.custom-js-form-ajax');
-    form.setAttribute('action', '/form-ajax.json?Return=form_failure');
+    form.setAttribute('action', 'ajax/form-ajax-form_failure.json');
     var text = el.querySelector('.custom-form__errorfailure');
     var bt = el.querySelector('button');
     componentHandler.upgradeElements(el);
@@ -216,7 +214,6 @@ describe('CustomFormAjax', function () {
     bt.click();
 
     setTimeout(function() {
-
       expect(text.innerHTML).to.be.equal('Something went wrong');
       componentHandler.downgradeElementRecursive(el);
       el.remove();
@@ -230,7 +227,7 @@ describe('CustomFormAjax', function () {
     el.innerHTML = templatesLoader.get('FormAjax');
 
     var form = el.querySelector('.custom-js-form-ajax');
-    form.setAttribute('action', '/form-ajax.json?Return=field_errors');
+    form.setAttribute('action', 'ajax/form-ajax-field_errors.json');
     var errfields = el.querySelectorAll('.mdl-textfield__error');
     var bt = el.querySelector('button');
     componentHandler.upgradeElements(el);
@@ -254,7 +251,7 @@ describe('CustomFormAjax', function () {
     el.innerHTML = templatesLoader.get('FormAjax');
 
     var form = el.querySelector('.custom-js-form-ajax');
-    form.setAttribute('action', '/form-ajax.json?Return=field_errors');
+    form.setAttribute('action', 'ajax/form-ajax-field_errors.json');
     var bt = el.querySelector('button');
     componentHandler.upgradeElements(el);
 
@@ -276,7 +273,7 @@ describe('CustomFormAjax', function () {
     el.innerHTML = templatesLoader.get('FormAjaxHtml5');
 
     var form = el.querySelector('.custom-js-form-ajax');
-    form.setAttribute('action', '/form-ajax.json?Return=field_errors');
+    form.setAttribute('action', 'ajax/form-ajax-field_errors.json');
     var bt = el.querySelector('button');
     componentHandler.upgradeElements(el);
 
@@ -298,7 +295,7 @@ describe('CustomFormAjax', function () {
     el.innerHTML = templatesLoader.get('FormAjaxHtml5');
 
     var form = el.querySelector('.custom-js-form-ajax');
-    form.setAttribute('action', '/form-ajax.json?Return=field_errors');
+    form.setAttribute('action', 'ajax/form-ajax-field_errors.json');
     var bt = el.querySelector('button');
     bt.setAttribute('formmethod', 'GET');
     bt.setAttribute('formaction', '/somewhere');
@@ -401,7 +398,7 @@ describe('CustomFormAjax', function () {
     el.appendChild(div);
 
     var form = el.querySelector('.custom-js-form-ajax');
-    form.setAttribute('action', '/form-ajax.json?Return=field_errors');
+    form.setAttribute('action', 'ajax/form-ajax-field_errors.json');
     form.setAttribute('post-notify', '#'+div.id);
     form.setAttribute('post-notify-failure', 'message');
     form.setAttribute('post-notify-action', 'action');
@@ -441,7 +438,7 @@ describe('CustomFormAjax', function () {
     el.appendChild(div);
 
     var form = el.querySelector('.custom-js-form-ajax');
-    form.setAttribute('action', '/form-ajax.json?Return=form_failure');
+    form.setAttribute('action', 'ajax/form-ajax-form_failure.json');
     form.setAttribute('post-notify', '#'+div.id);
     form.setAttribute('post-notify-failure', 'message');
     form.setAttribute('post-notify-action', 'action');

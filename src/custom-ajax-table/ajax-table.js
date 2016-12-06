@@ -109,7 +109,7 @@
       }
       this.hideLoader_();
     }.bind(this)).catch(function(response, xhr) {
-      window.alert('beep boop');
+      throw 'beep boop';
     });
   };
 

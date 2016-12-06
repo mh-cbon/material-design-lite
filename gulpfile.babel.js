@@ -891,92 +891,14 @@ function chipautocompleteMw() {
       'Value': 3
     }
   ];
-
-  var list2 = [
-    {
-      'Text': 'C#',
-      'Value': 0
-    },
-    {
-      'Text': 'Go',
-      'Value': 1
-    },
-    {
-      'Text': 'C++',
-      'Value': 2
-    },
-    {
-      'Text': 'Javascript',
-      'Value': 3
-    },
-    {
-      'Text': 'Php',
-      'Value': 4
-    },
-    {
-      'Text': 'Scala',
-      'Value': 5
-    },
-    {
-      'Text': 'Java',
-      'Value': 6
-    },
-    {
-      'Text': 'Ruby',
-      'Value': 7
-    },
-    {
-      'Text': 'Python',
-      'Value': 8
-    },
-    {
-      'Text': 'Haskell',
-      'Value': 9
-    },
-    {
-      'Text': 'Lisp',
-      'Value': 10
-    },
-    {
-      'Text': 'Erlang',
-      'Value': 11
-    },
-    {
-      'Text': 'ADA',
-      'Value': 12
-    },
-    {
-      'Text': 'Cobol',
-      'Value': 13
-    },
-    {
-      'Text': 'ASM',
-      'Value': 14
-    },
-    {
-      'Text': 'Pascal',
-      'Value': 15
-    },
-    {
-      'Text': 'Vbscript',
-      'Value': 16
-    },
-    {
-      'Text': 'F#',
-      'Value': 17
-    },
-    {
-      'Text': 'Rust',
-      'Value': 18
-    }
-  ];
-
+  var list2 = JSON.parse(fs.readFileSync('demo/ajax/chip_autocomplete_list.json'));
   var list3 = [];
 
   return function(req, res, next) {
     var parsedUrl = url.parse(req.url, true);
     var list = parsedUrl.query.List || 0;
     var input = parsedUrl.query.Input || 0;
+    var items = [];
 
     if (req.url.match(/chip_autocomplete_list-error[.]json/)) {
       res.writeHead(500);
@@ -988,39 +910,29 @@ function chipautocompleteMw() {
       res.end('Sooooouuuutttthhh');
       return;
 
+    }else if (req.url.match(/chip_autocomplete_empty[.]json/)) {
+
+      res.setHeader('Content-Type', 'application/json');
+      res.end(JSON.stringify([]));
+
     }else if (req.url.match(/chip_autocomplete_list[.]json/)) {
 
-      var copy = [];
+      var result = [];
       if (list === 'list1') {
-        if (input) {
-          list1.forEach(function(opt) {
-            if (opt.Text.toLowerCase().substr(0, input.length) === input) {
-              copy.push(opt);
-            }
-          });
-        } else {
-          copy = copy.concat(list1);
-        }
-        res.setHeader('Content-Type', 'application/json');
-        res.end(JSON.stringify(copy));
-
+        items = items.concat(list1);
       } else if (list === 'list2') {
-        if (input) {
-          list2.forEach(function(opt) {
-            if (opt.Text.toLowerCase().substr(0, input.length) === input) {
-              copy.push(opt);
-            }
-          });
-        } else {
-          copy = copy.concat(list2);
-        }
-        res.setHeader('Content-Type', 'application/json');
-        res.end(JSON.stringify(copy));
-
+        items = items.concat(list2);
       } else {
-        res.setHeader('Content-Type', 'application/json');
-        res.end(JSON.stringify(list3));
+        items = items.concat(list3);
       }
+
+      items.forEach(function(opt) {
+        if (!input || opt.Text.toLowerCase().substr(0, input.length) === input) {
+          result.push(opt);
+        }
+      });
+      res.setHeader('Content-Type', 'application/json');
+      res.end(JSON.stringify(result));
 
     } else if (req.url.match(/chip_autocomplete_create[.]json/)) {
       var error = parsedUrl.query.Error || false;
@@ -1031,29 +943,25 @@ function chipautocompleteMw() {
         return;
       }
 
-      var opt = {};
+      items = list3;
       if (list === 'list1') {
-        opt = {
-          Value: list1.length,
-          Text: req.body.Value
-        };
-        list1.push(opt);
-
+        items = list1;
       } else if (list === 'list2') {
-        opt = {
-          Value: list2.length,
-          Text: req.body.Value
-        };
-        list2.push(opt);
-
-      } else {
-        opt = {
-          Value: list3.length,
-          Text: req.body.Value
-        };
-        list3.push(opt);
-
+        items = list2;
       }
+
+      var opt = {
+        Value: items.length,
+        Text: req.body.Value
+      };
+      if (list === 'list1') {
+        list1.push(opt);
+      } else if (list === 'list2') {
+        list2.push(opt);
+      } else {
+        list3.push(opt);
+      }
+
       res.setHeader('Content-Type', 'application/json');
       res.end(JSON.stringify({
         'Valid': true,
