@@ -61,12 +61,16 @@
    * Show the loader.
    */
   CustomLoaderOver.prototype.show = function(targetEl) {
+
+    if (this.element_.parentNode === targetEl) {
+      return ;
+    }
+
     var cherry = window.cherry;
     clearTimeout(this.pendingHide_);
     cherry.off(this.element_, 'CustomLoaderOver.transitionend');
 
     targetEl.CustomLoaderOver = {
-      busy: true,
       oldPosition_: targetEl.style.position,
     };
 
@@ -134,7 +138,6 @@
           cherry.trigger(this.spinner_, 'disable');
           this.placeholder_.appendChild(this.element_);
           targetEl.style.position = targetEl.CustomLoaderOver.oldPosition_;
-          targetEl.CustomLoaderOver.busy = false;
         }).bind(this);
         this.element_.classList.remove('show');
       }.bind(this), 100); // this is required to ensure transitionend does trigger
