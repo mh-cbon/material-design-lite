@@ -364,7 +364,6 @@ gulp.task('all', ['clean'], cb => {
 // notes: the phantom testing is totally broken.
 // too many troubles with it, prefer nightmare.
 gulp.task('mocha', ['styles'], () => {
-  var server =
   $.connect.server({
     root: '.',
     port: 3000,
