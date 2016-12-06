@@ -42,12 +42,29 @@
     var element;
     if (some && some.querySelector) {
       element = [some];
-    } else if (some === window) {
-      element = [window];
+    } else if (cherry.isAWindow(some)) {
+      element = [some];
+    } else if (some instanceof Array || isNodeList(some)) {
+      element = some;
     } else {
       element = document.querySelectorAll(some);
     }
     return element;
+  }
+
+  /**
+  * Teells if given value is a NodeList type.
+  * @param {string|DomNode} some A selector to a node, or the node itself.
+  * @returns {bool}
+  * @private
+  */
+  function isNodeList(some) {
+    var stringRepr = Object.prototype.toString.call(some);
+
+    return typeof some === 'object' &&
+        /^\[object (HTMLCollection|NodeList|Object)\]$/.test(stringRepr) &&
+        (typeof some.length === 'number') &&
+        (some.length === 0 || (typeof some[0] === 'object' && some[0].nodeType > 0));
   }
 
   /**
@@ -57,18 +74,23 @@
   * @private
   */
   function createEvent_(eventType, opts) {
+    var ev = {};
     if ('CustomEvent' in window && typeof window.CustomEvent === 'function') {
-      return new CustomEvent(eventType, opts);
+      ev = new CustomEvent(eventType, opts);
+
+    } else if ('Event' in window && typeof window.Event === 'function') {
+      ev = new Event(eventType, opts);
+
     } else {
-      var ev = document.createEvent('Events');
+      ev = document.createEvent('Events');
       ev.initEvent(eventType, opts.bubbles, opts.cancelable);
-      for (var n in opts) {
-        if (n !== 'bubbles' && n !== 'cancelable') {
-          ev[n] = opts[n];
-        }
-      }
-      return ev;
     }
+    for (var n in opts) {
+      if (n !== 'bubbles' && n !== 'cancelable') {
+        ev[n] = opts[n];
+      }
+    }
+    return ev;
   }
 
   /**
@@ -121,7 +143,7 @@
           that.triggerForEventName(ev.onlyThisEventName, ev);
         }
       };
-      this.domNode.addEventListener(eventName, this.subscribedDomEvents[eventName]);
+      this.domNode.addEventListener(eventName, this.subscribedDomEvents[eventName], false);
     }
   };
 
@@ -147,11 +169,13 @@
   */
   EventManager.prototype.addUserEventHandler = function(eventName, handler, userFn, delegationSelector) {
     this.subscribeToDomEvent(eventName);
-    if (!this.userEventHandlers[eventName]) {
-      this.userEventHandlers[eventName] = [];
+    var domEventName = getEventName(eventName);
+    if (!this.userEventHandlers[domEventName]) {
+      this.userEventHandlers[domEventName] = [];
     }
     var that = this;
     var ret = {
+      eventName: eventName,
       effectiveHandler: handler,
       delegationSelector: delegationSelector,
       userHandler: userFn,
@@ -172,16 +196,42 @@
         return ret;
       },
       /**
+      * ensure the event triggers after len milliseconds.
+      */
+      // timeout: function(len) {
+      //   ret.mustTimeout = setTimeout(function() {
+      //     that.triggerForEventName(eventName);
+      //   }, len);
+      //   return ret;
+      // },
+      /**
+      * ensure an event does not triggers before len milliseconds.
+      */
+      notBefore: function(len) {
+        throw 'TODO';
+        // return ret;
+      },
+      /**
+      * clear event associated resources.
+      */
+      clear: function(len) {
+        if (ret.debouncedHandler) {
+          ret.debouncedHandler.cancel();
+        }
+      },
+      /**
       * Set event handler to trigger in first.
       */
       first: function() {
-        var i = that.userEventHandlers[eventName].indexOf(ret);
-        that.userEventHandlers[eventName].splice(i, 1);
-        that.userEventHandlers[eventName].unshift(ret);
+        var i = that.userEventHandlers[domEventName].indexOf(ret);
+        if (i > -1) {
+          that.userEventHandlers[domEventName].splice(i, 1);
+        }
+        that.userEventHandlers[domEventName].unshift(ret);
         return ret;
       }
     };
-    this.userEventHandlers[eventName].push(ret);
+    this.userEventHandlers[domEventName].push(ret);
     return ret;
   };
 
@@ -192,27 +242,36 @@
   * @param {string} delegationSelector The target of a delegated event.
   */
   EventManager.prototype.removeUserEventHandler = function(eventName, handler, delegationSelector) {
-    if (this.userEventHandlers[eventName]) {
+    var domEventName = getEventName(eventName);
+    if (this.userEventHandlers[domEventName]) {
+      var rm = [];
       if (!handler) {
-        this.userEventHandlers[eventName] = [];
-      } else {
-        var i = -1;
-        this.userEventHandlers[eventName].forEach(function(o, index) {
-          if (delegationSelector && o.delegationSelector === delegationSelector &&
-              o.userHandler && o.userHandler === handler) {
-            i = index;
-          } else if (delegationSelector && o.delegationSelector === delegationSelector && !handler) {
-            i = index;
-          } else if (o.userHandler && o.userHandler === handler) {
-            i = index;
-          } else if (!o.userHandler && o.effectiveHandler === handler) {
-            i = index;
+        this.userEventHandlers[domEventName].forEach(function(o, index) {
+          if (o.eventName === eventName) {
+            rm.push(index);
           }
         });
-        if (i > -1) {
-          this.userEventHandlers[eventName].splice(i, 1);
-        }
+      } else {
+        this.userEventHandlers[domEventName].forEach(function(o, index) {
+          if (o.eventName === eventName) {
+            if (delegationSelector && o.delegationSelector === delegationSelector &&
+              o.userHandler && o.userHandler === handler) {
+              rm.push(index);
+            } else if (delegationSelector && o.delegationSelector === delegationSelector && !handler) {
+              rm.push(index);
+            } else if (o.userHandler && o.userHandler === handler) {
+              rm.push(index);
+            } else if (!o.userHandler && o.effectiveHandler === handler) {
+              rm.push(index);
+            }
+          }
+        });
       }
+      rm.reverse().forEach(function(i) {
+        // clearTimeout(this.userEventHandlers[domEventName][i].mustTimeout);
+        this.userEventHandlers[domEventName][i].clear();
+        this.userEventHandlers[domEventName].splice(i, 1);
+      }.bind(this));
       var remaining = this.getAllRelatedUserEventHandlers(eventName);
       if (remaining.length === 0) {
         this.unsubscribeToDomEvent(eventName);
@@ -234,7 +293,7 @@
     * Lookup for all handlers related to a dom event.
     */
     Object.keys(t).forEach(function(name) {
-      if (name.substr(-eventName.length) === eventName) {
+      if (name === eventName) {
         ret = ret.concat(t[name]);
       }
     });
@@ -256,9 +315,11 @@
       * xx
       */
       Object.keys(t).forEach(function(name) {
-        if (name.substr(-eventName.length) === eventName) {
-          ret = ret.concat(t[name]);
-        }
+        t[name].forEach(function(o) {
+          if (o.eventName === eventName || o.eventName.substr(-eventName.length - 1) === '.' + eventName) {
+            ret.push(o);
+          }
+        });
       });
       return ret;
     }
@@ -270,9 +331,10 @@
   * @param {Event} ev The event object.
   */
   EventManager.prototype.triggerForEventName = function(eventName, ev) {
+    ev = ev || {};
     var eventHandlers = this.getUserEventHandlers(eventName);
     eventHandlers.forEach(function(o) {
-      // there should be some test for cancelled event right here.
+      // clearTimeout(o.mustTimeout);
       if (!ev.__HasStopped) {
         var fn = (o.debouncedHandler || o.effectiveHandler);
         if (o.scope !== null) {
@@ -301,10 +363,12 @@
   * Clear all subscriptions to dom or user events.
   */
   EventManager.prototype.Clear = function() {
-    var that = this;
     Object.keys(this.userEventHandlers).forEach(function(evName) {
-      that.unsubscribeToDomEvent(evName);
-    });
+      this.userEventHandlers[evName].forEach(function(h) {
+        h.clear();
+      });
+      this.unsubscribeToDomEvent(evName);
+    }.bind(this));
     this.userEventHandlers = [];
   };
 
@@ -348,6 +412,17 @@
     return this;
   };
   /**
+  * Ensure the event triggers after len milliseconds.
+  * @param {int} len The delay to apply.
+  * @returns {UserEventHandlerProxy}
+  */
+  // UserEventHandlerProxy.prototype.timeout = function(len) {
+  //   this.items.forEach(function(item) {
+  //     item.timeout(len);
+  //   });
+  //   return this;
+  // };
+  /**
   * Set the event to run first in the event queue.
   * @returns {UserEventHandlerProxy}
   */
@@ -357,66 +432,6 @@
     });
     return this;
   };
-
-  // registry is a global registry of all events currently managed.
-  // ideally there is no such global registry,
-  // the data could be bound to the domnode itself.
-  var registry = [];
-
-  /**
-  * Add a new EventManager instance for given node to the registry.
-  * @param {DomNode} targetNode The node to manage.
-  * @returns {EventManager}
-  */
-  registry.AddNewItem = function(targetNode) {
-    var ret = new EventManager(targetNode);
-    registry.push(ret);
-    return ret;
-  };
-
-  /**
-  * Get an existing EventManager for the given node.
-  * @param {DomNode} targetNode The node to manage.
-  * @returns {EventManager|null}
-  */
-  registry.GetItem = function(targetNode) {
-    var f = null;
-    registry.forEach(function(item) {
-      if (item.isNode(targetNode)) {
-        f = item;
-      }
-    });
-    return f;
-  };
-
-  /**
-  * Removes an existing EventManager for the given node.
-  * @param {DomNode} targetNode The node to manage.
-  * @returns {EventManager|null}
-  */
-  registry.RemoveItem = function(targetNode) {
-    var f = -1;
-    registry.forEach(function(item, index) {
-      if (item.isNode(targetNode)) {
-        f = index;
-      }
-    });
-    if (f > -1) {
-      registry.splice(f, 1);
-    }
-  };
-
-  /**
-  * Clear all registred EventManager instances and reset the registry.
-  */
-  registry.Reset = function() {
-    registry.forEach(function(item, index) {
-      item.Clear();
-    });
-    registry.splice(0, registry.length);
-  };
-
-  cherry.__registry = registry;
 
   /**
   * Susbcribe given evHandler for evName on the provided targetNode.
@@ -430,10 +445,10 @@
     var targetNodes = getElement(selector);
     for (var i = 0; i < targetNodes.length; i++) {
       var targetNode = targetNodes[i];
-      var nodeEventManager = registry.GetItem(targetNode);
-      if (!nodeEventManager) {
-        nodeEventManager = registry.AddNewItem(targetNode);
+      if (!targetNode.__eventManager) {
+        targetNode.__eventManager = new EventManager(targetNode);
       }
+      var nodeEventManager = targetNode.__eventManager;
       var userEventHandler = nodeEventManager.addUserEventHandler(evName, evHandler);
       ret.add(userEventHandler);
     }
@@ -473,11 +488,12 @@
     var targetNodes = getElement(selector);
     for (var i = 0; i < targetNodes.length; i++) {
       var targetNode = targetNodes[i];
-      var nodeEventManager = registry.GetItem(targetNode);
+      var nodeEventManager = targetNode.__eventManager;
       if (nodeEventManager) {
         nodeEventManager.removeUserEventHandler(evName, evHandler);
         if (nodeEventManager.IsEmpty()) {
-          registry.RemoveItem(targetNode);
+          nodeEventManager.Clear();
+          targetNode.__eventManager = undefined;
         }
       }
     }
@@ -501,10 +517,10 @@
     for (var i = 0; i < rootNodes.length; i++) {
       var rootNode = rootNodes[i];
 
-      var nodeEventManager = registry.GetItem(rootNode);
-      if (!nodeEventManager) {
-        nodeEventManager = registry.AddNewItem(rootNode);
+      if (!rootNode.__eventManager) {
+        rootNode.__eventManager = new EventManager(rootNode);
       }
+      var nodeEventManager = rootNode.__eventManager;
 
       var effectiveHandler = createEffectiveHandler(rootNode, selector, userHandler);
       var userEventHandler = nodeEventManager.addUserEventHandler(
@@ -563,11 +579,13 @@
     var rootNodes = getElement(rootSelector);
     for (var i = 0; i < rootNodes.length; i++) {
       var rootNode = rootNodes[i];
-      var nodeEventManager = registry.GetItem(rootNode);
+
+      var nodeEventManager = rootNode.__eventManager;
       if (nodeEventManager) {
         nodeEventManager.removeUserEventHandler(evName, evHandler, selector);
         if (nodeEventManager.IsEmpty()) {
-          registry.RemoveItem(rootNode);
+          nodeEventManager.Clear();
+          rootNode.__eventManager = undefined;
         }
       }
     }

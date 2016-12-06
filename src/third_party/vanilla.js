@@ -16,7 +16,10 @@
    */
   var debounce = function(fn, delay) {
     var timer = null;
-    return function() {
+    /**
+    * debounced function.
+    */
+    var ret = function() {
       var context = this;
       var args = arguments;
       clearTimeout(timer);
@@ -24,12 +27,34 @@
         fn.apply(context, args);
       }, delay);
     };
+    /**
+    * cancel the debounce.
+    */
+    ret.cancel = function() {
+      clearTimeout(timer);
+    };
+    return ret;
   };
   cherry.debounce = debounce;
   cherry['debounce'] = debounce;
 
   /**
-   * outerHeight polyfill.
+   * height.
+   * @param  {!DomElement} The element we want the outer heihgt of.
+   * @return {!Integer} The value of the height in pixel.
+   */
+  var height = function(el) {
+    var s = el.offsetHeight;
+    var style = getComputedStyle(el);
+    s += parseInt(style.marginTop) + parseInt(style.marginBottom);
+    s -= parseInt(style.paddingTop) + parseInt(style.paddingBottom);
+    return s;
+  };
+  cherry.height = height;
+  cherry['height'] = height;
+
+  /**
+   * outerHeight .
    * @param  {!DomElement} The element we want the outer heihgt of.
    * @return {!Integer} The value of the height in pixel.
    */
@@ -43,7 +68,7 @@
   cherry['outerHeight'] = outerHeight;
 
   /**
-   * innerHeight polyfill.
+   * innerHeight .
    * @param  {!DomElement} The element we want the outer heihgt of.
    * @return {!Integer} The value of the height in pixel.
    */
@@ -61,9 +86,23 @@
    * @param  {!DomElement} The parent element.
    * @return {!DomNodes} The list of dom child nodes.
    */
-  var childElements = function(el) {
+  var childElements = function(el, selector) {
     var ret = [];
-    var els = el.childNodes;
+    var els = [];
+    if (!selector) {
+      els = el.childNodes;
+    } else {
+      var hadId = true;
+      if (!el.id) {
+        hadId = false;
+        el.id = 'ID_' + Date.now();
+      }
+      selector = '#' + el.id + ' ' + selector;
+      els = document.querySelectorAll(selector);
+      if (!hadId) {
+        el.id = '';
+      }
+    }
     for (var i = 0; i < els.length; i++) {
       if (els[i].nodeType === 1) {
         ret.push(els[i]);
@@ -257,5 +296,134 @@
   };
   cherry.imgAsDataUrl = imgAsDataUrl;
   cherry['imgAsDataUrl'] = imgAsDataUrl;
+
+  /**
+   * Light templates.
+   *
+   * @param  {!string} content The template.
+   * @param {!Object} data Data of the template.
+   * @return {!string} Computed template.
+   */
+  var lightTemplate = function(content, data) {
+    var matches = content.match(/(\{:[a-z]+\})/gi);
+    if (matches) {
+      matches.forEach(function(m) {
+        var p = m.match(/[a-z]+/i)[0];
+        content = content.replace(m, data[p]);
+      });
+    }
+    return content;
+  };
+  cherry.lightTemplate = lightTemplate;
+  cherry['lightTemplate'] = lightTemplate;
+
+  /**
+   * Replaces current browser url parameters.
+   *
+   * @param  {!string} content The template.
+   * @return {!Object} data Data of the template.
+   */
+  var replaceUrlParams = function(newUrlParams) {
+    var url = new URL(window.location.href);
+    var allKeys = url.searchParams.keys();
+    for (var key1 = allKeys.next(); key1.done === false; key1 = allKeys.next()) {
+      url.searchParams.delete(key1);
+    }
+    if (newUrlParams.searchParams) {
+      var keys = [];
+      allKeys = newUrlParams.searchParams.keys();
+      for (var key2 = allKeys.next(); key2.done === false; key2 = allKeys.next()) {
+        if (keys.indexOf(key2.value) === -1) {
+          keys.push(key2.value);
+        }
+      }
+      for (var i = 0; i < keys.length; i++) {
+        var key = keys[i];
+        var values = newUrlParams.searchParams.getAll(key);
+        for (var e = 0; e < values.length; e++) {
+          url.searchParams.append(key, values[e]);
+        }
+      }
+    } else {
+      Object.keys(newUrlParams).forEach(function(key) {
+        var values = newUrlParams[key];
+        if (values.substr) {
+          values = [values];
+        }
+        values.forEach(function(value) {
+          url.searchParams.append(key, value);
+        });
+      });
+    }
+    var title = '';
+    var el = document.getElementsByTagName('title');
+    if (el.length) {
+      el = el[0].innerHTML;
+    }
+    window.history.replaceState({}, title, url.toString());
+  };
+  cherry.replaceUrlParams = replaceUrlParams;
+  cherry['replaceUrlParams'] = replaceUrlParams;
+
+  /**
+   * Stringify an url argument.
+   *
+   * @param {!Object} data Value of the url.
+   * @return {!string} Computed template.
+   */
+  var stringifyUrlArgs = function(data) {
+    var ret = '';
+    Object.keys(data).forEach(function(k) {
+      if (data[k].sort) {
+        data[k].forEach(function(v) {
+          ret += encodeURIComponent(k) + '=' + encodeURIComponent(v) + '&';
+        });
+      } else {
+        ret += encodeURIComponent(k) + '=' + encodeURIComponent(data[k]) + '&';
+      }
+    });
+    if (ret.length) {
+      ret = ret.substr(0, ret.length - 1);
+    }
+    return ret;
+  };
+  cherry.stringifyUrlArgs = stringifyUrlArgs;
+  cherry['stringifyUrlArgs'] = stringifyUrlArgs;
+
+  /**
+   * Get a computed style.
+   *
+   * @param {!DomNode} element The element to interrogate.
+   * @param {!string} prop The name of the css property.
+   * @return {!string} the value of the style.
+   */
+  var getStyle = function(oElm, css3Prop) {
+    var strValue = '';
+
+    if (window.getComputedStyle) {
+      strValue = getComputedStyle(oElm).getPropertyValue(css3Prop);
+    } //IE
+    else if (oElm.currentStyle) {
+      try {
+        strValue = oElm.currentStyle[css3Prop];
+      } catch (e) {}
+    }
+
+    return strValue;
+  };
+  cherry.getStyle = getStyle;
+  cherry['getStyle'] = getStyle;
+
+  /**
+   * Test if the object is a window.
+   *
+   * @param {!DomNode} w The element to check.
+   * @return {!bool} The result.
+   */
+  var isAWindow = function(w) {
+    return w && w.document && w.location && w.alert && w.setInterval;
+  };
+  cherry.isAWindow = isAWindow;
+  cherry['isAWindow'] = isAWindow;
 
 })(window);

@@ -64,6 +64,7 @@
 
   /**
    * Show the dialog.
+   * @private
    */
   CustomDialog.prototype.showBox_ = function() {
     document.body.appendChild(this.element_);
@@ -74,18 +75,27 @@
 
   /**
    * Hide the dialog.
+   *
+   * @private
    */
   CustomDialog.prototype.closeBox_ = function() {
+    this.pendingBt_ = null;
     this.element_.classList.remove('beforeshow');
     this.element_.classList.remove('show');
     this.placeholder_.parentNode.insertBefore(this.element_, this.placeholder_);
   };
 
   /**
+   * Hide the dialog.
+   */
+  CustomDialog.prototype.hide = function() {
+    this.closeBox_();
+  };
+
+  /**
    * Cancel the dialog.
    */
   CustomDialog.prototype.cancelClicked_ = function() {
-    this.pendingBt_ = null;
     this.closeBox_();
   };
 
@@ -93,11 +103,10 @@
    * Confirm the dialog.
    */
   CustomDialog.prototype.confirmClicked_ = function() {
-    this.nextOp_ = 'run_click';
-    this.closeBox_();
     if (this.pendingBt_) {
       this.pendingBt_.click();
     }
+    this.closeBox_();
   };
 
   /**
@@ -168,6 +177,9 @@
    * Downgrade element.
    */
   CustomDialog.prototype.mdlDowngrade_ = function() {
+
+    this.element_.classList.remove('beforeshow');
+    this.element_.classList.remove('show');
 
     var cherry = window.cherry;
     cherry.off(this.close_, 'customdialog.click');

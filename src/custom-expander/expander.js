@@ -64,12 +64,9 @@
    * Toggle the dialog display.
    */
   CustomExpander.prototype.toggleBox_ = function(ev) {
-    window.Velocity(this.container_, 'stop', true);
     if (this.nextDir_ === 'close') {
-      this.nextDir_ = 'open';
       this.closeBox_();
     } else {
-      this.nextDir_ = 'close';
       this.showBox_();
     }
   };
@@ -78,41 +75,64 @@
    * Show the dialog.
    */
   CustomExpander.prototype.showBox_ = function() {
-    var h = 0;
+    this.nextDir_ = 'close';
     var cherry = window.cherry;
-    var els = cherry.childElements(this.container_);
-    for (var i = 0; i < els.length; i++) {
-      h += cherry.outerHeight(els[i]);
-    }
-    var that = this;
-    window.Velocity(this.container_, {
-      height: h,
-    }, {
-      /**
-      * complete.
-      */
-      complete: function() {
-        that.element_.classList.add(that.CssClasses_.IS_EXPANDED);
-        that.container_.style.height = 'auto';
-      }
-    });
+    var h = this.getContainerHeight_();
+    cherry.off(this.container_, 'transitionend');
+    cherry.once(this.container_, 'transitionend', function() {
+      this.element_.classList.add(this.CssClasses_.IS_EXPANDED);
+      this.container_.style.height = 'auto';
+    }).bind(this);
+    this.container_.style.height = h + 'px';
   };
 
   /**
    * Hide the dialog.
    */
   CustomExpander.prototype.closeBox_ = function() {
-    var that = this;
-    window.Velocity(this.container_, {
-      height: 0,
-    }, {
-      /**
-      * complete.
-      */
-      complete: function() {
-        that.element_.classList.remove(that.CssClasses_.IS_EXPANDED);
-      }
-    });
+    var cherry = window.cherry;
+    this.nextDir_ = 'open';
+    var h = this.getContainerHeight_();
+    cherry.off(this.container_, 'transitionend');
+    cherry.once(this.container_, 'transitionend', function() {
+      this.element_.classList.remove(this.CssClasses_.IS_EXPANDED);
+    }).bind(this);
+    this.container_.style.height = h + 'px';
+    setTimeout(function() {
+      this.container_.style.height = '0px';
+    }.bind(this), 50);
+  };
+
+  /**
+   * Hide the dialog.
+   */
+  CustomExpander.prototype.getContainerHeight_ = function() {
+    var h = 0;
+    var cherry = window.cherry;
+    var els = cherry.childElements(this.container_);
+    for (var i = 0; i < els.length; i++) {
+      h += cherry.outerHeight(els[i]);
+    }
+    return h;
+  };
+
+  /**
+   * Handles notify events.
+   *
+   * @private
+   */
+  CustomExpander.prototype.onNotify_ = function(ev) {
+    var notification = ev.notification;
+    if (!notification || !notification.message) {
+      this.closeBox_();
+      return;
+    }
+    this.message_.innerHTML = notification.message;
+    if (notification.notificationType) {
+      var k = 'custom-expander-notify-' + notification.notificationType;
+      this.element_.classList.add(k);
+    }
+    this.showBox_();
   };
 
   /**
@@ -121,15 +141,15 @@
   CustomExpander.prototype.init = function() {
     if (this.element_) {
       this.container_ = this.element_.querySelector('.custom-expander-container');
+      this.message_ = this.element_.querySelector('.custom-expander-message');
       this.bt_ = this.element_.querySelector('.custom-expander-bt');
 
-      this.nextDir_ = 'open';
-      if (this.element_.classList.contains(this.CssClasses_.IS_EXPANDED)) {
-        this.nextDir_ = 'close';
-      }
+      this.wasOpen_ = this.element_.classList.contains(this.CssClasses_.IS_EXPANDED);
+      this.nextDir_ = this.wasOpen_ ? 'close' : 'open';
 
       var cherry = window.cherry;
       cherry.on(this.bt_, 'CustomExpander.click', this.toggleBox_).bind(this).debounce(10);
+      cherry.on(this.element_, 'CustomExpander.notify', this.onNotify_).bind(this).first();
       this.element_.classList.add(this.CssClasses_.IS_UPGRADED);
     }
   };
@@ -138,12 +158,18 @@
    * Downgrade element.
    */
   CustomExpander.prototype.mdlDowngrade_ = function() {
+    this.container_.style.height = '0px';
+    this.nextDir_ = 'open';
     var cherry = window.cherry;
     cherry.off(this.bt_, 'CustomExpander.click', this.toggleBox_);
+    cherry.off(this.element_, 'CustomExpander.notify', this.onNotify_);
     this.nextDir_ = null;
     this.bt_ = null;
     this.container_ = null;
     this.element_.classList.remove(this.CssClasses_.IS_EXPANDED);
+    if (this.wasOpen_) {
+      this.element_.classList.add(this.CssClasses_.IS_EXPANDED);
+    }
     this.element_.classList.remove(this.CssClasses_.IS_UPGRADED);
   };
 

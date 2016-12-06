@@ -20,7 +20,9 @@ It s not AAA compliant all browsers, but could be!
 componentHandler.downgradeElementRecursive: a method to downgrade a node recursively.
 
 
-See it in action [here](https://mh-cbon.github.io/material-design-lite/test.html)
+To see an half-functional version, click [here](https://mh-cbon.github.io/material-design-lite/test.html)
+
+To see an full-functional version, please, fork the project, run `gulp serve`, browse `test.html`.
 
 ### Install
 
@@ -35,6 +37,8 @@ git clone https://github.com/mh-cbon/material-design-lite.git
 cd material-design-lite
 npm i
 ./node_modules/.bin/gulp default
+./node_modules/.bin/gulp test:web
+./node_modules/.bin/gulp nightmare
 ./node_modules/.bin/gulp serve
 ./node_modules/.bin/gulp gh # publish your updates on your own gh-pages branch.
 ./node_modules/.bin/gulp build # to build dist folder

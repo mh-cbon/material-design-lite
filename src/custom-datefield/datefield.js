@@ -72,7 +72,7 @@
    */
   CustomDateField.prototype.onOkClick_ = function(ev) {
     this.input_.value = this.dialog.time.format(this.displayformat_);
-    this.value_.value = this.dialog.time.format(this.format_);
+    this.value_.value = this.dialog.time.utc().format(this.format_);
     this.element_['MaterialTextfield'].updateClasses_();
   };
 
@@ -91,7 +91,7 @@
 
         var displaylocale = this.element_.getAttribute('displaylocale') || 'en';
         this.displayformat_ = this.element_.getAttribute('displayformat') || 'ddd DD MMM YYYY';
-        this.format_ = this.element_.getAttribute('format') || 'YYYY-MM-DDThh:mm:ssZ';
+        this.format_ = this.element_.getAttribute('format') || 'YYYY-MM-DDTHH:mm:ssZ';
         var future = this.element_.getAttribute('future') || undefined;
         var past = this.element_.getAttribute('past') || undefined;
         var mode = this.element_.getAttribute('mode') || undefined;
@@ -106,8 +106,8 @@
           type: 'date',
           init: moment.utc(this.value_.value, this.format_),
           trigger: this.input_,
-          future: future && moment(future, this.format_) || future,
-          past: past && moment(past, this.format_) || past,
+          future: future && moment.utc(future, this.format_),
+          past: past && moment.utc(past, this.format_),
           mode: mode,
           orientation: orientation,
           colon: colon === 'true',
@@ -129,7 +129,10 @@
    * Downgrade element.
    */
   CustomDateField.prototype.mdlDowngrade_ = function() {
-    // this.dialog.destroy();
+    if (this.dialog) {
+      var bt = document.getElementById('mddtp-date__cancel');
+      bt.click(); // force the dialog to hide
+    }
     var cherry = window.cherry;
     cherry.off(this.input_, 'customdatefield.click');
     cherry.off(this.input_, 'customdatefield.onOk');

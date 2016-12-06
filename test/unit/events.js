@@ -23,16 +23,20 @@ describe('events', function () {
   // std events
   it('should be able to add an event', function () {
     var bt = document.createElement("button");
+
     var res = false;
     var handler = function () {
       res = true;
     };
     cherry.on(bt, 'click', handler);
+    expect(bt.__eventManager.IsEmpty()).to.be.equal(false);
+
     bt.click();
     expect(res).to.be.equal(true);
 
-    cherry.__registry.Reset();
-    expect(cherry.__registry.length).to.be.equal(0);
+    bt.__eventManager.Clear();
+    expect(bt.__eventManager.IsEmpty()).to.be.equal(true);
+
     res = false;
     bt.click();
     expect(res).to.be.equal(false);
@@ -45,15 +49,17 @@ describe('events', function () {
       res = true;
     };
     cherry.on(bt, 'click', handler);
-    expect(cherry.__registry.length).to.be.equal(1);
+    expect(bt.__eventManager.IsEmpty()).to.be.equal(false);
+
     bt.click();
     expect(res).to.be.equal(true);
+
     res = false;
     cherry.off(bt, 'click', handler);
+    expect(bt.__eventManager).to.be.equal(undefined);
+
     bt.click();
     expect(res).to.be.equal(false);
-    expect(cherry.__registry.length).to.be.equal(0);
-    expect(cherry.__registry.GetItem(bt)).to.be.equal(null);
   });
 
   function ObjScope(){
@@ -71,7 +77,7 @@ describe('events', function () {
     expect(obj.res).to.be.equal(false);
 
     cherry.on(bt, 'click', obj.handler).bind(obj);
-    expect(cherry.__registry.length).to.be.equal(1);
+    expect(bt.__eventManager.IsEmpty()).to.be.equal(false);
 
     bt.click();
     expect(obj.res).to.be.equal(true);
@@ -81,8 +87,7 @@ describe('events', function () {
     bt.click();
     expect(obj.res).to.be.equal(false);
 
-    expect(cherry.__registry.length).to.be.equal(0);
-    expect(cherry.__registry.GetItem(bt)).to.be.equal(null);
+    expect(bt.__eventManager).to.be.equal(undefined);
   });
 
   it('should be able to remove a specific event handler', function () {
@@ -97,21 +102,23 @@ describe('events', function () {
     };
     cherry.on(bt, 'click', handler1);
     cherry.on(bt, 'click', handler2);
-    expect(cherry.__registry.length).to.be.equal(1);
+    expect(bt.__eventManager.IsEmpty()).to.be.equal(false);
+
     bt.click();
     expect(res1).to.be.equal(true);
     expect(res2).to.be.equal(true);
+
     res1 = false;
     res2 = false;
     cherry.off(bt, 'click', handler2);
+    expect(bt.__eventManager.IsEmpty()).to.be.equal(false);
+
     bt.click();
     expect(res1).to.be.equal(true);
     expect(res2).to.be.equal(false);
-    expect(cherry.__registry.length).to.be.equal(1);
-    expect(cherry.__registry.GetItem(bt)).to.not.equal(null);
+
     cherry.off(bt, 'click', handler1);
-    expect(cherry.__registry.length).to.be.equal(0);
-    expect(cherry.__registry.GetItem(bt)).to.be.equal(null);
+    expect(bt.__eventManager).to.be.equal(undefined);
   });
 
   it('should be able to remove all event handlers', function () {
@@ -126,18 +133,21 @@ describe('events', function () {
     };
     cherry.on(bt, 'click', handler1);
     cherry.on(bt, 'click', handler2);
-    expect(cherry.__registry.length).to.be.equal(1);
+    expect(bt.__eventManager.IsEmpty()).to.be.equal(false);
+
     bt.click();
     expect(res1).to.be.equal(true);
     expect(res2).to.be.equal(true);
+
     res1 = false;
     res2 = false;
     cherry.off(bt, 'click');
+    expect(bt.__eventManager).to.be.equal(undefined);
+
     bt.click();
     expect(res1).to.be.equal(false);
     expect(res2).to.be.equal(false);
-    expect(cherry.__registry.length).to.be.equal(0);
-    expect(cherry.__registry.GetItem(bt)).to.be.equal(null);
+    expect(bt.__eventManager).to.be.equal(undefined);
   });
 
   it('should be able to add an once event', function () {
@@ -147,16 +157,16 @@ describe('events', function () {
       res = true;
     };
     cherry.once(bt, 'click', handler);
-    expect(cherry.__registry.length).to.be.equal(1);
+    expect(bt.__eventManager.IsEmpty()).to.be.equal(false);
+
     bt.click();
     expect(res).to.be.equal(true);
-
-    expect(cherry.__registry.length).to.be.equal(0);
-    expect(cherry.__registry.GetItem(bt)).to.be.equal(null);
+    expect(bt.__eventManager).to.be.equal(undefined);
 
     res = false;
     bt.click();
     expect(res).to.be.equal(false);
+    expect(bt.__eventManager).to.be.equal(undefined);
   });
 
   it('should be able to bind the handler scope for an once event', function () {
@@ -166,13 +176,11 @@ describe('events', function () {
     expect(obj.res).to.be.equal(false);
 
     cherry.once(bt, 'click', obj.handler).bind(obj);
-    expect(cherry.__registry.length).to.be.equal(1);
+    expect(bt.__eventManager.IsEmpty()).to.be.equal(false);
 
     bt.click();
     expect(obj.res).to.be.equal(true);
-
-    expect(cherry.__registry.length).to.be.equal(0);
-    expect(cherry.__registry.GetItem(bt)).to.be.equal(null);
+    expect(bt.__eventManager).to.be.equal(undefined);
   });
 
   it('should be able to trigger multiple handlers', function () {
@@ -185,18 +193,16 @@ describe('events', function () {
     var handler2 = function (ev) {
       res++;
     }
-    expect(res).to.be.equal(0);
-
     cherry.on(bt, 'click', handler);
     cherry.on(bt, 'click', handler2);
-    expect(cherry.__registry.length).to.be.equal(1);
+    expect(bt.__eventManager.IsEmpty()).to.be.equal(false);
+    expect(res).to.be.equal(0);
 
     bt.click();
     expect(res).to.be.equal(2);
 
     cherry.off(bt, 'click');
-    expect(cherry.__registry.length).to.be.equal(0);
-    expect(cherry.__registry.GetItem(bt)).to.be.equal(null);
+    expect(bt.__eventManager).to.be.equal(undefined);
   });
 
   it('should be able to respect stopImmediatePropagation', function () {
@@ -209,18 +215,16 @@ describe('events', function () {
     var handler2 = function (ev) {
       res = true;
     }
-    expect(res).to.be.equal(false);
-
     cherry.on(bt, 'click', handler);
     cherry.on(bt, 'click', handler2);
-    expect(cherry.__registry.length).to.be.equal(1);
+    expect(bt.__eventManager.IsEmpty()).to.be.equal(false);
 
+    expect(res).to.be.equal(false);
     bt.click();
     expect(res).to.be.equal(false);
 
     cherry.off(bt, 'click');
-    expect(cherry.__registry.length).to.be.equal(0);
-    expect(cherry.__registry.GetItem(bt)).to.be.equal(null);
+    expect(bt.__eventManager).to.be.equal(undefined);
   });
 
   it('should be able to respect stopImmediatePropagation for an once event', function () {
@@ -233,26 +237,24 @@ describe('events', function () {
     var handler2 = function (ev) {
       res = true;
     }
-    expect(res).to.be.equal(false);
 
     cherry.once(bt, 'click', handler);
     cherry.once(bt, 'click', handler2);
-    expect(cherry.__registry.length).to.be.equal(1);
+    expect(bt.__eventManager.IsEmpty()).to.be.equal(false);
 
+    expect(res).to.be.equal(false);
     bt.click();
     expect(res).to.be.equal(false);
 
     // note, as handler as stopped propagation, handler2 was not fired,
     // thus it was not undbounded
-    expect(cherry.__registry.length).to.be.equal(1);
-    expect(cherry.__registry.GetItem(bt)).to.not.equal(null);
+    expect(bt.__eventManager.IsEmpty()).to.be.equal(false);
 
     // we should click again to trigger handler2,
     // thus unbound it.
     bt.click();
     expect(res).to.be.equal(true);
-    expect(cherry.__registry.length).to.be.equal(0);
-    expect(cherry.__registry.GetItem(bt)).to.be.equal(null);
+    expect(bt.__eventManager).to.be.equal(undefined);
   });
 
   it('should be able to debounce an event', function (done) {
@@ -262,19 +264,18 @@ describe('events', function () {
     var handler = function (ev) {
       res = true;
     }
-    expect(res).to.be.equal(false);
 
     cherry.on(bt, 'click', handler).debounce(100);
-    expect(cherry.__registry.length).to.be.equal(1);
+    expect(bt.__eventManager.IsEmpty()).to.be.equal(false);
 
+    expect(res).to.be.equal(false);
     bt.click();
     expect(res).to.be.equal(false);
 
     setTimeout(function () {
       expect(res).to.be.equal(true);
       cherry.off(bt, 'click', handler);
-      expect(cherry.__registry.length).to.be.equal(0);
-      expect(cherry.__registry.GetItem(bt)).to.be.equal(null);
+      expect(bt.__eventManager).to.be.equal(undefined);
       done();
     }, 150);
   });
@@ -286,13 +287,19 @@ describe('events', function () {
     var handler = function () {
       res = true;
     };
+
+    expect(bt.__eventManager).to.be.equal(undefined);
     cherry.on(bt, 'ns.click', handler);
-    expect(cherry.__registry.length).to.be.equal(1);
+    expect(bt.__eventManager.IsEmpty()).to.be.equal(false);
+
+    expect(res).to.be.equal(false);
     bt.click();
     expect(res).to.be.equal(true);
+    expect(bt.__eventManager.IsEmpty()).to.be.equal(false);
 
-    cherry.__registry.Reset();
-    expect(cherry.__registry.length).to.be.equal(0);
+    bt.__eventManager.Clear();
+    expect(bt.__eventManager.IsEmpty()).to.be.equal(true);
+
     res = false;
     bt.click();
     expect(res).to.be.equal(false);
@@ -304,16 +311,23 @@ describe('events', function () {
     var handler = function () {
       res = true;
     };
+
+    expect(bt.__eventManager).to.be.equal(undefined);
     cherry.on(bt, 'ns.click', handler);
-    expect(cherry.__registry.length).to.be.equal(1);
+    expect(bt.__eventManager.IsEmpty()).to.be.equal(false);
+
+    expect(res).to.be.equal(false);
     bt.click();
     expect(res).to.be.equal(true);
-    res = false;
+    expect(bt.__eventManager.IsEmpty()).to.be.equal(false);
+
     cherry.off(bt, 'ns.click', handler);
+    expect(bt.__eventManager).to.be.equal(undefined);
+
+    res = false;
     bt.click();
     expect(res).to.be.equal(false);
-    expect(cherry.__registry.length).to.be.equal(0);
-    expect(cherry.__registry.GetItem(bt)).to.be.equal(null);
+    expect(bt.__eventManager).to.be.equal(undefined);
   });
 
   it('should be able to remove a specific namespaced event handler', function () {
@@ -326,23 +340,31 @@ describe('events', function () {
     var handler2 = function () {
       res2 = true;
     };
+
+    expect(bt.__eventManager).to.be.equal(undefined);
     cherry.on(bt, 'ns.click', handler1);
     cherry.on(bt, 'ns.click', handler2);
-    expect(cherry.__registry.length).to.be.equal(1);
+    expect(bt.__eventManager.IsEmpty()).to.be.equal(false);
+
+    expect(res1).to.be.equal(false);
+    expect(res2).to.be.equal(false);
     bt.click();
     expect(res1).to.be.equal(true);
     expect(res2).to.be.equal(true);
+    expect(bt.__eventManager.IsEmpty()).to.be.equal(false);
+
+    cherry.off(bt, 'ns.click', handler2);
+    expect(bt.__eventManager.IsEmpty()).to.be.equal(false);
+
     res1 = false;
     res2 = false;
-    cherry.off(bt, 'ns.click', handler2);
     bt.click();
     expect(res1).to.be.equal(true);
     expect(res2).to.be.equal(false);
-    expect(cherry.__registry.length).to.be.equal(1);
-    expect(cherry.__registry.GetItem(bt)).to.not.equal(null);
+
+    expect(bt.__eventManager.IsEmpty()).to.be.equal(false);
     cherry.off(bt, 'ns.click', handler1);
-    expect(cherry.__registry.length).to.be.equal(0);
-    expect(cherry.__registry.GetItem(bt)).to.be.equal(null);
+    expect(bt.__eventManager).to.be.equal(undefined);
   });
 
   it('should be able to remove all namespaced event handlers', function () {
@@ -355,20 +377,26 @@ describe('events', function () {
     var handler2 = function () {
       res2 = true;
     };
+
+    expect(bt.__eventManager).to.be.equal(undefined);
     cherry.on(bt, 'ns.click', handler1);
     cherry.on(bt, 'ns.click', handler2);
-    expect(cherry.__registry.length).to.be.equal(1);
+    expect(bt.__eventManager.IsEmpty()).to.be.equal(false);
+
+    expect(res1).to.be.equal(false);
+    expect(res2).to.be.equal(false);
     bt.click();
     expect(res1).to.be.equal(true);
     expect(res2).to.be.equal(true);
+
+    cherry.off(bt, 'ns.click');
+    expect(bt.__eventManager).to.be.equal(undefined);
+
     res1 = false;
     res2 = false;
-    cherry.off(bt, 'ns.click');
     bt.click();
     expect(res1).to.be.equal(false);
     expect(res2).to.be.equal(false);
-    expect(cherry.__registry.length).to.be.equal(0);
-    expect(cherry.__registry.GetItem(bt)).to.be.equal(null);
   });
 
   it('should be able to add an once namespaced event', function () {
@@ -377,13 +405,16 @@ describe('events', function () {
     var handler = function () {
       res = true;
     };
+
+    expect(bt.__eventManager).to.be.equal(undefined);
     cherry.once(bt, 'ns.click', handler);
-    expect(cherry.__registry.length).to.be.equal(1);
+    expect(bt.__eventManager.IsEmpty()).to.be.equal(false);
+
+    expect(res).to.be.equal(false);
     bt.click();
     expect(res).to.be.equal(true);
 
-    expect(cherry.__registry.length).to.be.equal(0);
-    expect(cherry.__registry.GetItem(bt)).to.be.equal(null);
+    expect(bt.__eventManager).to.be.equal(undefined);
 
     res = false;
     bt.click();
@@ -409,38 +440,49 @@ describe('events', function () {
     var nshandler2 = function () {
       nsres2 = true;
     };
+
+    expect(bt.__eventManager).to.be.equal(undefined);
     cherry.on(bt, 'click', handler1);
     cherry.on(bt, 'click', handler2);
     cherry.on(bt, 'ns.click', nshandler1);
     cherry.on(bt, 'ns.click', nshandler2);
-    expect(cherry.__registry.length).to.be.equal(1);
+    expect(bt.__eventManager.IsEmpty()).to.be.equal(false);
+
+    expect(res1).to.be.equal(false);
+    expect(res2).to.be.equal(false);
+    expect(nsres1).to.be.equal(false);
+    expect(nsres2).to.be.equal(false);
     bt.click();
     expect(res1).to.be.equal(true);
     expect(res2).to.be.equal(true);
     expect(nsres1).to.be.equal(true);
     expect(nsres2).to.be.equal(true);
+    expect(bt.__eventManager.IsEmpty()).to.be.equal(false);
 
     res1 = false;
     res2 = false;
     nsres1 = false;
     nsres2 = false;
     cherry.off(bt, 'ns.click');
+    expect(bt.__eventManager.IsEmpty()).to.be.equal(false);
+
     bt.click();
     expect(res1).to.be.equal(true);
     expect(res2).to.be.equal(true);
     expect(nsres1).to.be.equal(false);
     expect(nsres2).to.be.equal(false);
-    expect(cherry.__registry.length).to.be.equal(1);
-    expect(cherry.__registry.GetItem(bt)).to.not.equal(null);
+
+
+    expect(bt.__eventManager.IsEmpty()).to.be.equal(false);
+    cherry.off(bt, 'click');
+    expect(bt.__eventManager).to.be.equal(undefined);
 
     res1 = false;
     res2 = false;
-    cherry.off(bt, 'click');
     bt.click();
     expect(res1).to.be.equal(false);
     expect(res2).to.be.equal(false);
-    expect(cherry.__registry.length).to.be.equal(0);
-    expect(cherry.__registry.GetItem(bt)).to.be.equal(null);
+    expect(bt.__eventManager).to.be.equal(undefined);
   });
 
   it('should be able to remove only non-namespaced event handlers', function () {
@@ -461,38 +503,46 @@ describe('events', function () {
     var nshandler2 = function () {
       nsres2 = true;
     };
+
+    expect(bt.__eventManager).to.be.equal(undefined);
     cherry.on(bt, 'click', handler1);
     cherry.on(bt, 'click', handler2);
     cherry.on(bt, 'ns.click', nshandler1);
     cherry.on(bt, 'ns.click', nshandler2);
-    expect(cherry.__registry.length).to.be.equal(1);
+    expect(bt.__eventManager.IsEmpty()).to.be.equal(false);
+
+    expect(res1).to.be.equal(false);
+    expect(res2).to.be.equal(false);
+    expect(nsres1).to.be.equal(false);
+    expect(nsres2).to.be.equal(false);
     bt.click();
     expect(res1).to.be.equal(true);
     expect(res2).to.be.equal(true);
     expect(nsres1).to.be.equal(true);
     expect(nsres2).to.be.equal(true);
 
+    cherry.off(bt, 'click');
+    expect(bt.__eventManager.IsEmpty()).to.be.equal(false);
+
     res1 = false;
     res2 = false;
     nsres1 = false;
     nsres2 = false;
-    cherry.off(bt, 'click');
     bt.click();
     expect(res1).to.be.equal(false);
     expect(res2).to.be.equal(false);
     expect(nsres1).to.be.equal(true);
     expect(nsres2).to.be.equal(true);
-    expect(cherry.__registry.length).to.be.equal(1);
-    expect(cherry.__registry.GetItem(bt)).to.not.equal(null);
+
+    expect(bt.__eventManager.IsEmpty()).to.be.equal(false);
+    cherry.off(bt, 'ns.click');
+    expect(bt.__eventManager).to.be.equal(undefined);
 
     nsres1 = false;
     nsres2 = false;
-    cherry.off(bt, 'ns.click');
     bt.click();
     expect(nsres1).to.be.equal(false);
     expect(nsres2).to.be.equal(false);
-    expect(cherry.__registry.length).to.be.equal(0);
-    expect(cherry.__registry.GetItem(bt)).to.be.equal(null);
   });
 
   // delegate events
@@ -510,7 +560,12 @@ describe('events', function () {
     var handler = function (ev) {
       res = true;
     };
+
+    expect(div.__eventManager).to.be.equal(undefined);
     cherry.delegate(div, '.bt1', 'click', handler);
+    expect(div.__eventManager.IsEmpty()).to.be.equal(false);
+
+    expect(res).to.be.equal(false);
     div.click();
     expect(res).to.be.equal(false);
     bt2.click();
@@ -518,9 +573,17 @@ describe('events', function () {
     bt1.click();
     expect(res).to.be.equal(true);
 
+    expect(div.__eventManager.IsEmpty()).to.be.equal(false);
     cherry.off(div, 'click', handler);
-    expect(cherry.__registry.length).to.be.equal(0);
-    expect(cherry.__registry.GetItem(div)).to.be.equal(null);
+    expect(div.__eventManager).to.be.equal(undefined);
+
+    res = false;
+    expect(res).to.be.equal(false);
+    bt1.click();
+    bt2.click();
+    div.click();
+    expect(res).to.be.equal(false);
+
     div.remove();
   });
 
@@ -538,11 +601,21 @@ describe('events', function () {
     var handler = function (ev) {
       res = true;
     };
+
+    expect(div.__eventManager).to.be.equal(undefined);
     cherry.delegate(div, '.bt1', 'click', handler);
+    expect(div.__eventManager.IsEmpty()).to.be.equal(false);
 
     cherry.undelegate(div, '.bt1', 'click');
-    expect(cherry.__registry.length).to.be.equal(0);
-    expect(cherry.__registry.GetItem(div)).to.be.equal(null);
+    expect(div.__eventManager).to.be.equal(undefined);
+
+    res = false;
+    expect(res).to.be.equal(false);
+    bt1.click();
+    bt2.click();
+    div.click();
+    expect(res).to.be.equal(false);
+
     div.remove();
   });
 
@@ -560,11 +633,21 @@ describe('events', function () {
     var handler = function (ev) {
       res = true;
     };
+
+    expect(div.__eventManager).to.be.equal(undefined);
     cherry.delegate(div, '.bt1', 'click', handler);
+    expect(div.__eventManager.IsEmpty()).to.be.equal(false);
 
     cherry.undelegate(div, 'click', handler);
-    expect(cherry.__registry.length).to.be.equal(0);
-    expect(cherry.__registry.GetItem(div)).to.be.equal(null);
+    expect(div.__eventManager).to.be.equal(undefined);
+
+    res = false;
+    expect(res).to.be.equal(false);
+    bt1.click();
+    bt2.click();
+    div.click();
+    expect(res).to.be.equal(false);
+
     div.remove();
   });
 
@@ -582,11 +665,21 @@ describe('events', function () {
     var handler = function (ev) {
       res = true;
     };
+
+    expect(div.__eventManager).to.be.equal(undefined);
     cherry.delegate(div, '.bt1', 'click', handler);
+    expect(div.__eventManager.IsEmpty()).to.be.equal(false);
 
     cherry.undelegate(div, 'click');
-    expect(cherry.__registry.length).to.be.equal(0);
-    expect(cherry.__registry.GetItem(div)).to.be.equal(null);
+    expect(div.__eventManager).to.be.equal(undefined);
+
+    res = false;
+    expect(res).to.be.equal(false);
+    bt1.click();
+    bt2.click();
+    div.click();
+    expect(res).to.be.equal(false);
+
     div.remove();
   });
 
@@ -601,15 +694,23 @@ describe('events', function () {
     document.body.appendChild(div); // this very specific line is for phantomjs@2.1.1
 
     var obj = new ObjScope();
-    expect(obj.res).to.be.equal(false);
 
+    expect(div.__eventManager).to.be.equal(undefined);
     cherry.delegate(div, '.bt1', 'click', obj.handler).bind(obj);
+    expect(div.__eventManager.IsEmpty()).to.be.equal(false);
+
+    expect(obj.res).to.be.equal(false);
     bt1.click();
     expect(obj.res).to.be.equal(true);
 
     cherry.undelegate(div, 'click');
-    expect(cherry.__registry.length).to.be.equal(0);
-    expect(cherry.__registry.GetItem(div)).to.be.equal(null);
+    expect(div.__eventManager).to.be.equal(undefined);
+
+    obj.res = false;
+    expect(obj.res).to.be.equal(false);
+    bt1.click();
+    expect(obj.res).to.be.equal(false);
+
     div.remove();
   });
 
@@ -624,15 +725,23 @@ describe('events', function () {
     document.body.appendChild(div); // this very specific line is for phantomjs@2.1.1
 
     var obj = new ObjScope();
-    expect(obj.res).to.be.equal(false);
 
+    expect(div.__eventManager).to.be.equal(undefined);
     cherry.delegate(div, '.bt1', 'click', obj.handler).bind(obj);
+    expect(div.__eventManager.IsEmpty()).to.be.equal(false);
+
+    expect(obj.res).to.be.equal(false);
     bt1.click();
     expect(obj.res).to.be.equal(true);
 
     cherry.undelegate(div, 'click', obj.handler);
-    expect(cherry.__registry.length).to.be.equal(0);
-    expect(cherry.__registry.GetItem(div)).to.be.equal(null);
+    expect(div.__eventManager).to.be.equal(undefined);
+
+    obj.res = false;
+    expect(obj.res).to.be.equal(false);
+    bt1.click();
+    expect(obj.res).to.be.equal(false);
+
     div.remove();
   });
 
@@ -653,18 +762,25 @@ describe('events', function () {
     var handler2 = function (ev) {
       res = true;
     }
-    expect(res).to.be.equal(false);
 
+    expect(div.__eventManager).to.be.equal(undefined);
     cherry.delegate(div, '.bt1', 'click', handler);
     cherry.delegate(div, '.bt1', 'click', handler2);
-    expect(cherry.__registry.length).to.be.equal(1);
+    expect(div.__eventManager.IsEmpty()).to.be.equal(false);
 
+    expect(res).to.be.equal(false);
     bt1.click();
     expect(res).to.be.equal(false);
 
+    expect(div.__eventManager.IsEmpty()).to.be.equal(false);
     cherry.off(div, 'click');
-    expect(cherry.__registry.length).to.be.equal(0);
-    expect(cherry.__registry.GetItem(div)).to.be.equal(null);
+    expect(div.__eventManager).to.be.equal(undefined);
+
+    res = false;
+    expect(res).to.be.equal(false);
+    bt1.click();
+    expect(res).to.be.equal(false);
+
     div.remove();
   });
 
@@ -686,23 +802,25 @@ describe('events', function () {
       res = ev.delegateTarget;
     }
 
+    expect(div.__eventManager).to.be.equal(undefined);
     cherry.delegate(div, '.bt1', 'click', handler);
-    expect(cherry.__registry.length).to.be.equal(1);
+    expect(div.__eventManager.IsEmpty()).to.be.equal(false);
 
+    expect(res).to.be.equal(null);
     bt1.click();
     expect(res).to.be.equal(bt1);
 
-    var res = null;
+    res = null;
     span.click();
     expect(res).to.be.equal(bt1);
 
-    var res = null;
+    res = null;
     div.click();
     expect(res).to.be.equal(null);
 
     cherry.off(div, 'click');
-    expect(cherry.__registry.length).to.be.equal(0);
-    expect(cherry.__registry.GetItem(div)).to.be.equal(null);
+    expect(div.__eventManager).to.be.equal(undefined);
+
     div.remove();
   });
 
@@ -720,19 +838,25 @@ describe('events', function () {
     var handler = function (ev) {
       res = true;
     }
-    expect(res).to.be.equal(false);
 
+    expect(div.__eventManager).to.be.equal(undefined);
     cherry.delegate(div, '.bt1', 'click', handler).debounce(100);
-    expect(cherry.__registry.length).to.be.equal(1);
+    expect(div.__eventManager.IsEmpty()).to.be.equal(false);
 
+    expect(res).to.be.equal(false);
     bt1.click();
     expect(res).to.be.equal(false);
 
     setTimeout(function () {
       expect(res).to.be.equal(true);
       cherry.undelegate(div, '.bt1', 'click', handler);
-      expect(cherry.__registry.length).to.be.equal(0);
-      expect(cherry.__registry.GetItem(div)).to.be.equal(null);
+      expect(div.__eventManager).to.be.equal(undefined);
+
+      res = false;
+      expect(res).to.be.equal(false);
+      bt1.click();
+      expect(res).to.be.equal(false);
+
       div.remove();
       done();
     }, 150);
@@ -746,19 +870,25 @@ describe('events', function () {
     var handler = function (ev) {
       res = true;
     };
+    expect(bt.__eventManager).to.be.equal(undefined);
     cherry.on(bt, 'click', handler);
+    expect(bt.__eventManager.IsEmpty()).to.be.equal(false);
 
     var nsres = false;
     var nshandler = function (ev) {
       nsres = true;
     };
     cherry.on(bt, 'ns.click', nshandler);
+    expect(bt.__eventManager.IsEmpty()).to.be.equal(false);
 
     cherry.trigger(bt, 'click');
     expect(res).to.be.equal(true);
     expect(nsres).to.be.equal(true);
+    expect(bt.__eventManager.IsEmpty()).to.be.equal(false);
 
-    cherry.__registry.Reset();
+    cherry.off(bt, 'click');
+    cherry.off(bt, 'ns.click');
+    expect(bt.__eventManager).to.be.equal(undefined);
   });
 
   it('should be able to trigger namespaced events specifically', function () {
@@ -768,35 +898,65 @@ describe('events', function () {
     var handler = function (ev) {
       res = true;
     };
+    expect(bt.__eventManager).to.be.equal(undefined);
     cherry.on(bt, 'click', handler);
+    expect(bt.__eventManager.IsEmpty()).to.be.equal(false);
 
     var nsres = false;
     var nshandler = function (ev) {
       nsres = true;
     };
     cherry.on(bt, 'ns.click', nshandler);
+    expect(bt.__eventManager.IsEmpty()).to.be.equal(false);
 
     cherry.trigger(bt, 'ns.click');
     expect(res).to.be.equal(false);
     expect(nsres).to.be.equal(true);
 
-    cherry.__registry.Reset();
+    cherry.off(bt, 'click');
+    cherry.off(bt, 'ns.click');
+    expect(bt.__eventManager).to.be.equal(undefined);
   });
 
   // custom events
   it('should be able to register and trigger custom events', function () {
     var bt = document.createElement("button");
 
-    var res = false;
+    var gotEvent = null;
     var handler = function (ev) {
-      res = true;
+      gotEvent = ev;
     };
+
+    expect(bt.__eventManager).to.be.equal(undefined);
     cherry.on(bt, 'myCustom', handler);
+    expect(bt.__eventManager.IsEmpty()).to.be.equal(false);
 
+    expect(gotEvent).to.be.equal(null);
     cherry.trigger(bt, 'myCustom');
-    expect(res).to.be.equal(true);
+    expect(gotEvent.type).to.be.equal('myCustom');
 
-    cherry.__registry.Reset();
+    cherry.off(bt, 'myCustom');
+    expect(bt.__eventManager).to.be.equal(undefined);
+  });
+
+  it('should be able to trigger events with custom args', function () {
+    var bt = document.createElement("button");
+
+    var gotEvent = null;
+    var handler = function (ev) {
+      gotEvent = ev;
+    };
+
+    expect(bt.__eventManager).to.be.equal(undefined);
+    cherry.on(bt, 'myCustom', handler);
+    expect(bt.__eventManager.IsEmpty()).to.be.equal(false);
+
+    expect(gotEvent).to.be.equal(null);
+    cherry.trigger(bt, 'myCustom', {my: 'arg'});
+    expect(gotEvent.my).to.be.equal('arg');
+
+    cherry.off(bt, 'myCustom');
+    expect(bt.__eventManager).to.be.equal(undefined);
   });
 
   // multiple node selectors
@@ -819,7 +979,8 @@ describe('events', function () {
     bt2.click();
     expect(res).to.be.equal(2);
 
-    cherry.__registry.Reset();
+    bt1.__eventManager.Clear();
+    bt2.__eventManager.Clear();
     div.remove();
   });
 
@@ -851,7 +1012,8 @@ describe('events', function () {
     bt2.click();
     expect(res).to.be.equal(2);
 
-    cherry.__registry.Reset();
+    bt1.__eventManager.Clear();
+    bt2.__eventManager.Clear();
     div.remove();
   });
 
@@ -863,6 +1025,51 @@ describe('events', function () {
   });
 
   it.skip('should be able to set a delegated event first in the queue', function () {
+  });
+
+  // timeout, needs to decide it keep
+  it.skip('should trigger an event with a timeout', function (done) {
+    var bt = document.createElement("button");
+    var res = false;
+    var handler = function () {
+      res = true;
+    };
+    cherry.on(bt, 'click', handler).timeout(10);
+    setTimeout(function() {
+      expect(res).to.be.equal(true);
+      cherry.__registry.Reset();
+      done();
+    }, 200);
+  });
+  it.skip('should trigger not a trigger an event for its timeout, if it has already trigger', function (done) {
+    var bt = document.createElement("button");
+    var res = false;
+    var handler = function () {
+      res = true;
+    };
+    cherry.on(bt, 'click', handler).timeout(10);
+    bt.click();
+    expect(res).to.be.equal(true);
+    res = false;
+    setTimeout(function() {
+      expect(res).to.be.equal(false);
+      cherry.__registry.Reset();
+      done();
+    }, 200);
+  });
+  it.skip('should trigger not a trigger an event for its timeout, if was removed', function (done) {
+    var bt = document.createElement("button");
+    var res = false;
+    var handler = function () {
+      res = true;
+    };
+    cherry.on(bt, 'click', handler).timeout(10);
+    cherry.off(bt, 'click', handler);
+    setTimeout(function() {
+      expect(res).to.be.equal(false);
+      cherry.__registry.Reset();
+      done();
+    }, 200);
   });
 
 });

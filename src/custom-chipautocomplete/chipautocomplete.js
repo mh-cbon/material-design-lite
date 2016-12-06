@@ -75,7 +75,6 @@
     this.hideResults_();
     this.input_.value = '';
     this.textfield_['MaterialTextfield'].updateClasses_();
-    // this.element_.classList.remove("is-dirty");
   };
 
   /**
@@ -84,11 +83,12 @@
    * @private
    */
   CustomChipAutocomplete.prototype.makeFetchUrl_ = function(text) {
-    var url = this.urlCompleter_.replace(this.urlPlaceholder_, text);
+    var cherry = window.cherry;
+    var url = cherry.lightTemplate(this.urlCompleter_, {Text: text});
     var urlArgs = '';
     var getArgs = this.completerArgs_;
     Object.keys(getArgs).forEach(function(key) {
-      urlArgs += key + '=' + getArgs[key];
+      urlArgs += encodeURIComponent(key) + '=' + encodeURIComponent(getArgs[key]) + '&';
     });
     if (url.match(/[?]/)) {
       url = url + '&' + urlArgs;
@@ -104,30 +104,42 @@
    * @private
    */
   CustomChipAutocomplete.prototype.fetchResults_ = function(text) {
+    var url = this.makeFetchUrl_(text);
     var ajax = window.ajax;
-    var that = this;
-    var request = ajax().get(this.makeFetchUrl_(text));
+    var request = ajax().get(url);
     request.then(function(response) {
-      var results = response;
-      if (!results.length) {
-        if (that.urlCreator_ && text) {
-          results.unshift(that.makeCreateResultOption_());
-        } else {
-          results.unshift(that.makeNoResultOption_());
-        }
-      } else if (results.length  && text && !that.resultsContainsText_(results, text)) {
-        if (that.urlCreator_) {
-          results.unshift(that.makeCreateResultOption_());
-        }
+      var results = this.filterExistingResults_(response);
+      if (text && !this.chipTextExists_(text) && this.urlCreator_) {
+        results.unshift(this.makeCreateResultOption_());
       }
-      that.emptyResults_();
-      if (results.length) {
-        that.setResults_(results);
-        that.showResults_();
+      if (!results.length && text) {
+        results.unshift(this.makeNoResultOption_());
       }
-    }).catch(function(response, xhr) {
-      that.setError_(that.txtRemoteUnreachable_);
-    });
+      if (!results.length && !text) {
+        results.unshift(this.makeTypeMoreTexOption_());
+      }
+      this.emptyResults_();
+      this.setResults_(results);
+      this.showResults_();
+    }.bind(this)).catch(function(response, xhr) {
+      this.setError_(this.txtRemoteUnreachable_);
+    }.bind(this));
+  };
+
+  /**
+   * Make a new create option for the result list.
+   *
+   * @private
+   */
+  CustomChipAutocomplete.prototype.filterExistingResults_ = function(results) {
+    var ret = [];
+    for (var i = 0; i < results.length; i++) {
+      var opt = results[i];
+      if (opt.Value && this.chipExists_(opt.Value) === false) {
+        ret.push(opt);
+      }
+    }
+    return ret;
   };
 
   /**
@@ -137,13 +149,14 @@
    */
   CustomChipAutocomplete.prototype.setResults_ = function(results) {
     for (var i = 0; i < results.length; i++) {
+      var opt = results[i];
       var li = document.createElement('li');
       li.classList.add('mdl-list__item');
-      li.setAttribute('value', results[i].Value);
+      li.setAttribute('value', opt.Value);
 
       var span = document.createElement('span');
       span.classList.add('mdl-list__item-primary-content');
-      span.innerHTML = results[i].Text;
+      span.innerHTML = opt.Text;
 
       li.appendChild(span);
       this.ul_.appendChild(li);
@@ -171,6 +184,18 @@
     return {
       Value: '-1',
       Text: this.txtNoResults_,
+    };
+  };
+
+  /**
+   * Make a new no-result option for the result list.
+   *
+   * @private
+   */
+  CustomChipAutocomplete.prototype.makeTypeMoreTexOption_ = function() {
+    return {
+      Value: '-1',
+      Text: this.txtTypeMore_,
     };
   };
 
@@ -215,7 +240,7 @@
   };
 
   /**
-   * Tells if given options contains given text.
+   * Tells if given results contains given text.
    *
    * @private
    */
@@ -241,18 +266,19 @@
 
     var componentHeight = cherry.outerHeight(this.results_);
     var inputRect       = this.input_.getBoundingClientRect();
-    var inputLeft       = inputRect.left;
     var inputTop        = inputRect.top;
     var inputHeight     = cherry.outerHeight(this.input_);
+    var textFieldHeight = cherry.outerHeight(this.textfield_);
     var intFrameHeight  = window.innerHeight;
-    var scrollTop       = document.body.scrollTop;
+    var d = (textFieldHeight - inputHeight) / 2;
 
     if (intFrameHeight > inputTop + inputHeight + componentHeight) {
-      this.results_.style.top = '' + (inputTop + inputHeight + scrollTop) + 'px';
+      //dispaly below
+      this.results_.style.top = '' + (inputHeight + d + 1) + 'px';
     } else {
-      this.results_.style.top = '' + (inputTop + scrollTop - componentHeight - 1) + 'px';
+      //dispaly above
+      this.results_.style.top = '-' + (componentHeight - inputHeight + d) + 'px';
     }
-    this.results_.style.left = '' + inputLeft + 'px';
     this.results_.style.visibility = 'visible';
   };
 
@@ -263,7 +289,6 @@
    */
   CustomChipAutocomplete.prototype.onResultClick_ = function(ev) {
     var li = ev.delegateTarget;
-    // return function() {
     if (this.isCreateResultOption_(li)) {
       this.createNewValue_(this.input_.value);
     } else if (!this.isNoResultOption_(li)) {
@@ -274,7 +299,6 @@
       this.addChip_(option);
       this.clearComponent_();
     }
-    // };
   };
 
   /**
@@ -366,12 +390,30 @@
   };
 
   /**
+   * Tells if a chip with given text exists.
+   *
+   * @private
+   */
+  CustomChipAutocomplete.prototype.chipTextExists_ = function(text) {
+    if (!text) {
+      return false;
+    }
+    var els = this.selected_.querySelectorAll('.mdl-chip__text');
+    for (var i = 0; i < els.length; i++) {
+      if (els[i].innerHTML.toLowerCase() === text.toLowerCase()) {
+        return true;
+      }
+    }
+    return false;
+  };
+
+  /**
    * Tells if a chip with given value exists.
    *
    * @private
    */
   CustomChipAutocomplete.prototype.chipExists_ = function(value) {
-    return this.selected_.querySelector('[type="hidden"][value="' + value + '"]');
+    return !!this.selected_.querySelector('[type="hidden"][value="' + value + '"]');
   };
 
   /**
@@ -491,7 +533,7 @@
    * @private
    */
   CustomChipAutocomplete.prototype.onInputFocus = function(ev) {
-    this.fetchResults_('');
+    this.fetchResults_(this.input_.value);
   };
 
   /**
@@ -507,7 +549,6 @@
       this.ul_ = this.element_.querySelector('.mdl-list');
       this.selected_ = this.element_.querySelector('.custom-chipautocomplete-selected');
 
-      this.urlPlaceholder_ = element_.getAttribute('url-placeholder') || '!pl!';
       this.urlCompleter_ = element_.getAttribute('url-completer');
       this.urlCompleter_ = this.urlCompleter_ && decodeURI(this.urlCompleter_);
       this.completerArgs_ = element_.getAttribute('url-complete-args') || '{}';
@@ -521,11 +562,13 @@
       this.txtCreateResult_ = element_.getAttribute('txt-create-results') ||
         'Press enter to create <i class="material-icons">create</i>';
       this.txtNoResults_ = element_.getAttribute('txt-no-results') || 'No results';
+      this.txtTypeMore_ = element_.getAttribute('txt-type-more') || 'Type more text...';
       this.txtRemoteUnreachable_ = element_.getAttribute('txt-remote-unreachable') ||
         'Failed to query the remote application';
       this.chipName_ = element_.getAttribute('chip-name') || 'chip';
 
-      document.body.appendChild(this.results_);
+      // document.body.appendChild(this.results_);
+      this.textfield_.appendChild(this.results_);
       this.results_.style.width = this.input_.offsetWidth + 'px';
 
       var cherry = window.cherry;
@@ -536,6 +579,11 @@
       cherry.on(this.input_, 'chipautocomplete.focus', this.onInputFocus).bind(this);
       cherry.on(this.input_, 'chipautocomplete.keypress', this.onInputCtrlKeys_).bind(this);
       cherry.on(this.input_, 'chipautocomplete.keypress', this.onInputChanged).bind(this).debounce(250);
+
+      // if (!element_.getAttribute('id')) {
+      //   element_.setAttribute('id', (new Date()).now());
+      // }
+      // this.results_.setAttribute('about-chipautocomplete', element_.getAttribute('id'));
 
       this.element_.classList.add(this.CssClasses_.IS_UPGRADED);
     }
@@ -548,6 +596,7 @@
 
     var cherry = window.cherry;
 
+    cherry.off(this.input_, 'chipautocomplete.focus');
     cherry.off(this.input_, 'chipautocomplete.blur');
     cherry.off(this.input_, 'chipautocomplete.keypress');
     cherry.undelegate(this.selected_, 'li', 'click', this.onResultClick_);
@@ -563,7 +612,6 @@
     this.ul_ = null;
     this.selected_ = null;
 
-    this.urlPlaceholder_ = null;
     this.urlCompleter_ = null;
     this.completerArgs_ = null;
 

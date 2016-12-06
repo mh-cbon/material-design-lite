@@ -31,6 +31,51 @@
   .custom-expander-container {
     height: 0;
     overflow: hidden;
+    transition: height .5s;
+  }
+
+  &.custom-expander-notifier {
+    position: relative;
+
+    .custom-expander-message {
+      padding: 4px;
+      display: inline-block;
+    }
+
+    .custom-expander-bt {
+      position: absolute;
+      top: 0;
+      right: 0;
+      visibility: hidden;
+      z-index: -1;
+      .material-icons {
+        font-size: 1.2em;
+      }
+    }
+
+    &.is-expanded {
+      .custom-expander-bt {
+        cursor: pointer;
+        visibility: visible;
+        z-index: 5;
+      }
+    }
+    &.custom-expander-notify-info {
+      background-color: unquote("rgb(#{$palette-light-blue-50})");
+    }
+    &.custom-expander-notify-success {
+      background-color: unquote("rgb(#{$palette-teal-A700})");
+    }
+    &.custom-expander-notify-warn {
+      background-color: unquote("rgb(#{$palette-amber-900})");
+    }
+    &.custom-expander-notify-severe {
+      background-color: unquote("rgb(#{$palette-red-600})");
+      color: white;
+    }
+    &.custom-expander-notify-critical {
+      background-color: unquote("rgb(#{$palette-blue-grey-900})");
+    }
   }
 
 }

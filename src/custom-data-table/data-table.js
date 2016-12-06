@@ -28,7 +28,7 @@
    */
   var CustomDataTable = function CustomDataTable(element) {
     this.element_ = element;
-    this.btEl_ = null;
+    this.CheckboxBtAction_ = null;
 
     // Initialize instance.
     this.init();
@@ -59,6 +59,9 @@
     SELECTABLE: 'mdl-data-table--selectable',
     SELECT_ELEMENT: 'mdl-data-table__select',
     IS_SELECTED: 'is-selected',
+    SORT_ASC: 'mdl-data-table__header--sorted-ascending',
+    SORT_DESC: 'mdl-data-table__header--sorted-descending',
+    SORT_ABLE: 'mdl-data-table__header--sorted',
     IS_UPGRADED: 'is-upgraded'
   };
 
@@ -69,7 +72,7 @@
    * @param {Element} row Row to toggle when checkbox changes.
    * @private
    */
-  CustomDataTable.prototype.createCheckbox_ = function(row) {
+  CustomDataTable.prototype.insertCheckbox_ = function(row) {
     var label = document.createElement('label');
     var labelClasses = [
       'mdl-checkbox',
@@ -83,11 +86,11 @@
     checkbox.classList.add('mdl-checkbox__input');
 
     if (row) {
-      if (row.getAttribute('value')) {
-        checkbox.value = row.getAttribute('value');
+      if (row.getAttribute('checkbox-value')) {
+        checkbox.value = row.getAttribute('checkbox-value');
       }
-      if (row.getAttribute('name')) {
-        checkbox.setAttribute('name', row.getAttribute('name'));
+      if (this.checkboxName_) {
+        checkbox.setAttribute('name', this.checkboxName_);
       }
       checkbox.checked = row.classList.contains(this.CssClasses_.IS_SELECTED);
     }
@@ -98,17 +101,17 @@
   };
 
   /**
-   * Enables or disables associated bt-el.
+   * Enables or disables associated checkbox-action-bt.
    *
    * @private
    */
-  CustomDataTable.prototype.updateBt_ = function(btEl) {
-    if (this.btEl_) {
+  CustomDataTable.prototype.updateCheckboxBtAction_ = function(btEl) {
+    if (this.CheckboxBtAction_) {
       var sTr = this.element_.querySelectorAll('tr.is-selected');
       if (sTr.length) {
-        this.btEl_.removeAttribute('disabled');
+        this.CheckboxBtAction_.removeAttribute('disabled');
       } else {
-        this.btEl_.setAttribute('disabled', 'disabled');
+        this.CheckboxBtAction_.setAttribute('disabled', 'disabled');
       }
     }
   };
@@ -172,7 +175,20 @@
         }
       }
     }
-    this.updateBt_();
+    this.updateCheckboxBtAction_();
+  };
+
+  /**
+   * Handles checkbox click event.
+   *
+   * @private
+   */
+  CustomDataTable.prototype.onHeaderClick_ = function(ev) {
+    var th = ev.target;
+    var a = th.querySelector('a');
+    if (a && !a.classList.contains('template')) {
+      a.click();
+    }
   };
 
   /**
@@ -184,7 +200,7 @@
     var firstCell = row.querySelector('td');
     var td = document.createElement('td');
     if (firstCell) {
-      var rowCheckbox = this.createCheckbox_(row);
+      var rowCheckbox = this.insertCheckbox_(row);
       td.appendChild(rowCheckbox);
       row.insertBefore(td, firstCell);
     } else {
@@ -200,7 +216,7 @@
   CustomDataTable.prototype.setupSelectableTable_ = function() {
 
     var th = document.createElement('th');
-    var headerCheckbox = this.createCheckbox_();
+    var headerCheckbox = this.insertCheckbox_();
     th.appendChild(headerCheckbox);
 
     var firstHeader = this.element_.querySelector('th');
@@ -211,7 +227,9 @@
     var rows = bodyRows.concat(footRows);
 
     for (var i = 0; i < rows.length; i++) {
-      this.addCheckboxToRow_(rows[i]);
+      if (!rows[i].classList.contains('template')) {
+        this.addCheckboxToRow_(rows[i]);
+      }
     }
   };
 
@@ -221,10 +239,10 @@
   CustomDataTable.prototype.init = function() {
     if (this.element_) {
 
+      this.checkboxName_ = this.element_.getAttribute('checkbox-name');
       if (this.element_.classList.contains(this.CssClasses_.SELECTABLE)) {
         this.setupSelectableTable_();
       }
-      this.element_.classList.add(this.CssClasses_.IS_UPGRADED);
 
       var cherry = window.cherry;
       cherry.delegate(this.element_,
@@ -233,10 +251,16 @@
         this.onCheckboxClick_
       ).bind(this);
 
-      if (this.element_.hasAttribute('bt-el')) {
-        this.btEl_ = document.querySelector(this.element_.getAttribute('bt-el'));
-        this.updateBt_();
+      cherry.on(this.element_.querySelectorAll('thead tr th'),
+        'customdatatable.click',
+        this.onHeaderClick_
+      ).bind(this);
+
+      if (this.element_.hasAttribute('checkbox-action-bt')) {
+        this.CheckboxBtAction_ = document.querySelector(this.element_.getAttribute('checkbox-action-bt'));
+        this.updateCheckboxBtAction_();
       }
+      this.element_.classList.add(this.CssClasses_.IS_UPGRADED);
     }
   };
 
@@ -246,8 +270,13 @@
   CustomDataTable.prototype.mdlDowngrade_ = function() {
     var cherry = window.cherry;
     cherry.undelegate(this.element_, 'customdatatable.change');
-    this.btEl_ = null;
-    this.element_.removeEventListener('change', this.element_.__selectall);
+
+    var th = this.element_.querySelectorAll('thead tr th');
+    cherry.off(th, 'customdatatable.click', this.onHeaderClick_);
+
+    this.CheckboxBtAction_ = null;
+    this.checkboxName_ = null;
+
     this.element_.classList.remove(this.CssClasses_.IS_UPGRADED);
   };
 

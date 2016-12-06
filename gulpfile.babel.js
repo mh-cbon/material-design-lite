@@ -38,6 +38,8 @@ import ghPages from 'gulp-gh-pages';
 import gulpLoadPlugins from 'gulp-load-plugins';
 import uniffe from './utils/uniffe.js';
 import pkg from './package.json';
+import url from 'url';
+import bodyParser from 'body-parser';
 
 const $ = gulpLoadPlugins();
 const reload = browserSync.reload;
@@ -70,12 +72,12 @@ const AUTOPREFIXER_BROWSERS = [
 ];
 
 const SOURCES = [
-  'node_modules/velocity-animate/velocity.min.js',
   'node_modules/moment/min/moment-with-locales.min.js',
   'node_modules/md-date-time-picker/dist/js/mdDateTimePicker.js',
   'node_modules/imagesloaded/imagesloaded.pkgd.js',
   'node_modules/@fdaciuk/ajax/dist/ajax.min.js',
   'node_modules/cropperjs/dist/cropper.min.js',
+  'node_modules/thenby/thenBy.min.js',
   // 'node_modules/tinymce/tinymce.min.js',
   // Component handler
   'src/mdlComponentHandler.js',
@@ -112,6 +114,10 @@ const SOURCES = [
   'src/custom-chipautocomplete/chipautocomplete.js',
   'src/custom-cropper/cropper.js',
   'src/custom-input-confirm/custom-input-confirm.js',
+  'src/custom-ajax-table/ajax-table.js',
+  'src/custom-form-ajax/form-ajax.js',
+  'src/custom-loader-over/loader-over.js',
+  'src/custom-snackbar-notify/snackbar-notify.js',
   'src/custom-select-change-url/select_change_url.js',
   // And finally, the ripples
   'src/ripple/ripple.js'
@@ -134,7 +140,7 @@ gulp.task('demofork', () => {
     .pipe(gulpCopy('dist/', {prefix: 1}));
 });
 
-gulp.task('gh', function() {
+gulp.task('gh', ['build-dist'], function() {
   return gulp.src('./dist/**/*')
     .pipe(ghPages());
 });
@@ -335,7 +341,7 @@ gulp.task('default', ['clean'], cb => {
     ['scripts'],
     ['tinymce'],
     ['demofork'],
-    ['mocha'],
+    ['nightmare'],
     cb);
 });
 
@@ -346,7 +352,7 @@ gulp.task('all', ['clean'], cb => {
     ['styles-grid', 'styles:gen'],
     ['scripts'],
     ['tinymce'],
-    ['mocha'],
+    ['nightmare'],
     ['assets', 'pages',
      'templates', 'images', 'metadata'],
     ['zip'],
@@ -355,9 +361,84 @@ gulp.task('all', ['clean'], cb => {
 
 // ***** Testing tasks ***** //
 
+// notes: the phantom testing is totally broken.
+// too many troubles with it, prefer nightmare.
 gulp.task('mocha', ['styles'], () => {
-  return gulp.src('test/index.html')
-    .pipe($.mochaPhantomjs({reporter: 'tap'}));
+  var server =
+  $.connect.server({
+    root: '.',
+    port: 3000,
+    livereload: false,
+    middleware: function() {
+      return [
+        bodyParser.urlencoded({extended: true}),
+        chipautocompleteMw(),
+        datatableMw(),
+        formAjax(),
+      ];
+    }
+  });
+
+  var stream = $.mochaPhantomjs({
+    reporter: 'tap',
+    settings: {
+      webSecurityEnabled: false
+    },
+    phantomjs: [
+      '--web-security=off',
+      '--local-to-remote-url-access=on',
+      '--ignore-ssl-errors=true'
+    ]
+  });
+  stream.write({path: 'http://localhost:3000/test/index.html'});
+  stream.end();
+  stream.on('end', function() {
+    process.exit(1);
+  });
+  return stream;
+});
+
+gulp.task('nightmare', () => {
+  $.connect.server({
+    root: '.',
+    port: 3000,
+    livereload: false,
+    middleware: function() {
+      return [
+        bodyParser.urlencoded({extended: true}),
+        chipautocompleteMw(),
+        datatableMw(),
+        formAjax(),
+      ];
+    }
+  });
+
+  var nightmareJs = require('nightmare');
+  var nightmare = nightmareJs({
+    show: false,
+    waitTimeout: 90000
+  });
+
+  var fails = 0;
+  return nightmare
+    .on('console', function(type) {
+      var fn = console[type];
+      if (fn) {
+        var args = [].slice.call(arguments);
+        args.shift();
+        if (args.length && args[0].match && args[0].match(/^# fail [0-9]+/)) {
+          fails = args[0].match(/^# fail ([0-9]+)/)[1];
+          fails = parseInt(fails);
+        }
+        fn.apply(console, args);
+      }
+    })
+    .goto('http://localhost:3000/test/index.html?reporter=tap')
+    .wait('#nightmarejs')
+    .end()
+    .then(function() {
+      process.exit(fails > 0 ? 1 : 0);
+    });
 });
 
 gulp.task('mocha:closure', ['closure'], () => {
@@ -387,11 +468,23 @@ gulp.task('test:visual', () => {
   gulp.watch('test/visual/**', reload);
 });
 
-gulp.task('test:web', () => {
-  browserSync({
-    notify: false,
-    server: '.',
-    startPath: 'test/index.html'
+gulp.task('test:web',
+// ['build-dist'],
+() => {
+
+  isLive = true;
+  $.connect.server({
+    root: '.',
+    port: 3000,
+    livereload: true,
+    middleware: function() {
+      return [
+        bodyParser.urlencoded({extended: true}),
+        chipautocompleteMw(),
+        datatableMw(),
+        formAjax(),
+      ];
+    }
   });
 
   gulp.watch('test/**', reload);
@@ -568,7 +661,7 @@ gulp.task('assets', () => {
  */
 function watch() {
   gulp.watch(['src/**/*.js', '!src/**/README.md'],
-    ['scripts', 'demos', 'components', reload]);
+    ['scripts', /*'demos', 'components',*/  reload]);
   gulp.watch(['src/**/*.{scss,css}'],
     ['styles', 'styles-grid', 'styletemplates', reload]);
   gulp.watch(['demo/*'], ['demofork', reload]);
@@ -594,13 +687,28 @@ gulp.task('serve:browsersync', () => {
   watch();
 });
 
-gulp.task('serve', () => {
+gulp.task('build-serve', cb => {
+  runSequence(
+    ['build-dist'],
+    ['demofork'],
+    cb);
+});
+
+gulp.task('serve', ['build-serve'], () => {
 
   isLive = true;
   $.connect.server({
     root: 'dist',
     port: 5000,
-    livereload: true
+    livereload: true,
+    middleware: function() {
+      return [
+        bodyParser.urlencoded({extended: true}),
+        chipautocompleteMw(),
+        datatableMw(),
+        formAjax(),
+      ];
+    }
   });
 
   watch();
@@ -608,6 +716,414 @@ gulp.task('serve', () => {
   gulp.src('dist/test.html')
     .pipe($.open({uri: 'http://localhost:5000'}));
 });
+
+function formAjax() {
+  var responseTemplate = {
+    SuccessTo: null,
+    Valid: false,
+    HasFailure: true,
+    Failure: '',
+    HasFieldErrors: true,
+    FieldErrors: {},
+  };
+  var FieldErrors = {
+    'Username': 'Anyway its wrong for the demo!',
+    'Email': 'Anyway its wrong for the demo!',
+    'RoleId': 'Anyway its wrong for the demo!',
+  };
+  var FieldErrors2 = {
+    'Username': 'Anyway its wrong for the demo!',
+    'Password': 'Mismatch!',
+  };
+  var FieldErrors3 = {
+    'Username': 'Anyway its wrong for the demo!',
+    'Upload': 'Incorrect!',
+  };
+  return function(req, res, next) {
+    if (req.url.match(/form-ajax[.]json/)) {
+      var parsedUrl = url.parse(req.url, true);
+      var timeout = parsedUrl.query.Timeout || 0;
+      var Return = parsedUrl.query.Return || '';
+
+      var response = JSON.parse(JSON.stringify(responseTemplate));
+      if (Return === 'form_failure') {
+        response.Valid = false;
+        response.HasFailure = true;
+        response.HasFieldErrors = false;
+        response.Failure = 'Something went wrong';
+
+      } else if (Return === 'field_errors') {
+        response.Valid = false;
+        response.HasFailure = false;
+        response.HasFieldErrors = true;
+        response.FieldErrors = FieldErrors;
+
+      } else if (Return === 'field_errors2') {
+        response.Valid = false;
+        response.HasFieldErrors = true;
+        response.FieldErrors = FieldErrors2;
+        response.HasFailure = true;
+        response.Failure = 'Something went wrong';
+
+      } else if (Return === 'field_errors3') {
+        response.Valid = false;
+        response.HasFieldErrors = true;
+        response.FieldErrors = FieldErrors3;
+        response.HasFailure = true;
+        response.Failure = 'Something went wrong';
+
+      } else if (Return === 'valid') {
+        response.Valid = true;
+        response.HasFailure = false;
+        response.HasFieldErrors = false;
+
+      } else {
+        response.SuccessTo = '/test-form-ajax.hmtl?success=yes';
+        response.Valid = true;
+        response.HasFailure = false;
+        response.HasFieldErrors = false;
+      }
+
+      res.setHeader('Content-Type', 'application/json');
+      setTimeout(function() {
+        res.end(JSON.stringify(response));
+      }, timeout);
+      return;
+    }
+    next();
+  };
+}
+
+function datatableMw() {
+  /**
+  * gg
+  */
+  function getRandomArbitrary(min, max) {
+    var num = Math.random() * (max - min) + min;
+    return Math.round(num * 100) / 100;
+  }
+
+  var firstBy = require('thenby');
+  /**
+  * hh
+  */
+  function getSorter(sort) {
+    var k = sort.pop();
+    var j = k.split('-');
+    var dir = j[j.length - 1];
+    var col = k.substr(0, k.length - dir.length - 1);
+    var sorter = firstBy(col, (dir === 'asc' ? 1 : -1));
+    sort.forEach(function(k) {
+      var j = k.split('-');
+      var dir = j[j.length - 1];
+      var col = k.substring(0, k.length - dir.length - 1);
+      sorter = sorter.thenBy(col, (dir === 'asc' ? 1 : -1));
+    });
+    return sorter;
+  }
+
+  /**
+  * hh
+  */
+  function handleGetDataTale(req, res) {
+    var parsedUrl = url.parse(req.url, true);
+    var offset = parsedUrl.query.Offset || 0;
+    var limit = parsedUrl.query.Limit || 10;
+    var sort = parsedUrl.query.Sort || [];
+    var Timeout = parsedUrl.query.Timeout || 0;
+    if (sort && sort.match) {
+      sort = [sort];
+    }
+    limit = parseInt(limit);
+    offset = parseInt(offset);
+    var copy = JSON.parse(JSON.stringify(ajaxTableData));
+    if (sort.length) {
+      copy.Data.sort(getSorter(sort));
+    }
+    copy.Data = copy.Data.slice(offset, offset + limit);
+    res.setHeader('Content-Type', 'application/json');
+    setTimeout(function() {
+      res.end(JSON.stringify(copy));
+    }, Timeout);
+  }
+
+  /**
+  * hh
+  */
+  function handlePostDataTale(req, res) {
+    var material = req.body.Material;
+    var offset = req.body.Offset || 0;
+    var limit = req.body.Limit || 10;
+    var sort = req.body.Sort || [];
+    if (sort && sort.match) {
+      sort = [sort];
+    }
+    limit = parseInt(limit);
+    offset = parseInt(offset);
+    var copy = JSON.parse(JSON.stringify(ajaxTableData));
+    if (material) {
+      var keep = [];
+      copy.Data.forEach(function(data, index) {
+        if (material && data.Material.toLowerCase().indexOf(material) > -1) {
+          keep.push(data);
+        }
+      });
+      copy.Data = keep;
+    }
+    if (sort.length) {
+      copy.Data.sort(getSorter(sort));
+    }
+    copy.Data = copy.Data.slice(offset, offset + limit);
+    res.setHeader('Content-Type', 'application/json');
+    setTimeout(function() {
+      res.end(JSON.stringify(copy));
+    }, 1500);
+  }
+
+  var ajaxTableData = {
+    'Valid': true,
+    'Data': [],
+    'HasFailure': false,
+    'Failure': 'an error here',
+    'HasFieldErrors': false,
+    'FieldErrors': {
+      'Value': 'some error here'
+    }
+  };
+  var e = 0;
+  for (var i = 0; i < 30; i++) {
+    ajaxTableData.Data.push({
+      'Id': ++e,
+      'Material': 'Wood (' + e + ')',
+      'Quantity': 1,
+      'UnitPrice': '$' + getRandomArbitrary(0, 3),
+    });
+    ajaxTableData.Data.push({
+      'Id': ++e,
+      'Material': 'Concrete (' + e + ')',
+      'Quantity': 2,
+      'UnitPrice': '$' + getRandomArbitrary(3, 9),
+    });
+    ajaxTableData.Data.push({
+      'Id': ++e,
+      'Material': 'Gold (' + e + ')',
+      'Quantity': 3,
+      'UnitPrice': '$' + getRandomArbitrary(600, 900),
+    });
+  }
+  return function(req, res, next) {
+    if (req.url.match(/form-table[.]json/)) {
+      handlePostDataTale(req, res);
+
+    } else if (req.url.match(/ajax-data[.]json/)) {
+      handleGetDataTale(req, res);
+
+    } else {
+      next();
+    }
+  };
+}
+
+function chipautocompleteMw() {
+
+  var list1 = [
+    {
+      'Text': 'Silk',
+      'Value': 0
+    },
+    {
+      'Text': 'Gold',
+      'Value': 1
+    },
+    {
+      'Text': 'Copper',
+      'Value': 2
+    },
+    {
+      'Text': 'Silver',
+      'Value': 3
+    }
+  ];
+
+  var list2 = [
+    {
+      'Text': 'C#',
+      'Value': 0
+    },
+    {
+      'Text': 'Go',
+      'Value': 1
+    },
+    {
+      'Text': 'C++',
+      'Value': 2
+    },
+    {
+      'Text': 'Javascript',
+      'Value': 3
+    },
+    {
+      'Text': 'Php',
+      'Value': 4
+    },
+    {
+      'Text': 'Scala',
+      'Value': 5
+    },
+    {
+      'Text': 'Java',
+      'Value': 6
+    },
+    {
+      'Text': 'Ruby',
+      'Value': 7
+    },
+    {
+      'Text': 'Python',
+      'Value': 8
+    },
+    {
+      'Text': 'Haskell',
+      'Value': 9
+    },
+    {
+      'Text': 'Lisp',
+      'Value': 10
+    },
+    {
+      'Text': 'Erlang',
+      'Value': 11
+    },
+    {
+      'Text': 'ADA',
+      'Value': 12
+    },
+    {
+      'Text': 'Cobol',
+      'Value': 13
+    },
+    {
+      'Text': 'ASM',
+      'Value': 14
+    },
+    {
+      'Text': 'Pascal',
+      'Value': 15
+    },
+    {
+      'Text': 'Vbscript',
+      'Value': 16
+    },
+    {
+      'Text': 'F#',
+      'Value': 17
+    },
+    {
+      'Text': 'Rust',
+      'Value': 18
+    }
+  ];
+
+  var list3 = [];
+
+  return function(req, res, next) {
+    var parsedUrl = url.parse(req.url, true);
+    var list = parsedUrl.query.List || 0;
+    var input = parsedUrl.query.Input || 0;
+
+    if (req.url.match(/chip_autocomplete_list-error[.]json/)) {
+      res.writeHead(500);
+      res.end('Sooooouuuutttthhh');
+      return;
+
+    }else if (req.url.match(/chip_autocomplete_create-error[.]json/)) {
+      res.writeHead(500);
+      res.end('Sooooouuuutttthhh');
+      return;
+
+    }else if (req.url.match(/chip_autocomplete_list[.]json/)) {
+
+      var copy = [];
+      if (list === 'list1') {
+        if (input) {
+          list1.forEach(function(opt) {
+            if (opt.Text.toLowerCase().substr(0, input.length) === input) {
+              copy.push(opt);
+            }
+          });
+        } else {
+          copy = copy.concat(list1);
+        }
+        res.setHeader('Content-Type', 'application/json');
+        res.end(JSON.stringify(copy));
+
+      } else if (list === 'list2') {
+        if (input) {
+          list2.forEach(function(opt) {
+            if (opt.Text.toLowerCase().substr(0, input.length) === input) {
+              copy.push(opt);
+            }
+          });
+        } else {
+          copy = copy.concat(list2);
+        }
+        res.setHeader('Content-Type', 'application/json');
+        res.end(JSON.stringify(copy));
+
+      } else {
+        res.setHeader('Content-Type', 'application/json');
+        res.end(JSON.stringify(list3));
+      }
+
+    } else if (req.url.match(/chip_autocomplete_create[.]json/)) {
+      var error = parsedUrl.query.Error || false;
+
+      if (error) {
+        res.writeHead(500);
+        res.end('Sooooouuuutttthhh');
+        return;
+      }
+
+      var opt = {};
+      if (list === 'list1') {
+        opt = {
+          Value: list1.length,
+          Text: req.body.Value
+        };
+        list1.push(opt);
+
+      } else if (list === 'list2') {
+        opt = {
+          Value: list2.length,
+          Text: req.body.Value
+        };
+        list2.push(opt);
+
+      } else {
+        opt = {
+          Value: list3.length,
+          Text: req.body.Value
+        };
+        list3.push(opt);
+
+      }
+      res.setHeader('Content-Type', 'application/json');
+      res.end(JSON.stringify({
+        'Valid': true,
+        'Data': opt,
+        'HasFailure': false,
+        'Failure': 'an error here',
+        'HasFieldErrors': false,
+        'FieldErrors': {
+          'Value': 'some error here'
+        },
+      }));
+
+    } else {
+      next();
+    }
+  };
+}
 
 // Generate release archive containing just JS, CSS, Source Map deps
 gulp.task('zip:mdl', () => {

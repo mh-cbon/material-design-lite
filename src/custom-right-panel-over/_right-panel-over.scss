@@ -29,20 +29,15 @@
     visibility: visible;
   }
 
-  .custom-rightpanelover-loader,
-  .custom-rightpanelover-overlay-loader,
   .custom-rightpanelover-container {
     position: absolute;
     top: 0;
-    right: 0;
     height: 100%;
     width: 80%;
-  }
-
-  .custom-rightpanelover-container {
     box-shadow: 0px 0 0px 0px rgba(255,255,255,0);
     transition: right .5s, box-shadow 1s;
     right: -100%;
+    background-color: white;
     &.show {
       right: 0%;
       box-shadow: -25px 0 250px 30px rgba(70, 70, 70, 0.7)
@@ -51,7 +46,7 @@
       box-shadow: 0px 0 0px 0px rgba(255,255,255,0);
       right: -100%;
     }
-    > * {
+    > iframe {
       border:none;
       position: absolute;
       top: 0;
@@ -60,52 +55,23 @@
       height: 100%;
       visibility: hidden;
     }
-    &.loaded > * {
+    &.loaded > iframe {
       visibility: visible;
     }
   }
 
-  .custom-rightpanelover-overlay-loader {
-    background-color: white;
-    z-index: -10;
-    transition: right .5s;
-    right: -100%;
-    &.show {
-      right: 0%;
-      z-index: 100;
-    }
-  }
-
-  .custom-rightpanelover-loader {
-    z-index: -10;
-    transition: right .5s;
-    right: -100%;
-    &.show {
-      right: 0%;
-      z-index: 110;
-    }
-    .mdl-spinner {
-      position: absolute;
-      top: 50%;
-      left: 50%;
-      margin-top: -14px;
-      margin-left: -14px;
-    }
-  }
-
-  .custom-rightpanelover-overlay {
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    opacity: 0;
-    transition: opacity 1s;
-    &.show {
-      opacity: .15;
-    }
-  }
-
+  // .custom-rightpanelover-overlay {
+  //   position: absolute;
+  //   top: 0;
+  //   left: 0;
+  //   width: 100%;
+  //   height: 100%;
+  //   opacity: 0;
+  //   transition: opacity 1s;
+  //   &.show {
+  //     opacity: .15;
+  //   }
+  // }
 }
 .custom-rightpanelover-noscroll {
   overflow-y: hidden;

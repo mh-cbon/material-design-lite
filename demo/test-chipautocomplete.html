@@ -8,94 +8,57 @@
   <body>
     <h4>Chip autocomplete</h4>
 
+    this demonstrates the behavior of the list results when space below the textfield is missing.
     <br/><br/><br/><br/><br/><br/><br/><br/><br/>
     <br/><br/><br/><br/><br/><br/><br/><br/><br/>
     <br/><br/><br/><br/><br/><br/><br/><br/><br/>
     <br/><br/><br/><br/><br/><br/><br/><br/><br/>
 <div
-   id="rnd-0"
-  class="custom-chipautocomplete custom-js-chipautocomplete
-  "
-    url-completer="static-results.json?input=myinput"
+   id="rnd-0" class="custom-chipautocomplete custom-js-chipautocomplete"
+   url-completer="/chip_autocomplete_list.json?Input={:Text}&List=list2"
     url-completer-args='{"limit": 30}'
-    url-placeholder="myinput"
     txt-remote-unreachable="Server gone south, baaaadddd!"
-    chip-name="inputname"
-  >
+    chip-name="inputname">
 
-  <div
-
-    class="mdl-textfield mdl-js-textfield
-      is-invalid
-      mdl-textfield--floating-label
-      ">
-
+  <div class="mdl-textfield mdl-js-textfield is-invalid mdl-textfield--floating-label">
     <input
       id="rnd-1"
       class="mdl-textfield__input "
       type="text"
-      value=""
-      >
-
+      value="">
     <label class="mdl-textfield__label" for="rnd-1">Type text to complete</label>
     <span class="mdl-textfield__error">Wronggg!!!</span>
   </div>
 
-  <div
-
-    class="custom-chipautocomplete-results mdl-shadow--2dp
-    "
-    >
+  <div class="custom-chipautocomplete-results mdl-shadow--2dp">
     <ul class="mdl-list"></ul>
   </div>
-  <div
-
-    class="custom-chipautocomplete-selected
-    "
-    >
-
+  <div class="custom-chipautocomplete-selected">
   </div>
 </div>
 
-      <hr/>
-
+<hr/>
 
 <div
-  url-completer="/chip_autocomplete_list?input=itsinput"  url-placeholder="itsinput"  id="rnd-2"
-  class="custom-chipautocomplete custom-js-chipautocomplete
-  "
-  >
+  url-completer="/chip_autocomplete_list.json?Input={:Text}&List=list2"
+  url-creator="/chip_autocomplete_create.json"
+  id="rnd-2"
+  class="custom-chipautocomplete custom-js-chipautocomplete">
 
-  <div
-
-    class="mdl-textfield mdl-js-textfield
-
-      mdl-textfield--floating-label
-      ">
-
+  <div class="mdl-textfield mdl-js-textfield mdl-textfield--floating-label">
     <input
       id="rnd-3"
       class="mdl-textfield__input "
       type="text"
-      value=""
-      >
-
+      value="">
     <label class="mdl-textfield__label" for="rnd-3">Type text to complete</label>
     <span class="mdl-textfield__error"></span>
   </div>
 
-  <div
-
-    class="custom-chipautocomplete-results mdl-shadow--2dp
-    "
-    >
+  <div class="custom-chipautocomplete-results mdl-shadow--2dp">
     <ul class="mdl-list"></ul>
   </div>
-  <div
-
-    class="custom-chipautocomplete-selected
-    "
-    >
+  <div class="custom-chipautocomplete-selected">
 
       <span class="mdl-chip mdl-chip--deletable">
         <input type="hidden" name="" value="value" />
@@ -112,7 +75,7 @@
   </div>
 </div>
 
-      <hr/>
+<hr/>
 
-  </body>
-  </html>
+</body>
+</html>

@@ -376,12 +376,18 @@ componentHandler = (function() {
       createdComponents_.splice(componentIndex, 1);
 
       var upgrades = component.element_.getAttribute('data-upgraded').split(',');
-      var componentPlace = upgrades.indexOf(component[componentConfigProperty_].classAsString);
+      var componentName = component[componentConfigProperty_].classAsString;
+      // var componentName2 = component[componentConfigProperty_].className;
+      var componentPlace = upgrades.indexOf(componentName);
       if (component.mdlDowngrade_) {
         component.mdlDowngrade_();
+      } else {
+        // console.log('Component %s (%s) does not handle downgrade.',
+        //   componentName, componentName2);
       }
       upgrades.splice(componentPlace, 1);
       component.element_.setAttribute('data-upgraded', upgrades.join(','));
+
       var ev = createEvent_('mdl-componentdowngraded', true, false);
       component.element_.dispatchEvent(ev);
     }

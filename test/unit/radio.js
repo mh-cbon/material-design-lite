@@ -129,5 +129,6 @@ describe('MaterialRadio', function () {
       expect(item.parentElement.className).to.equal('mdl-radio mdl-js-radio is-upgraded');
     });
 
+    container.remove();
   });
 });

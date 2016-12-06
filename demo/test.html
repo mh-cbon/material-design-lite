@@ -12,21 +12,24 @@
 <br/>
 
 
-<a href="https://getmdl.io/" id="bt-rightpanelover">
-Click me!
-</a>
+<a href="right-page.html"
+  class="bt-rightpanelover"
+  >Click me!</a>
 
-<div class="custom-js-rightpanelover custom-rightpanelover" on-button-click="#bt-rightpanelover">
-  <div class="custom-rightpanelover-overlay"></div>
-  <div class="custom-rightpanelover-container">
-  </div>
-  <div class="custom-rightpanelover-overlay-loader"></div>
-  <div class="custom-rightpanelover-loader">
-    <div class="mdl-spinner mdl-js-spinner"></div>
-  </div>
+<div class="custom-js-rightpanelover custom-rightpanelover"
+  opener-bt=".bt-rightpanelover"
+  closer-bt=".bt-closer"
+  closer-form=".form-closer"
+  closer-form-delay="2000"
+  loader-selector="#rightpanel-loader"
+  >
+  <div class="custom-rightpanelover-container"></div>
 </div>
 
-<hr/>
+<div id="rightpanel-loader" class="custom-loaderover custom-js-loaderover">
+  <div class="custom-loaderover-bg"></div>
+  <div class="mdl-spinner mdl-js-spinner is-active custom-spinner"></div>
+</div>
 
 <hr/>
 
@@ -34,7 +37,8 @@ Click me!
 
     <table
     class="mdl-data-table custom-js-data-table custom-data-table mdl-data-table--selectable mdl-shadow--2dp"
-    bt-el="#bt-action"
+    checkbox-action-bt="#bt-action"
+    checkbx-name="some"
     >
       <thead>
         <tr>
@@ -44,17 +48,17 @@ Click me!
         </tr>
       </thead>
       <tbody>
-        <tr value="r">
+        <tr checkbox-value="r">
           <td class="mdl-data-table__cell--non-numeric">Acrylic (Transparent)</td>
           <td>25</td>
           <td>$2.90</td>
         </tr>
-        <tr value="t">
+        <tr checkbox-value="t">
           <td class="mdl-data-table__cell--non-numeric">Plywood (Birch)</td>
           <td>50</td>
           <td>$1.25</td>
         </tr>
-        <tr value="yy">
+        <tr checkbox-value="yy">
           <td class="mdl-data-table__cell--non-numeric">Laminate (Gold on Blue)</td>
           <td>10</td>
           <td>$2.35</td>
@@ -91,7 +95,8 @@ Click me!
 
     <table
     class="mdl-data-table custom-js-data-table custom-data-table mdl-data-table--selectable mdl-shadow--2dp"
-    bt-el="#bt-action"
+    checkbox-action-bt="#bt-action"
+    checkbox-name="some"
     >
       <thead>
         <tr>
@@ -99,7 +104,7 @@ Click me!
             <a href="?sort=desc">Material</a>
           </th>
           <th class="mdl-data-table__header--sorted">
-            <a href="?sort=asc"><i class='material-icons'>sort_by_alpha</i>Quantity</a>
+            <a href="?sort=asc">Quantity</a>
           </th>
           <th class="mdl-data-table__header--sorted-descending">
             <a href="?sort=asc">Unit price</a>
@@ -107,17 +112,17 @@ Click me!
         </tr>
       </thead>
       <tbody>
-        <tr value="r" name="some">
+        <tr checkbox-value="r">
           <td class="mdl-data-table__cell--non-numeric">Acrylic (Transparent)</td>
           <td>25</td>
           <td>$2.90</td>
         </tr>
-        <tr value="t" name="some">
+        <tr checkbox-value="t">
           <td class="mdl-data-table__cell--non-numeric">Plywood (Birch)</td>
           <td>50</td>
           <td>$1.25</td>
         </tr>
-        <tr value="yy" name="some">
+        <tr checkbox-value="yy">
           <td class="mdl-data-table__cell--non-numeric">Laminate (Gold on Blue)</td>
           <td>10</td>
           <td>$2.35</td>
@@ -134,7 +139,8 @@ Click me!
   <input type="hidden" name="legume" value="tomate" />
 </form>
 
-<button class="mdl-button mdl-js-button mdl-button--raised mdl-button--colored bt-with-dialog" form="form1">
+<button class="mdl-button mdl-js-button mdl-button--raised mdl-button--colored bt-with-dialog"
+  form="form1">
   Button
 </button>
 
@@ -334,10 +340,9 @@ Click me!
 <hr/>
 
 <div class="custom-chipautocomplete custom-js-chipautocomplete"
-  url-completer="static-results.json?input=myinput"
+  url-completer="/chip_autocomplete_list.json?Input={:Text}&List=list1"
   url-completer-args='{"limit": 30}'
-  url-placeholder="myinput"
-  url-creator="static-create.json"
+  url-creator="/chip_autocomplete_create.json"
   url-creator-args='{"extra": "arg"}'
   txt-remote-unreachable="Server gone south, baaaadddd!"
   chip-name="inputname"
@@ -358,10 +363,9 @@ Click me!
 <hr/>
 
 <div class="custom-chipautocomplete custom-js-chipautocomplete"
-  url-completer="static-results-empty.json?input=myinput"
+  url-completer="/chip_autocomplete_list.json?Input={:Text}&List=list2"
   url-completer-args='{"limit": 30}'
-  url-placeholder="myinput"
-  url-creator="static-create.json"
+  url-creator="/chip_autocomplete_create-error.json"
   url-creator-args='{"extra": "arg"}'
   txt-remote-unreachable="Server gone south, baaaadddd!"
   txt-no-results="No results found!"
@@ -383,9 +387,8 @@ Click me!
 <hr/>
 
 <div class="custom-chipautocomplete custom-js-chipautocomplete"
-  url-completer="static-results.json?input=myinput"
+  url-completer="/chip_autocomplete_list-error.json?Input={:Text}"
   url-completer-args='{"limit": 30}'
-  url-placeholder="myinput"
   txt-remote-unreachable="Server gone south, baaaadddd!"
   chip-name="inputname"
   >

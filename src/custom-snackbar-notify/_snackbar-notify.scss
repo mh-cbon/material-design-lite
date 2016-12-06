@@ -1,0 +1,36 @@
+
+.custom-snackbar-notify{
+  &.custom-snackbar-notify-info {
+    background-color: unquote("rgb(#{$palette-light-blue-50})");
+    .mdl-snackbar__text{
+      color: black;
+    }
+    .mdl-snackbar__action{
+      color: unquote("rgb(#{$palette-light-blue-900})");
+    }
+  }
+  &.custom-snackbar-notify-success {
+    background-color: unquote("rgb(#{$palette-teal-A700})");
+    .mdl-snackbar__text{
+      color: white;
+    }
+    .mdl-snackbar__action{
+      color: white;
+    }
+  }
+  &.custom-snackbar-notify-warn {
+    background-color: unquote("rgb(#{$palette-amber-900})");
+    .mdl-snackbar__action{
+      color: black;
+    }
+  }
+  &.custom-snackbar-notify-severe {
+    background-color: unquote("rgb(#{$palette-red-600})");
+    .mdl-snackbar__action{
+      color: black;
+    }
+  }
+  &.custom-snackbar-notify-critical {
+    // background-color: unquote("rgb(#{$palette-light-blue-50})");
+  }
+}

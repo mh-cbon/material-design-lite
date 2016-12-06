@@ -17,40 +17,44 @@
  .custom-chipautocomplete{
     width: 300px;
     max-width: 100%;
+
    .mdl-textfield {
      width: 100%;
-   }
- }
+     position: relative;
 
- .custom-chipautocomplete-results {
-   position: absolute;
-   right: 0px;
-   width: 100%;
-   z-index: 100;
-   background-color: white;
-   max-height: 150px;
-   overflow: hidden;
-   overflow-y: auto;
-   display: none;
-   border:1px solid #d7d7d7;
+     .custom-chipautocomplete-results {
+       position: absolute;
+       right: 0px;
+       width: 100%;
+       z-index: 100;
+       background-color: white;
+       max-height: 150px;
+       overflow: hidden;
+       overflow-y: auto;
+       display: none;
+       border:1px solid #d7d7d7;
 
-   &.show{
-     display:block;
+       &.show{
+         display:block;
+       }
+       ul{
+         padding: 0px;
+         margin: 0px;
+       }
+       ul li{
+         padding: 0px;
+         line-height: 1.4em;
+         cursor: pointer;
+       }
+       ul li:hover{
+         background-color:#f8f8f8;
+       }
+       ul li .material-icons{
+         margin-top: -5px;
+         margin-left: 5px;
+       }
+     }
+
    }
-   ul{
-     padding: 0px;
-     margin: 0px;
-   }
-   ul li{
-     padding: 0px;
-     line-height: 1.4em;
-     cursor: pointer;
-   }
-   ul li:hover{
-     background-color:#f8f8f8;
-   }
-   ul li .material-icons{
-     margin-top: -5px;
-     margin-left: 5px;
-   }
+
  }

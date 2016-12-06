@@ -11,7 +11,7 @@ module.exports = function(stamps, i, driver, component) {
     action: function() {
       driver.executeScript("(function() { var e = document.createElement('div');" +
          "componentHandler.upgradeElement(e, '"+ component + "');" +
-         "componentHandler.downgradeElements(e);})()");
+         "componentHandler.downgradeElementRecursive(e);})()");
     },
     assert: function(after, initial) {
       heapDiffPrinter(after, initial, i, component);

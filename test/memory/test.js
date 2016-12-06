@@ -28,7 +28,7 @@ var menuStamps = [];
 // 'MaterialSnackbar',
 // 'MaterialSwitch',
  'MaterialTabs',
-// 'MaterialTextfield',
+'MaterialTextfield',
 ].forEach(function(v) {
   measureUpgradeDowngrade([], 0, driver, v);
 });

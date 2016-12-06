@@ -44,6 +44,8 @@ describe('MaterialTextfield', function () {
     var el = createSingleLineTextfield();
     componentHandler.upgradeElement(el, 'MaterialTextfield');
     expect($(el)).to.have.data('upgraded', ',MaterialTextfield');
+    componentHandler.downgradeElementRecursive(el);
+    el.remove();
   });
 
   it('should be a widget', function () {

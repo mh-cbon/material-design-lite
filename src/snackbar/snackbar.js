@@ -82,11 +82,17 @@
       this.actionElement_.addEventListener('click', this.actionHandler_);
       this.setActionHidden_(false);
     }
-
+    // ok, small modification
+    if (this.addClass_) {
+      this.element_.classList.add(this.addClass_);
+    }
+    // eom
     this.textElement_.textContent = this.message_;
     this.element_.classList.add(this.cssClasses_.ACTIVE);
     this.element_.setAttribute('aria-hidden', 'false');
-    setTimeout(this.cleanup_.bind(this), this.timeout_);
+    // ok, small modification
+    this.timeoutHandler_ = setTimeout(this.cleanup_.bind(this), this.timeout_);
+    // eom
 
   };
 
@@ -123,6 +129,12 @@
       if (data['actionText']) {
         this.actionText_ = data['actionText'];
       }
+      //ok, small modification inlined, not to reproduce,
+      // but for now i don t want to duplicate the snackbar component.
+      if (data['addClass']) {
+        this.addClass_ = data['addClass'];
+      }
+      // eom
       this.displaySnackbar_();
     }
   };
@@ -147,6 +159,9 @@
    */
   MaterialSnackbar.prototype.cleanup_ = function() {
     this.element_.classList.remove(this.cssClasses_.ACTIVE);
+    // ok, small modification
+    clearTimeout(this.timeoutHandler_);
+    // eom
     setTimeout(function() {
       this.element_.setAttribute('aria-hidden', 'true');
       this.textElement_.textContent = '';
@@ -155,9 +170,17 @@
         this.actionElement_.textContent = '';
         this.actionElement_.removeEventListener('click', this.actionHandler_);
       }
+      // ok, small modification
+      if (this.addClass_) {
+        this.element_.classList.remove(this.addClass_);
+      }
+      // eom
       this.actionHandler_ = undefined;
       this.message_ = undefined;
       this.actionText_ = undefined;
+      // ok, small modification
+      this.addClass_ = undefined;
+      // eom
       this.active = false;
       this.checkQueue_();
     }.bind(this), /** @type {number} */ (this.Constant_.ANIMATION_LENGTH));

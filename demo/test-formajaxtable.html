@@ -1,0 +1,126 @@
+<html>
+<head>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons">
+  <link rel="stylesheet" href="material.css">
+  <script defer src="material.js"></script>
+  <script src="tinymce/tinymce.min.js"></script>
+  <style type="text/css">
+  .custom-data-table.custom-data-table__body--scroll tbody {
+      display: block;
+      max-height: 450px;
+      overflow-y: scroll;
+  }
+  </style>
+</head>
+<body>
+
+<div class="container">
+  <form
+    method="POST"
+    action="/form-table.json?Timeout=2500"
+    class="custom-js-form-ajax"
+    pre-notify="#form-notifier"
+    pre-notify-message="You are about to submit :D"
+    post-notify="#form-notifier"
+    post-notify-failure="Please fix errors"
+    post-notify-critical="It gone south, pleas try again later"
+    post-notify-success="All correct!"
+    id="form1">
+
+    <div class="mdl-textfield mdl-js-textfield
+        mdl-textfield--floating-label">
+      <input name="Material" id="rnd-3" class="mdl-textfield__input " value="" type="text">
+      <label class="mdl-textfield__label" for="rnd-3">Type material</label>
+      <span class="mdl-textfield__error"></span>
+    </div>
+
+    <input class="" name="Offset" value="0" type="hidden">
+    <input class="" name="Limit" value="10" type="hidden">
+    <button type="submit" name="form"
+      class="mdl-button mdl-js-button mdl-js-ripple-effect mdl-button--raised mdl-button--colored"
+      value="users_filters">Filter</button>
+  </form>
+</div>
+
+<table
+  class="mdl-data-table
+  custom-js-data-table custom-data-table
+  custom-js-ajax-table custom-ajax-table
+  custom-data-table__body--scroll
+  mdl-data-table--selectable mdl-shadow--2dp"
+  checkbox-action-bt="#bt-action2"
+  checkbox-name="some"
+  checkbox-property-value="Id"
+  loadmore-action-bt="#bt-loadmore2"
+  refresh-action-bt="#bt-refresh2"
+  loader-selector="#table-loader2"
+  sort-qs-name="Sort"
+  limit-qs-name="Limit"
+  offset-qs-name="Offset"
+  limit-value="15"
+  form-recipient="#form1"
+  >
+  <thead>
+    <tr>
+      <th class="mdl-data-table__cell--non-numeric mdl-data-table__header--sorted"
+        data-name="Material"><a href="?sort=asc">Material</a></th>
+      <th data-name="Quantity" class="mdl-data-table__header--sorted"><a href="?sort=asc">Quantity</a></th>
+      <th data-name="UnitPrice" class="mdl-data-table__header--sorted"><a href="?sort=asc">Unit price</a></th>
+      <th data-link="/edit/{:Id}">
+        Edit
+        <div class="template"><a>edit</a></div>
+      </th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr class="template navigation-helper" show-nav-helper-every="10">
+      <td collapse="auto">
+        Past {:Offset} items
+      </td>
+    </tr>
+    <tr checkbox-value="r">
+      <td class="mdl-data-table__cell--non-numeric">Acrylic (Transparent)</td>
+      <td>25</td>
+      <td>$2.90</td>
+      <td>
+        <a href="/edit">edit</a>
+      </td>
+    </tr>
+    <tr checkbox-value="t">
+      <td class="mdl-data-table__cell--non-numeric">Plywood (Birch)</td>
+      <td>50</td>
+      <td>$1.25</td>
+      <td>
+        <a href="/edit">edit</a>
+      </td>
+    </tr>
+    <tr checkbox-value="yy">
+      <td class="mdl-data-table__cell--non-numeric">Laminate (Gold on Blue)</td>
+      <td>10</td>
+      <td>$2.35</td>
+      <td>
+        <a href="/edit">edit</a>
+      </td>
+    </tr>
+  </tbody>
+</table>
+
+<div id="table-loader2" class="custom-loaderover custom-js-loaderover">
+  <div class="custom-loaderover-bg"></div>
+  <div class="mdl-spinner mdl-js-spinner is-active custom-spinner"></div>
+</div>
+
+<button class="mdl-button mdl-js-button mdl-button--raised mdl-button--colored" id="bt-action2">
+  Checkbox button
+</button>
+
+<button class="mdl-button mdl-js-button mdl-button--raised mdl-button--colored" id="bt-loadmore2">
+  Load more button
+</button>
+
+<button class="mdl-button mdl-js-button mdl-button--raised mdl-button--colored" id="bt-refresh2">
+  Refresh button
+</button>
+
+</body>
+</html>

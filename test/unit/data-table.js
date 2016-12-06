@@ -48,6 +48,8 @@ describe('MaterialDataTable', function () {
 
     componentHandler.upgradeElement(el, 'MaterialDataTable');
     expect($(el)).to.have.data('upgraded', ',MaterialDataTable');
+
+    el.remove();
   });
 
   it('should have is-checked class when the row has the is-selected class', function () {
@@ -57,6 +59,7 @@ describe('MaterialDataTable', function () {
     table = document.querySelector('#data-table-test')
     componentHandler.upgradeElement(table, 'MaterialDataTable');
     expect(table.querySelector('.second-row label').classList.contains('is-checked')).to.be.true;
+    el.remove();
   });
 
 });

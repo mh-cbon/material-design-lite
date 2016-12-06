@@ -1,0 +1,77 @@
+<html>
+<head>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons">
+  <link rel="stylesheet" href="material.css">
+  <script defer src="material.js"></script>
+</head>
+<body>
+
+<br/><br/><br/><br/>
+
+<button class="mdl-button mdl-js-button mdl-button--raised mdl-button--colored bt-closer">
+  Click to close
+</button>
+
+<div class="container">
+  <form
+    method="POST"
+    action="/form-ajax.json?Return=valid"
+    class="custom-js-form-ajax form-closer"
+    post-notify="#form-notifier"
+    post-notify-failure="Please fix errors"
+    post-notify-critical="It gone south, pleas try again later"
+    post-notify-success="All correct!"
+    >
+
+    <div class="">
+      <span class="custom-form__errorfailure"></span>
+    </div>
+
+    <div class="mdl-textfield mdl-js-textfield
+        mdl-textfield--floating-label">
+      <input name="Username" id="rnd-3" class="mdl-textfield__input " value="" type="text">
+      <label class="mdl-textfield__label" for="rnd-3">Saisissez un nom d'utilisateur</label>
+      <span class="mdl-textfield__error"></span>
+    </div>
+
+    <br/>
+    <div class="mdl-textfield mdl-js-textfield
+        mdl-textfield--floating-label">
+      <input name="Email" id="rnd-4" class="mdl-textfield__input " value="" type="text">
+      <label class="mdl-textfield__label" for="rnd-4">Saisissez un email</label>
+      <span class="mdl-textfield__error"></span>
+    </div>
+
+    <br/>
+    <div class="mdl-selectfield mdl-js-selectfield
+      mdl-selectfield--floating-label">
+      <select name="RoleId"class="mdl-selectfield__select" id="rnd-5">
+        <option value="" selected="selected">Choisissez un rôle</option>
+        <option value="1">user</option>
+        <option value="2">admin</option>
+      </select>
+
+      <label class="mdl-selectfield__label" for="rnd-5"></label>
+      <span class="mdl-selectfield__error"></span>
+    </div>
+
+    <input class="" name="Page" value="1" type="hidden">
+    <input class="" name="Limit" value="10" type="hidden">
+
+    <br/>
+    <button type="submit" name="form"
+      class="mdl-button mdl-js-button mdl-js-ripple-effect mdl-button--raised mdl-button--colored"
+      value="users_filters">Appliquer</button>
+  </form>
+</div>
+
+
+<div class="mdl-js-snackbar mdl-snackbar custom-js-snackbar-notify custom-snackbar-notify"
+  id="form-notifier">
+  <div class="mdl-snackbar__text"></div>
+  <button class="mdl-snackbar__action bt-closer" type="button"></button>
+</div>
+
+
+</body>
+</html>

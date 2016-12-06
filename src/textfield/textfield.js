@@ -258,11 +258,12 @@
           this.boundKeyDownHandler = this.onKeyDown_.bind(this);
           this.input_.addEventListener('keydown', this.boundKeyDownHandler);
         }
-        var invalid = this.element_.classList
+
+        this.wasInvalid_ = this.element_.classList
           .contains(this.CssClasses_.IS_INVALID);
         this.updateClasses_();
         this.element_.classList.add(this.CssClasses_.IS_UPGRADED);
-        if (invalid) {
+        if (this.wasInvalid_) {
           this.element_.classList.add(this.CssClasses_.IS_INVALID);
         }
         if (this.input_.hasAttribute('autofocus')) {
@@ -271,6 +272,36 @@
         }
       }
     }
+  };
+
+  /**
+   * Downgrade element.
+   */
+  MaterialTextfield.prototype.mdlDowngrade_ = function() {
+    this.element_.classList.remove(this.CssClasses_.HAS_PLACEHOLDER);
+    if (this.wasInvalid_) {
+      this.element_.classList.add(this.CssClasses_.IS_INVALID);
+    }
+    this.element_.classList.remove(this.CssClasses_.IS_UPGRADED);
+    this.element_.classList.remove(this.CssClasses_.IS_DIRTY);
+    this.element_.classList.remove(this.CssClasses_.IS_FOCUSED);
+    this.element_.classList.remove(this.CssClasses_.IS_DISABLED);
+
+    this.input_.removeEventListener('input', this.boundUpdateClassesHandler);
+    this.input_.removeEventListener('focus', this.boundFocusHandler);
+    this.input_.removeEventListener('blur', this.boundBlurHandler);
+    this.input_.removeEventListener('reset', this.boundResetHandler);
+    this.input_.removeEventListener('keydown', this.boundKeyDownHandler);
+
+    this.boundUpdateClassesHandler = null;
+    this.boundFocusHandler = null;
+    this.boundBlurHandler = null;
+    this.boundResetHandler = null;
+    this.boundKeyDownHandler = null;
+
+    this.label_ = null;
+    this.input_ = null;
+    this.maxRows = null;
   };
 
   // The component registers itself. It can assume componentHandler is available
