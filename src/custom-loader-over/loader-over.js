@@ -62,10 +62,6 @@
    */
   CustomLoaderOver.prototype.show = function(targetEl) {
 
-    if (this.element_.parentNode === targetEl) {
-      return ;
-    }
-
     var cherry = window.cherry;
     clearTimeout(this.pendingHide_);
     cherry.off(this.element_, 'CustomLoaderOver.transitionend');
@@ -74,16 +70,16 @@
       oldPosition_: targetEl.style.position,
     };
 
-    targetEl.appendChild(this.element_);
-    cherry.trigger(this.spinner_, 'enable');
-
-    this.adjustSize_(targetEl);
-
-    this.element_.classList.add('show');
-
-    if (cherry.getStyle(targetEl, 'position') === 'static') {
-      targetEl.style.position = 'relative';
+    if (this.element_.parentNode !== targetEl) {
+      cherry.trigger(this.spinner_, 'enable');
+      targetEl.appendChild(this.element_);
+      this.adjustSize_(targetEl);
+      this.element_.classList.add('show');
+      if (cherry.getStyle(targetEl, 'position') === 'static') {
+        targetEl.style.position = 'relative';
+      }
     }
+
   };
 
   /**
