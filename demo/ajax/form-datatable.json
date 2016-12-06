@@ -5,37 +5,37 @@
       "Id": "1",
       "Material": "wood",
       "Quantity": "11",
-      "UnitPrice": "$2.83",
+      "UnitPrice": "$2.83"
     },
     {
       "Id": "2",
       "Material": "concrete",
       "Quantity": "11",
-      "UnitPrice": "$2.83",
+      "UnitPrice": "$2.83"
     },
     {
       "Id": "3",
       "Material": "gold",
       "Quantity": "11",
-      "UnitPrice": "$2.83",
+      "UnitPrice": "$2.83"
     },
     {
       "Id": "4",
       "Material": "silk",
       "Quantity": "11",
-      "UnitPrice": "$2.83",
+      "UnitPrice": "$2.83"
     },
     {
       "Id": "5",
       "Material": "silver",
       "Quantity": "11",
-      "UnitPrice": "$2.83",
+      "UnitPrice": "$2.83"
     },
     {
       "Id": "6",
       "Material": "copper",
       "Quantity": "11",
-      "UnitPrice": "$2.83",
+      "UnitPrice": "$2.83"
     }
   ]
 }
