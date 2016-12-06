@@ -192,7 +192,6 @@ describe('CustomChipAutocomplete', function () {
 
     var chipautocomplete = el.querySelector('.custom-chipautocomplete');
     var results = el.querySelector('.custom-chipautocomplete-results');
-    var chips = el.querySelector('.custom-chipautocomplete-selected');
     var url = chipautocomplete.getAttribute('url-completer');
     chipautocomplete.setAttribute('url-completer', url.replace(/List=[a-z0-9]+/, 'List=list3'));
     chipautocomplete.setAttribute('txt-type-more', 'type more');
@@ -225,7 +224,6 @@ describe('CustomChipAutocomplete', function () {
 
     var chipautocomplete = el.querySelector('.custom-chipautocomplete');
     var results = el.querySelector('.custom-chipautocomplete-results');
-    var chips = el.querySelector('.custom-chipautocomplete-selected');
     var url = chipautocomplete.getAttribute('url-completer');
     chipautocomplete.setAttribute('url-completer', url.replace(/List=[a-z0-9]+/, 'List=list3'));
     chipautocomplete.setAttribute('txt-no-results', 'no res');
@@ -274,6 +272,68 @@ describe('CustomChipAutocomplete', function () {
       expect(errfield.innerHTML).to.be.equal(unreachableText);
       setTimeout(function() {
         input.blur();
+        setTimeout(function() {
+          componentHandler.downgradeElementRecursive(el);
+          el.remove();
+          done();
+        }, defTout);
+      }, defTout);
+    }, defTout);
+  });
+
+  it('should not add the "type more text" option as a result on result click', function (done) {
+    var TEMPLATE = templatesLoader.get('CHIPAUTOCOMPLETE_CREATOR');
+    var el = document.createElement('div');
+    document.body.appendChild(el);
+    el.innerHTML = TEMPLATE;
+
+    var chipautocomplete = el.querySelector('.custom-chipautocomplete');
+    var url = chipautocomplete.getAttribute('url-completer');
+    chipautocomplete.setAttribute('url-completer', url.replace(/List=[a-z0-9]+/, 'List=list3'));
+    chipautocomplete.setAttribute('txt-no-results', 'no res');
+    var results = el.querySelector('.custom-chipautocomplete-results');
+    var chips = el.querySelector('.custom-chipautocomplete-selected');
+    componentHandler.upgradeElements(el);
+
+    var input = chipautocomplete.querySelector('input[type="text"]');
+
+    input.focus();
+    setTimeout(function() {
+      results.querySelector('li span').click();
+      setTimeout(function() {
+        var chipSelected = chips.querySelectorAll('.mdl-chip');
+        expect(chipSelected.length).to.be.equal(0);
+        setTimeout(function() {
+          componentHandler.downgradeElementRecursive(el);
+          el.remove();
+          done();
+        }, defTout);
+      }, defTout);
+    }, defTout);
+  });
+
+  it('should not add the "type more text" option as a result on enter press', function (done) {
+    var TEMPLATE = templatesLoader.get('CHIPAUTOCOMPLETE_CREATOR');
+    var el = document.createElement('div');
+    document.body.appendChild(el);
+    el.innerHTML = TEMPLATE;
+
+    var chipautocomplete = el.querySelector('.custom-chipautocomplete');
+    var url = chipautocomplete.getAttribute('url-completer');
+    chipautocomplete.setAttribute('url-completer', url.replace(/List=[a-z0-9]+/, 'List=list3'));
+    chipautocomplete.setAttribute('txt-no-results', 'no res');
+    var results = el.querySelector('.custom-chipautocomplete-results');
+    var chips = el.querySelector('.custom-chipautocomplete-selected');
+    componentHandler.upgradeElements(el);
+
+    var input = chipautocomplete.querySelector('input[type="text"]');
+
+    input.focus();
+    setTimeout(function() {
+      cherry.trigger(input, 'keypress', {keyCode: 13})
+      setTimeout(function() {
+        var chipSelected = chips.querySelectorAll('.mdl-chip');
+        expect(chipSelected.length).to.be.equal(0);
         setTimeout(function() {
           componentHandler.downgradeElementRecursive(el);
           el.remove();
