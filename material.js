@@ -8950,7 +8950,7 @@ CustomChipAutocomplete.prototype.fetchResults_ = function (text) {
             results.unshift(this.makeNoResultOption_());
         }
         if (!results.length && !text) {
-            results.unshift(this.makeTypeMoreTexOption_());
+            results.unshift(this.makeTypeMoreTextOption_());
         }
         this.emptyResults_();
         this.setResults_(results);
@@ -9015,17 +9015,6 @@ CustomChipAutocomplete.prototype.makeNoResultOption_ = function () {
     };
 };
 /**
-   * Make a new no-result option for the result list.
-   *
-   * @private
-   */
-CustomChipAutocomplete.prototype.makeTypeMoreTexOption_ = function () {
-    return {
-        Value: '-1',
-        Text: this.txtTypeMore_
-    };
-};
-/**
    * Tells if the results contains the create-result option.
    *
    * @private
@@ -9041,6 +9030,34 @@ CustomChipAutocomplete.prototype.hasCreateResultOption_ = function () {
    */
 CustomChipAutocomplete.prototype.isCreateResultOption_ = function (li) {
     return li.getAttribute('value') === '-1' && li.querySelector('span').innerHTML === this.txtCreateResult_;
+};
+/**
+   * Make a new no-result option for the result list.
+   *
+   * @private
+   */
+CustomChipAutocomplete.prototype.makeTypeMoreTextOption_ = function () {
+    return {
+        Value: '-1',
+        Text: this.txtTypeMore_
+    };
+};
+/**
+   * Tells if the results contains the create-result option.
+   *
+   * @private
+   */
+CustomChipAutocomplete.prototype.hasTypeMoreTextOption_ = function () {
+    var lis = this.ul_.querySelectorAll('li');
+    return lis.length && this.isTypeMoreTextOption_(lis[0]);
+};
+/**
+   * Tells if given li element is the no-result option.
+   *
+   * @private
+   */
+CustomChipAutocomplete.prototype.isTypeMoreTextOption_ = function (li) {
+    return li.getAttribute('value') === '-1' && li.querySelector('span').innerHTML === this.txtTypeMore_;
 };
 /**
    * Tells if given li element is the no-result option.
@@ -9105,15 +9122,17 @@ CustomChipAutocomplete.prototype.showResults_ = function () {
    */
 CustomChipAutocomplete.prototype.onResultClick_ = function (ev) {
     var li = ev.delegateTarget;
-    if (this.isCreateResultOption_(li)) {
-        this.createNewValue_(this.input_.value);
-    } else if (!this.isNoResultOption_(li)) {
-        var option = {
-            Value: li.getAttribute('value'),
-            Text: li.querySelector('span').innerHTML
-        };
-        this.addChip_(option);
-        this.clearComponent_();
+    if (!this.isTypeMoreTextOption_(li)) {
+        if (this.isCreateResultOption_(li)) {
+            this.createNewValue_(this.input_.value);
+        } else if (!this.isNoResultOption_(li)) {
+            var option = {
+                Value: li.getAttribute('value'),
+                Text: li.querySelector('span').innerHTML
+            };
+            this.addChip_(option);
+            this.clearComponent_();
+        }
     }
 };
 /**
@@ -9189,8 +9208,11 @@ CustomChipAutocomplete.prototype.createNewValue_ = function (text) {
 CustomChipAutocomplete.prototype.getCurrentResultsAsOptions_ = function () {
     var options = [];
     var lis = this.ul_.querySelectorAll('li');
-    var hasCreateResult = this.hasCreateResultOption_();
-    for (var i = hasCreateResult ? 1 : 0; i < lis.length; i++) {
+    var i = 0;
+    if (this.hasCreateResultOption_() || this.hasTypeMoreTextOption_()) {
+        i++;
+    }
+    for (; i < lis.length; i++) {
         options.push({
             Value: lis[i].getAttribute('value'),
             Text: lis[i].querySelector('span').innerHTML
@@ -9293,7 +9315,7 @@ CustomChipAutocomplete.prototype.onInputCtrlKeys_ = function (ev) {
     if (ev.keyCode === 13) {
         // enter
         var value = this.input_.value;
-        if (!this.hasNoResultOption_()) {
+        if (!this.hasNoResultOption_() && !this.hasTypeMoreTextOption_()) {
             var isCreateMode = this.hasCreateResultOption_();
             if (value && isCreateMode) {
                 if (this.urlCreator_) {
