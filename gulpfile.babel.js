@@ -158,6 +158,7 @@ gulp.task('build-dist', ['clean'], cb => {
   runSequence(
     ['styles', 'styles-grid'],
     ['scripts'],
+    ['demofork'],
     ['tinymce'],
     cb);
 });
@@ -366,7 +367,7 @@ gulp.task('all', ['clean'], cb => {
 gulp.task('mocha', ['styles'], () => {
   $.connect.server({
     root: '.',
-    port: 3000,
+    port: 3001,
     livereload: false,
     middleware: function() {
       return [
@@ -400,7 +401,7 @@ gulp.task('mocha', ['styles'], () => {
 gulp.task('nightmare', () => {
   $.connect.server({
     root: '.',
-    port: 3000,
+    port: 3001,
     livereload: false,
     middleware: function() {
       return [
@@ -432,7 +433,7 @@ gulp.task('nightmare', () => {
         fn.apply(console, args);
       }
     })
-    .goto('http://localhost:3000/test/index.html?reporter=tap')
+    .goto('http://localhost:3001/test/index.html?reporter=tap')
     .wait('#nightmarejs')
     .end()
     .then(function() {
