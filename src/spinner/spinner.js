@@ -132,8 +132,31 @@
         this.createLayer(i);
       }
 
+      var cherry = window.cherry;
+      cherry.on(this.element_, 'MaterialSpinner.enable', this.start).bind(this);
+      cherry.on(this.element_, 'MaterialSpinner.disable', this.stop).bind(this);
+
       this.element_.classList.add('is-upgraded');
     }
+  };
+
+  /**
+   * Downgrade element.
+   */
+  MaterialSpinner.prototype.mdlDowngrade_ = function() {
+
+    this.stop();
+
+    var cherry = window.cherry;
+    cherry.off(this.element_, 'MaterialSpinner.enable');
+    cherry.off(this.element_, 'MaterialSpinner.disable');
+
+    var layer = this.element_.querySelector(this.CssClasses_.MDL_SPINNER_LAYER);
+    if (layer) {
+      layer.remove();
+    }
+
+    this.element_.classList.remove(this.CssClasses_.IS_UPGRADED);
   };
 
   // The component registers itself. It can assume componentHandler is available
