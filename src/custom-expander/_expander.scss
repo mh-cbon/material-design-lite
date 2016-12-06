@@ -75,6 +75,7 @@
     }
     &.custom-expander-notify-critical {
       background-color: unquote("rgb(#{$palette-blue-grey-900})");
+      color: white;
     }
   }
 
