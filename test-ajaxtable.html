@@ -1,0 +1,102 @@
+<html>
+<head>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons">
+  <link rel="stylesheet" href="material.css">
+  <script defer src="material.js"></script>
+  <script src="tinymce/tinymce.min.js"></script>
+  <style type="text/css">
+  .custom-data-table.custom-data-table__body--scroll tbody {
+      display: block;
+      max-height: 450px;
+      overflow-y: scroll;
+  }
+  </style>
+</head>
+<body>
+
+<br/><br/><br/><br/>
+
+<table
+  class="mdl-data-table
+  custom-js-data-table custom-data-table
+  custom-js-ajax-table custom-ajax-table
+  custom-data-table__body--scroll
+  mdl-data-table--selectable mdl-shadow--2dp"
+  checkbox-action-bt="#bt-action"
+  checkbox-name="some"
+  checkbox-property-value="Id"
+  loadmore-action-bt="#bt-loadmore"
+  refresh-action-bt="#bt-refresh"
+  loader-selector="#table-loader"
+  sort-qs-name="Sort"
+  limit-qs-name="Limit"
+  offset-qs-name="Offset"
+  limit-value="15"
+  data-url="ajax-data.json"
+  >
+  <thead>
+    <tr>
+      <th class="mdl-data-table__cell--non-numeric mdl-data-table__header--sorted"
+        data-name="Material"><a href="">Material</a></th>
+      <th data-name="Quantity" class="mdl-data-table__header--sorted"><a href="">Quantity</a></th>
+      <th data-name="UnitPrice" class="mdl-data-table__header--sorted"><a href="">Unit price</a></th>
+      <th data-link="/edit/{:Id}">
+        Edit
+        <div class="template"><a>edit</a></div>
+      </th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr class="template navigation-helper" show-nav-helper-every="10">
+      <td collapse="auto">
+        Past {:Offset} items
+      </td>
+    </tr>
+    <tr checkbox-value="r">
+      <td class="mdl-data-table__cell--non-numeric">Acrylic (Transparent)</td>
+      <td>25</td>
+      <td>$2.90</td>
+      <td>
+        <a href="/edit">edit</a>
+      </td>
+    </tr>
+    <tr checkbox-value="t">
+      <td class="mdl-data-table__cell--non-numeric">Plywood (Birch)</td>
+      <td>50</td>
+      <td>$1.25</td>
+      <td>
+        <a href="/edit">edit</a>
+      </td>
+    </tr>
+    <tr checkbox-value="yy">
+      <td class="mdl-data-table__cell--non-numeric">Laminate (Gold on Blue)</td>
+      <td>10</td>
+      <td>$2.35</td>
+      <td>
+        <a href="/edit">edit</a>
+      </td>
+    </tr>
+  </tbody>
+</table>
+
+<div id="table-loader" class="custom-loaderover custom-js-loaderover">
+  <div class="custom-loaderover-bg"></div>
+  <div class="mdl-spinner mdl-js-spinner custom-spinner"></div>
+</div>
+
+<button class="mdl-button mdl-js-button mdl-button--raised mdl-button--colored" id="bt-action">
+  Checkbox button
+</button>
+
+<button class="mdl-button mdl-js-button mdl-button--raised mdl-button--colored" id="bt-loadmore">
+  Load more button
+</button>
+
+<button class="mdl-button mdl-js-button mdl-button--raised mdl-button--colored" id="bt-refresh">
+  Refresh button
+</button>
+
+<br/><br/><br/><br/>
+
+</body>
+</html>

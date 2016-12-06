@@ -1,0 +1,713 @@
+<html>
+<head>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons">
+  <link rel="stylesheet" href="material.css">
+  <script defer src="material.js"></script>
+  <script src="tinymce/tinymce.min.js"></script>
+</head>
+<body>
+
+<br/>
+<br/>
+<br/>
+
+
+<a href="right-page.html"
+  class="bt-rightpanelover"
+  >Click me!</a>
+
+<div class="custom-js-rightpanelover custom-rightpanelover"
+  opener-bt=".bt-rightpanelover"
+  closer-bt=".bt-closer"
+  closer-form=".form-closer"
+  closer-form-delay="2000"
+  loader-selector="#rightpanel-loader"
+  >
+  <div class="custom-rightpanelover-container"></div>
+</div>
+
+<div id="rightpanel-loader" class="custom-loaderover custom-js-loaderover">
+  <div class="custom-loaderover-bg"></div>
+  <div class="mdl-spinner mdl-js-spinner is-active custom-spinner"></div>
+</div>
+
+<hr/>
+
+<div>
+
+    <table
+    class="mdl-data-table custom-js-data-table custom-data-table mdl-data-table--selectable mdl-shadow--2dp"
+    checkbox-action-bt="#bt-action"
+    checkbx-name="some"
+    >
+      <thead>
+        <tr>
+          <th class="mdl-data-table__cell--non-numeric">Material</th>
+          <th>Quantity</th>
+          <th>Unit price</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr checkbox-value="r">
+          <td class="mdl-data-table__cell--non-numeric">Acrylic (Transparent)</td>
+          <td>25</td>
+          <td>$2.90</td>
+        </tr>
+        <tr checkbox-value="t">
+          <td class="mdl-data-table__cell--non-numeric">Plywood (Birch)</td>
+          <td>50</td>
+          <td>$1.25</td>
+        </tr>
+        <tr checkbox-value="yy">
+          <td class="mdl-data-table__cell--non-numeric">Laminate (Gold on Blue)</td>
+          <td>10</td>
+          <td>$2.35</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <!-- Colored raised button -->
+    <button class="mdl-button mdl-js-button mdl-button--raised mdl-button--colored" id="bt-action">
+      Button
+    </button>
+
+</div>
+
+<div class="custom-js-dialog custom-dialog" on-button-click="#bt-action">
+  <div class="custom-dialog-bg mdl-color--grey"></div>
+  <div class="custom-dialog-container mdl-dialog mdl-color--white">
+    <h4 class="mdl-dialog__title">Title of the dialog</h4>
+    <div class="mdl-dialog__content">
+      <p>Text of the dialog</p>
+    </div>
+    <div class="mdl-dialog__actions">
+      <button type="button" class="mdl-button custom-dialog-confirm">OK</button>
+      <button type="button" class="mdl-button custom-dialog-cancel">CANCEL</button>
+    </div>
+    <button type="button" class="mdl-button custom-dialog-close">
+      <i class="material-icons">close</i>
+    </button>
+  </div>
+</div>
+
+<hr/>
+<div>
+
+    <table
+    class="mdl-data-table custom-js-data-table custom-data-table mdl-data-table--selectable mdl-shadow--2dp"
+    checkbox-action-bt="#bt-action"
+    checkbox-name="some"
+    >
+      <thead>
+        <tr>
+          <th class="mdl-data-table__cell--non-numeric mdl-data-table__header--sorted-ascending">
+            <a href="?sort=desc">Material</a>
+          </th>
+          <th class="mdl-data-table__header--sorted">
+            <a href="?sort=asc">Quantity</a>
+          </th>
+          <th class="mdl-data-table__header--sorted-descending">
+            <a href="?sort=asc">Unit price</a>
+          </th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr checkbox-value="r">
+          <td class="mdl-data-table__cell--non-numeric">Acrylic (Transparent)</td>
+          <td>25</td>
+          <td>$2.90</td>
+        </tr>
+        <tr checkbox-value="t">
+          <td class="mdl-data-table__cell--non-numeric">Plywood (Birch)</td>
+          <td>50</td>
+          <td>$1.25</td>
+        </tr>
+        <tr checkbox-value="yy">
+          <td class="mdl-data-table__cell--non-numeric">Laminate (Gold on Blue)</td>
+          <td>10</td>
+          <td>$2.35</td>
+        </tr>
+      </tbody>
+    </table>
+</div>
+
+</div>
+
+<hr/>
+
+<form name="test" method="GET" id="form1">
+  <input type="hidden" name="legume" value="tomate" />
+</form>
+
+<button class="mdl-button mdl-js-button mdl-button--raised mdl-button--colored bt-with-dialog"
+  form="form1">
+  Button
+</button>
+
+<br/><br/>
+
+<button class="mdl-button mdl-js-button mdl-button--raised mdl-button--colored bt-with-dialog" form="form1" disabled="disabled">
+  Button disabled
+</button>
+
+<br/><br/>
+
+<a href="?dialog_confirmed=true" class="bt-with-dialog">
+  link
+</a>
+
+<br/><br/>
+
+<a href="?dialog_confirmed=true" class="bt-with-dialog" disabled="disabled">
+  link disabled
+</a>
+
+<div class="custom-js-dialog custom-dialog" on-button-click=".bt-with-dialog">
+  <div class="custom-dialog-bg mdl-color--grey"></div>
+  <div class="custom-dialog-container mdl-dialog mdl-color--white">
+    <h4 class="mdl-dialog__title">Title of the dialog</h4>
+    <div class="mdl-dialog__content">
+      <p>Text of the dialog</p>
+    </div>
+    <div class="mdl-dialog__actions">
+      <button type="submit" class="mdl-button custom-dialog-confirm"
+      form="form1">OK</button>
+      <button type="button" class="mdl-button custom-dialog-cancel">CANCEL</button>
+    </div>
+    <button type="button" class="mdl-button custom-dialog-close">
+      <i class="material-icons">close</i>
+    </button>
+  </div>
+</div>
+
+<hr/>
+
+<div class="custom-js-expander custom-expander">
+  <div class="custom-expander-bt">
+    Click me to expand!
+    <i class="material-icons custom-expander-shown">arrow_drop_down</i>
+    <i class="material-icons custom-expander-hidden">arrow_drop_up</i>
+  </div>
+  <div class="custom-expander-container mdl-color--grey">
+    <div style="height:50px;">expanded</div>
+    <div style="height:50px;">too</div>
+  </div>
+</div>
+
+<hr/>
+
+<form action="#">
+  <div class="mdl-textfield mdl-js-textfield custom-js-datefield"
+  displaylocale="fr"
+  displayformat="ddd DD MMM YYYY"
+  format="YYYY-MM-DDThh:mm:ssZ"
+  past="2011-11-09T00:00:01Z"
+  future="2031-11-09T00:00:01Z"
+  mode="24H"
+  orientation="LANDSCAPE"
+  color="true"
+  ok="ok"
+  cancel="cancel"
+  >
+    <input class="mdl-textfield__input" type="text" id="sample1">
+    <input class="custom-datefield__value" type="hidden" name="the_date"
+      value="2016-11-09T00:00:01Z">
+    <label class="mdl-textfield__label" for="sample1">Pick a date...</label>
+  </div>
+</form>
+
+<hr/>
+
+<div class="custom-js-expander custom-expander">
+
+  <label class="mdl-checkbox mdl-js-checkbox mdl-js-ripple-effect custom-expander-bt"
+  for="checkbox-1">
+    <input type="checkbox" id="checkbox-1" class="mdl-checkbox__input">
+    <span class="mdl-checkbox__label">Checkbox</span>
+  </label>
+
+  <div class="custom-expander-container">
+    <div class="mdl-textfield is-invalid custom-input-confirm custom-js-input-confirm">
+      <div class="mdl-textfield mdl-js-textfield">
+        <input class="mdl-textfield__input" type="text" id="sample1">
+        <label class="mdl-textfield__label" for="sample1">Text...</label>
+      </div>
+      <div class="mdl-textfield mdl-js-textfield">
+        <input class="mdl-textfield__input" type="text" id="sample1">
+        <label class="mdl-textfield__label" for="sample1">Text...</label>
+      </div>
+      <span class="mdl-textfield__error">It is not valid</span>
+    </div>
+  </div>
+</div>
+
+<hr/>
+
+<div class="mdl-selectfield mdl-js-selectfield mdl-selectfield--floating-label">
+  <select id="gender" class="mdl-selectfield__select">
+    <option value=""></option>
+    <option value="option1">option 1</option>
+    <option value="option2">option 2</option>
+  </select>
+  <label class="mdl-selectfield__label" for="gender">User gender</label>
+  <span class="mdl-selectfield__error">Select a value</span>
+</div>
+
+<hr/>
+
+<div class="mdl-selectfield mdl-js-selectfield mdl-selectfield--floating-label">
+  <select id="gender" class="mdl-selectfield__select">
+    <option value=""></option>
+    <option value="option1">option 1</option>
+    <option value="option2">option 2</option>
+  </select>
+  <div class="mdl-selectfield__icon"><i class="material-icons">arrow_drop_down</i></div>
+  <label class="mdl-selectfield__label" for="gender">User gender</label>
+</div>
+
+<hr/>
+
+<div class="mdl-selectfield mdl-js-selectfield">
+  <select id="gender" class="mdl-selectfield__select" multiple="multiple" size="3">
+    <option value=""></option>
+    <option value="option1">option 1</option>
+    <option value="option2">option 2</option>
+    <option value="option2">option 3</option>
+    <option value="option2">option 4</option>
+    <option value="option2">option 5</option>
+  </select>
+</div>
+
+<hr/>
+
+<div class="mdl-textfield mdl-js-textfield custom-inputfile custom-js-inputfile">
+  <input class="mdl-textfield__input" type="text" id="inputfile1"
+      value="" readonly="readonly" />
+
+  <label>
+    <div class="mdl-button mdl-button--icon">
+      <i class="material-icons">attach_file</i>
+      <i class="material-icons custom-clearbutton">clear</i>
+    </div>
+    <input type="file" />
+  </label>
+
+  <label class="mdl-textfield__label" for="inputfile1">Choose a file</label>
+  <span class="mdl-textfield__error">beep boop</span>
+</div>
+
+<hr/>
+
+<div class="mdl-textfield mdl-js-textfield custom-inputfile custom-js-inputfile
+            is-invalid mdl-textfield--floating-label">
+  <input class="mdl-textfield__input" type="text"
+      id="inputfile2" value="" readonly="readonly" />
+
+  <label>
+    <div class="mdl-button mdl-button--icon">
+      <i class="material-icons">attach_file</i>
+      <i class="material-icons custom-clearbutton">clear</i>
+    </div>
+    <input type="file" multiple="multiple" />
+  </label>
+
+  <label class="mdl-textfield__label" for="inputfile2">Choose a file</label>
+  <span class="mdl-textfield__error">beep boop</span>
+</div>
+
+<hr/>
+
+<div class="mdl-textfield mdl-js-textfield custom-tinymce custom-js-tinymce">
+   <textarea class="mdl-textfield__input"
+   type="text"
+   id="wysiwyg1"
+   rows= "3">wysiwyg</textarea>
+   <label class="mdl-textfield__label" for="wysiwyg1">label...</label>
+   <span class="mdl-textfield__error">beep boop</span>
+</div>
+
+<hr/>
+
+<div class="mdl-textfield mdl-js-textfield custom-tinymce custom-js-tinymce is-invalid mdl-textfield--floating-label">
+   <textarea class="mdl-textfield__input"
+   type="text"
+   id="wysiwyg2"
+   rows= "3">wysiwyg</textarea>
+   <label class="mdl-textfield__label" for="wysiwyg2">label...</label>
+   <span class="mdl-textfield__error">beep boop</span>
+</div>
+
+<hr/>
+
+<div class="custom-chipautocomplete custom-js-chipautocomplete"
+  url-completer="/chip_autocomplete_list.json?Input={:Text}&List=list1"
+  url-completer-args='{"limit": 30}'
+  url-creator="/chip_autocomplete_create.json"
+  url-creator-args='{"extra": "arg"}'
+  txt-remote-unreachable="Server gone south, baaaadddd!"
+  chip-name="inputname"
+  >
+  <div class="mdl-textfield mdl-js-textfield">
+      <input class="mdl-textfield__input"id="chipautocomplete1" autocomplete="off" type="text">
+      <label class="mdl-textfield__label" for="chipautocomplete1">chip autocomplete</label>
+      <span class="mdl-textfield__error">blah</span>
+    </div>
+
+    <div class="custom-chipautocomplete-results mdl-shadow--2dp">
+      <ul class="mdl-list"></ul>
+    </div>
+
+    <div class="custom-chipautocomplete-selected"></div>
+</div>
+
+<hr/>
+
+<div class="custom-chipautocomplete custom-js-chipautocomplete"
+  url-completer="/chip_autocomplete_list.json?Input={:Text}&List=list2"
+  url-completer-args='{"limit": 30}'
+  url-creator="/chip_autocomplete_create-error.json"
+  url-creator-args='{"extra": "arg"}'
+  txt-remote-unreachable="Server gone south, baaaadddd!"
+  txt-no-results="No results found!"
+  chip-name="inputname"
+  >
+  <div class="mdl-textfield mdl-js-textfield">
+      <input class="mdl-textfield__input"id="chipautocomplete1" autocomplete="off" type="text">
+      <label class="mdl-textfield__label" for="chipautocomplete1">chip autocomplete with empty results</label>
+      <span class="mdl-textfield__error">blah</span>
+    </div>
+
+    <div class="custom-chipautocomplete-results mdl-shadow--2dp">
+      <ul class="mdl-list"></ul>
+    </div>
+
+    <div class="custom-chipautocomplete-selected"></div>
+</div>
+
+<hr/>
+
+<div class="custom-chipautocomplete custom-js-chipautocomplete"
+  url-completer="/chip_autocomplete_list-error.json?Input={:Text}"
+  url-completer-args='{"limit": 30}'
+  txt-remote-unreachable="Server gone south, baaaadddd!"
+  chip-name="inputname"
+  >
+  <div class="mdl-textfield mdl-js-textfield">
+    <input class="mdl-textfield__input" id="chipautocomplete1" autocomplete="off" type="text">
+    <label class="mdl-textfield__label" for="chipautocomplete1">chip autocomplete</label>
+    <span class="mdl-textfield__error">blah</span>
+  </div>
+
+  <div class="custom-chipautocomplete-results mdl-shadow--2dp">
+    <ul class="mdl-list"></ul>
+  </div>
+
+  <div class="custom-chipautocomplete-selected">
+
+    <span class="mdl-chip mdl-chip--deletable">
+      <input type="hidden" name="chip" value="blah" />
+      <span class="mdl-chip__text">chip 1</span>
+      <button type="button" class="mdl-chip__action"><i class="material-icons">close</i></button>
+    </span>
+
+    <span class="mdl-chip mdl-chip--deletable">
+      <input type="hidden" name="chip" value="blah" />
+      <span class="mdl-chip__text">chip 2</span>
+      <button type="button" class="mdl-chip__action"><i class="material-icons">close</i></button>
+    </span>
+
+  </div>
+</div>
+
+<hr/>
+
+<div class="custom-cropper custom-js-cropper">
+
+  <div class="custom-cropper-current-img">
+    <img src="avatar-1.png" />
+  </div>
+
+  <input class="custom-cropper-b64-result" type="hidden" name="the name you need" />
+  <input class="custom-cropper-data-result" type="hidden" name="the name you need" />
+
+  <div class="mdl-textfield mdl-js-textfield custom-inputfile custom-js-inputfile
+              is-invalid mdl-textfield--floating-label">
+    <input class="mdl-textfield__input" type="text"
+        id="inputfile2" value="" readonly="readonly" />
+
+    <label>
+      <div class="mdl-button mdl-button--icon">
+        <i class="material-icons">attach_file</i>
+        <i class="material-icons custom-clearbutton">clear</i>
+      </div>
+      <input type="file" />
+    </label>
+
+    <label class="mdl-textfield__label" for="inputfile2">Choose a file</label>
+    <span class="mdl-textfield__error">beep boop</span>
+  </div>
+
+  <div class="custom-cropper-dialog custom-js-dialog custom-dialog">
+    <div class="custom-dialog-bg mdl-color--grey"></div>
+    <div class="custom-dialog-container mdl-dialog mdl-color--white">
+      <h4 class="mdl-dialog__title">Title of the dialog</h4>
+      <div class="mdl-dialog__content">
+        <div class="custom-cropper-component-container">
+          <img src="" class="custom-cropper-dialog-img" />
+        </div>
+        <div class="custom-cropper-preview">
+          <img />
+        </div>
+      </div>
+      <div class="mdl-dialog__actions">
+        <button type="button" class="mdl-button custom-dialog-confirm">OK</button>
+        <button type="button" class="mdl-button custom-dialog-cancel">CANCEL</button>
+      </div>
+      <button type="button" class="mdl-button custom-dialog-close">
+        <i class="material-icons">close</i>
+      </button>
+    </div>
+  </div>
+
+</div>
+
+<hr/>
+
+<div class="custom-cropper custom-js-cropper"
+  aspect-ratio="1"
+  b64-export-width="96"
+  b64-export-height="96"
+  >
+
+  <div class="custom-cropper-current-img custom-cropper-current-img--rounded">
+    <img src="avatar-1.png" />
+  </div>
+
+  <input class="custom-cropper-b64-result" type="hidden" name="the name you need" />
+  <input class="custom-cropper-data-result" type="hidden" name="the name you need" />
+
+  <div class="mdl-textfield mdl-js-textfield custom-inputfile custom-js-inputfile
+              is-invalid mdl-textfield--floating-label">
+    <input class="mdl-textfield__input" type="text"
+        id="inputfile2" value="" readonly="readonly" />
+
+    <label>
+      <div class="mdl-button mdl-button--icon">
+        <i class="material-icons">attach_file</i>
+        <i class="material-icons custom-clearbutton">clear</i>
+      </div>
+      <input type="file" />
+    </label>
+
+    <label class="mdl-textfield__label" for="inputfile2">Choose a file</label>
+    <span class="mdl-textfield__error">beep boop</span>
+  </div>
+
+  <div class="custom-cropper-dialog custom-js-dialog custom-dialog">
+    <div class="custom-dialog-bg mdl-color--grey"></div>
+    <div class="custom-dialog-container mdl-dialog mdl-color--white">
+      <h4 class="mdl-dialog__title">Title of the dialog</h4>
+      <div class="mdl-dialog__content">
+        <div class="custom-cropper-component-container">
+          <img src="" class="custom-cropper-dialog-img" />
+        </div>
+        <div class="custom-cropper-preview">
+          <img />
+        </div>
+      </div>
+      <div class="mdl-dialog__actions">
+        <button type="button" class="mdl-button custom-dialog-confirm">OK</button>
+        <button type="button" class="mdl-button custom-dialog-cancel">CANCEL</button>
+      </div>
+      <button type="button" class="mdl-button custom-dialog-close">
+        <i class="material-icons">close</i>
+      </button>
+    </div>
+  </div>
+
+</div>
+
+<hr/>
+
+<div class="custom-cropper custom-js-cropper"
+  aspect-ratio="1"
+  >
+
+  <input class="custom-cropper-b64-result" type="hidden" name="the name you need" />
+  <input class="custom-cropper-data-result" type="hidden" name="the name you need" />
+
+  <div class="mdl-textfield mdl-js-textfield custom-inputfile custom-js-inputfile
+              is-invalid mdl-textfield--floating-label">
+    <input class="mdl-textfield__input" type="text"
+        id="inputfile2" value="" readonly="readonly" />
+
+    <label>
+      <div class="mdl-button mdl-button--icon">
+        <i class="material-icons">attach_file</i>
+        <i class="material-icons custom-clearbutton">clear</i>
+      </div>
+      <input type="file" />
+    </label>
+
+    <label class="mdl-textfield__label" for="inputfile2">Choose a file</label>
+    <span class="mdl-textfield__error">beep boop</span>
+  </div>
+
+  <div class="custom-cropper-dialog custom-js-dialog custom-dialog">
+    <div class="custom-dialog-bg mdl-color--grey"></div>
+    <div class="custom-dialog-container mdl-dialog mdl-color--white">
+      <h4 class="mdl-dialog__title">Title of the dialog</h4>
+      <div class="mdl-dialog__content">
+        <div class="custom-cropper-component-container">
+          <img src="" class="custom-cropper-dialog-img" />
+        </div>
+        <div class="custom-cropper-preview">
+          <img />
+        </div>
+      </div>
+      <div class="mdl-dialog__actions">
+        <button type="button" class="mdl-button custom-dialog-confirm">OK</button>
+        <button type="button" class="mdl-button custom-dialog-cancel">CANCEL</button>
+      </div>
+      <button type="button" class="mdl-button custom-dialog-close">
+        <i class="material-icons">close</i>
+      </button>
+    </div>
+  </div>
+
+</div>
+
+<hr/>
+
+<div class="custom-dup custom-js-dup">
+
+  <div class="custom-dup-template">
+
+    <div class="custom-dup-item">
+      <div class="custom-dup-component">
+
+        <div class="custom-cropper custom-js-cropper">
+
+          <div class="custom-cropper-current-img">
+            <img src="avatar-1.png" />
+          </div>
+
+          <input class="custom-cropper-b64-result" type="hidden" name="the name you need" />
+          <input class="custom-cropper-data-result" type="hidden" name="the name you need" />
+
+          <div class="mdl-textfield mdl-js-textfield custom-inputfile custom-js-inputfile
+                      is-invalid mdl-textfield--floating-label">
+            <input class="mdl-textfield__input" type="text"
+                id="inputfile2" value="" readonly="readonly" />
+
+            <label>
+              <div class="mdl-button mdl-button--icon">
+                <i class="material-icons">attach_file</i>
+                <i class="material-icons custom-clearbutton">clear</i>
+              </div>
+              <input type="file" />
+            </label>
+
+            <label class="mdl-textfield__label" for="inputfile2">Choose a file</label>
+            <span class="mdl-textfield__error">beep boop</span>
+          </div>
+
+          <div class="custom-cropper-dialog custom-js-dialog custom-dialog">
+            <div class="custom-dialog-bg mdl-color--grey"></div>
+            <div class="custom-dialog-container mdl-dialog mdl-color--white">
+              <h4 class="mdl-dialog__title">Title of the dialog</h4>
+              <div class="mdl-dialog__content">
+                <div class="custom-cropper-component-container">
+                  <img src="" class="custom-cropper-dialog-img" />
+                </div>
+                <div class="custom-cropper-preview">
+                  <img />
+                </div>
+              </div>
+              <div class="mdl-dialog__actions">
+                <button type="button" class="mdl-button custom-dialog-confirm">OK</button>
+                <button type="button" class="mdl-button custom-dialog-cancel">CANCEL</button>
+              </div>
+              <button type="button" class="mdl-button custom-dialog-close">
+                <i class="material-icons">close</i>
+              </button>
+            </div>
+          </div>
+
+        </div>
+
+      </div>
+      <button class="mdl-button mdl-js-button mdl-button--raised custom-dup-bt-remove">
+        Remove
+      </button>
+    </div>
+
+  </div>
+
+  <div class="custom-dup-container">
+
+    <div class="custom-dup-item">
+      <div class="custom-dup-component">
+
+        <div class="mdl-textfield mdl-js-textfield">
+          <input class="mdl-textfield__input" type="text" id="sample1">
+          <label class="mdl-textfield__label" for="sample1">Text...</label>
+        </div>
+
+      </div>
+      <button class="mdl-button mdl-js-button mdl-button--raised custom-dup-bt-remove">
+        Remove
+      </button>
+    </div>
+
+  </div>
+
+  <button class="mdl-button mdl-js-button mdl-button--raised custom-dup-bt-add">
+    Add
+  </button>
+
+</div>
+
+<hr/>
+
+<div class="mdl-selectfield mdl-js-selectfield custom-js-select-change-url">
+  <select id="gender" class="mdl-selectfield__select">
+    <option value="/test.html">Change value to change url</option>
+    <option value="/test.html?opt1">option 1</option>
+    <option value="/test.html?opt2">option 2</option>
+  </select>
+  <label class="mdl-selectfield__label" for="gender">User gender</label>
+  <span class="mdl-selectfield__error">Select a value</span>
+</div>
+
+<hr/>
+
+<div class="custom-js-select-change-url">
+  <div class="mdl-selectfield mdl-js-selectfield">
+    <select id="gender" class="mdl-selectfield__select">
+      <option value="/test.html">Change value to change url</option>
+      <option value="/test.html?opt1">option 1</option>
+      <option value="/test.html?opt2">option 2</option>
+    </select>
+    <label class="mdl-selectfield__label" for="gender">User gender</label>
+    <span class="mdl-selectfield__error">Select a value</span>
+  </div>
+</div>
+
+<hr/>
+
+<select id="gender" class="custom-js-select-change-url">
+  <option value="/test.html">Change value to change url</option>
+  <option value="/test.html?opt1">option 1</option>
+  <option value="/test.html?opt2">option 2</option>
+</select>
+
+<hr/>
+
+<br/>
+<br/>
+<br/>
+<br/>
+
+</body>
+</html>

@@ -1,0 +1,88 @@
+<html>
+<head>
+  <script src="material.js"></script>
+</head>
+<body>
+
+<div id="playground" style="border: 1px solid black;">
+  <br/><br/><br/>
+  This is the playground
+  <br/>
+  <button id="button">button</button>
+  <br/><br/><br/>
+</div>
+
+<br/><br/><br/>
+
+<div>
+  <br/>
+  <button id="add_click">add 'click' event on button</button>
+  <button id="remove_click">remove 'click' event from button</button>
+  <button id="remove_all_click">remove all 'click' event from button</button>
+  <br/>
+  <button id="add_ns_click">add 'ns.click' event on button</button>
+  <button id="remove_ns_click">remove 'ns.click' event from button</button>
+  <button id="remove_all_ns_click">remove all 'ns.click' event from button</button>
+  <br/>
+  <button id="trigger_click">trigger 'click' event on button</button>
+  <button id="trigger_ns_click">trigger 'ns.click' event on button</button>
+</div>
+
+<script>
+  var pl = document.querySelector("#playground");
+  var bt = document.querySelector("#button");
+
+  var bt_add_click = document.querySelector("#add_click");
+  var bt_rem_click = document.querySelector("#remove_click");
+  var bt_rem_all_click = document.querySelector("#remove_all_click");
+
+  var bt_add_ns_click = document.querySelector("#add_ns_click");
+  var bt_rem_ns_click = document.querySelector("#remove_ns_click");
+  var bt_rem_all_ns_click = document.querySelector("#remove_all_ns_click");
+
+  var trigger_click = document.querySelector("#trigger_click");
+  var trigger_ns_click = document.querySelector("#trigger_ns_click");
+
+  var cherry = window.cherry;
+  var clickHandler = function (ev) {
+    console.log("hello from event handler");
+    console.log(ev);
+    console.log(this);
+    console.log("goodbye from event handler");
+  };
+  var nsClickHandler = function (ev) {
+    console.log("hello from NS event handler");
+    console.log(ev);
+    console.log(this);
+    console.log("goodbye from NS event handler");
+  };
+
+  bt_add_click.addEventListener('click', function () {
+    cherry.on(bt, 'click', clickHandler);
+    console.log('click added');
+  });
+  bt_rem_click.addEventListener('click', function () {
+    cherry.off(bt, 'click', clickHandler);
+    console.log('click removed');
+  });
+  bt_rem_all_click.addEventListener('click', function () {
+    cherry.off(bt, 'click');
+    console.log('all click removed');
+  });
+
+  bt_add_ns_click.addEventListener('click', function () {
+    cherry.on(bt, 'ns.click', nsClickHandler);
+    console.log('ns.click added');
+  });
+  bt_rem_ns_click.addEventListener('click', function () {
+    cherry.off(bt, 'ns.click', nsClickHandler);
+    console.log('ns.click removed');
+  });
+  bt_rem_all_ns_click.addEventListener('click', function () {
+    cherry.off(bt, 'ns.click');
+    console.log('all ns.click removed');
+  });
+</script>
+
+</body>
+</html>
