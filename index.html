@@ -1,0 +1,228 @@
+<!DOCTYPE html>
+<html lang="en-us">
+  <head>
+    <meta charset="UTF-8">
+    <title>Material-design-lite by mh-cbon</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" type="text/css" href="stylesheets/normalize.css" media="screen">
+    <link href='https://fonts.googleapis.com/css?family=Open+Sans:400,700' rel='stylesheet' type='text/css'>
+    <link rel="stylesheet" type="text/css" href="stylesheets/stylesheet.css" media="screen">
+    <link rel="stylesheet" type="text/css" href="stylesheets/github-light.css" media="screen">
+  </head>
+  <body>
+    <section class="page-header">
+      <h1 class="project-name">Material-design-lite</h1>
+      <h2 class="project-tagline">Fork Material Design Components in HTML/CSS/JS</h2>
+      <a href="https://github.com/mh-cbon/material-design-lite" class="btn">View on GitHub</a>
+      <a href="https://github.com/mh-cbon/material-design-lite/zipball/master" class="btn">Download .zip</a>
+      <a href="https://github.com/mh-cbon/material-design-lite/tarball/master" class="btn">Download .tar.gz</a>
+    </section>
+
+    <section class="main-content">
+      <h1>
+<a id="material-design-lite---fork" class="anchor" href="#material-design-lite---fork" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Material Design Lite - Fork</h1>
+
+<p>this forks add several components to the MDL base.</p>
+
+<p>It s not AAA compliant all browsers, but could be!</p>
+
+<ul>
+<li>custom-selectfield: Mdl integration fo the select field.</li>
+<li>custom-chipautocomplete: An autocomplete field which records selected data into chips.</li>
+<li>custom-cropper: An input file which opens an image cropper and appropriately sets form values.</li>
+<li>custom-input-file: An input file support for mdl.</li>
+<li>custom-tinymce: A textfield which supports tinymce integration right out of the box.</li>
+<li>custom-datefield: A text field which diplays an awesome date picker.</li>
+<li>custom-datatable: Improved data table which can enable/disable a button, set checkbox values.</li>
+<li>custom-expander: Easily expand nodes with css classes.</li>
+<li>custom-dialog: A dialog box implementation.</li>
+<li>custom-dup: A component which add / remove a component template.</li>
+<li>custom input confirm: A component to handle input confirmation (double input).</li>
+<li>custom right panel over: A component which displays a web page in a right panel over the existing content.</li>
+</ul>
+
+<p>componentHandler.downgradeElementRecursive: a method to downgrade a node recursively.</p>
+
+<p>To see an half-functional version, check</p>
+
+<ul>
+<li><a href="https://mh-cbon.github.io/material-design-lite/test.html">general test</a></li>
+<li><a href="https://mh-cbon.github.io/material-design-lite/test-form-ajax.html">form ajax</a></li>
+<li><a href="https://mh-cbon.github.io/material-design-lite/test-loaderover.html">loader over</a></li>
+<li><a href="https://mh-cbon.github.io/material-design-lite/test-formajaxtable.html">ajax table with form</a></li>
+</ul>
+
+<p>To see an full-functional version, please, clone the project, run <code>gulp serve</code>, browse </p>
+
+<ul>
+<li><a href="http://localhost:5000/test.html">general test</a></li>
+<li><a href="http://localhost:5000/test-form-ajax.html">form ajax</a></li>
+<li><a href="http://localhost:5000/test-loaderover.html">loader over</a></li>
+<li><a href="http://localhost:5000/test-formajaxtable.html">ajax table with form</a></li>
+</ul>
+
+<h3>
+<a id="install" class="anchor" href="#install" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Install</h3>
+
+<div class="highlight highlight-source-shell"><pre>npm i @mh-cbon/material-design-lite --save</pre></div>
+
+<h3>
+<a id="your-local-workflow" class="anchor" href="#your-local-workflow" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Your local workflow</h3>
+
+<div class="highlight highlight-source-shell"><pre>git clone https://github.com/mh-cbon/material-design-lite.git
+<span class="pl-c1">cd</span> material-design-lite
+npm i
+./node_modules/.bin/gulp default
+./node_modules/.bin/gulp <span class="pl-c1">test</span>:web
+./node_modules/.bin/gulp nightmare
+./node_modules/.bin/gulp serve
+./node_modules/.bin/gulp gh <span class="pl-c"># publish your updates on your own gh-pages branch.</span>
+./node_modules/.bin/gulp build <span class="pl-c"># to build dist folder</span>
+npm run patch<span class="pl-k">|</span>minor<span class="pl-k">|</span>major <span class="pl-c"># to publish an npm package of the built dist folder</span></pre></div>
+
+<h1>
+<a id="material-design-lite" class="anchor" href="#material-design-lite" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Material Design Lite</h1>
+
+<p><a href="https://badge.fury.io/gh/google%2Fmaterial-design-lite"><img src="https://badge.fury.io/gh/google%2Fmaterial-design-lite.svg" alt="GitHub version"></a>
+<a href="https://badge.fury.io/js/material-design-lite"><img src="https://badge.fury.io/js/material-design-lite.svg" alt="npm version"></a>
+<a href="https://badge.fury.io/bo/material-design-lite"><img src="https://badge.fury.io/bo/material-design-lite.svg" alt="Bower version"></a>
+<a href="https://gitter.im/google/material-design-lite"><img src="https://img.shields.io/gitter/room/gitterHQ/gitter.svg" alt="Gitter version"></a>
+<a href="https://david-dm.org/google/material-design-lite"><img src="https://david-dm.org/google/material-design-lite.svg" alt="Dependency Status"></a></p>
+
+<blockquote>
+<p>An implementation of <a href="http://www.google.com/design/spec/material-design/introduction.html">Material Design</a>
+components in vanilla CSS, JS, and HTML.</p>
+</blockquote>
+
+<p>Material Design Lite (MDL) lets you add a Material Design look and feel to your
+static content websites. It doesn't rely on any JavaScript frameworks or
+libraries. Optimized for cross-device use, gracefully degrades in older
+browsers, and offers an experience that is accessible from the get-go.</p>
+
+<h2>
+<a id="want-to-contribute" class="anchor" href="#want-to-contribute" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Want to contribute?</h2>
+
+<p>If you found a bug, have any questions or want to contribute. Follow our
+<a href="https://github.com/google/material-design-lite/blob/master/CONTRIBUTING.md">guidelines</a>,
+and help improve the Material Design Lite. For more information visit our
+<a href="https://github.com/google/material-design-lite/wiki">wiki</a>.</p>
+
+<p>If you are submitting a bug fix or a new component for the 1.x line, please send those into <code>mdl-1.x</code> currently.</p>
+
+<p>The <code>master</code> branch is where we are working on 2.0.
+It is currently <strong>highly</strong> experimental and no support building or using it will be provided.</p>
+
+<h2>
+<a id="use-mdl-on-your-site" class="anchor" href="#use-mdl-on-your-site" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Use MDL on your site?</h2>
+
+<p><strong>This document is targeted at developers that will contribute to or compile
+MDL. If you are looking to use MDL on your website or web app please head to
+<a href="http://getmdl.io">getmdl.io</a>.</strong></p>
+
+<h2>
+<a id="browser-support-in-v1" class="anchor" href="#browser-support-in-v1" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Browser Support in v1</h2>
+
+<table>
+<thead>
+<tr>
+<th>IE9</th>
+<th>IE10</th>
+<th>IE11</th>
+<th>Chrome</th>
+<th>Opera</th>
+<th>Firefox</th>
+<th>Safari</th>
+<th>Chrome (Android)</th>
+<th>Mobile Safari</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>B</td>
+<td>A</td>
+<td>A</td>
+<td>A</td>
+<td>A</td>
+<td>A</td>
+<td>A</td>
+<td>A</td>
+<td>A</td>
+</tr>
+</tbody>
+</table>
+
+<p>A-grade browsers are fully supported. B-grade browsers will gracefully degrade
+to our CSS-only experience.</p>
+
+<h2>
+<a id="browser-support-in-v2-in-development" class="anchor" href="#browser-support-in-v2-in-development" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Browser Support in v2 (in development)</h2>
+
+<p>Supported evergreen browsers:</p>
+
+<ul>
+<li>Chrome</li>
+<li>Edge</li>
+<li>Firefox</li>
+<li>Opera</li>
+</ul>
+
+<p>Supported versioned browsers:</p>
+
+<ul>
+<li>Internet Explorer 11</li>
+<li>Safari 8</li>
+<li>Mobile Safari 8</li>
+</ul>
+
+<h3>
+<a id="download--clone" class="anchor" href="#download--clone" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Download / Clone</h3>
+
+<p>Clone the repo using Git:</p>
+
+<div class="highlight highlight-source-shell"><pre>git clone https://github.com/google/material-design-lite.git</pre></div>
+
+<p>Alternatively you can <a href="https://github.com/google/material-design-lite/archive/master.zip">download</a>
+this repository.</p>
+
+<p>Windows users, if you have trouble compiling due to line endings then make sure
+you configure git to checkout the repository with <code>lf</code> (unix) line endings. This
+can be achieved by setting <code>core.eol</code>.</p>
+
+<div class="highlight highlight-source-shell"><pre>git config core.eol lf
+git config core.autocrlf input
+git rm --cached -r <span class="pl-c1">.</span>
+git reset --hard</pre></div>
+
+<blockquote>
+<p>Remember, the master branch is considered unstable. Do not use this in
+production. Use a tagged state of the repository, npm, or bower for stability!</p>
+</blockquote>
+
+<h2>
+<a id="feature-requests" class="anchor" href="#feature-requests" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Feature requests</h2>
+
+<p>If you find MDL doesn't contain a particular component you think would be
+useful, please check the issue tracker in case work has already started on it.
+If not, you can request a <a href="https://github.com/Google/material-design-lite/issues/new?title=%5BComponent%20Request%5D%20%7BComponent%7D&amp;body=Please%20include:%0A*%20Description%0A*%20Material%20Design%20Spec%20link%0A*%20Use%20Case%28s%29">new component</a>.
+Please keep in mind that one of the goals of MDL is to adhere to the Material
+Design specs and therefore some requests might not be within the scope of this
+project.</p>
+
+<h2>
+<a id="license" class="anchor" href="#license" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>License</h2>
+
+<p>© Google, 2015. Licensed under an
+<a href="https://github.com/google/material-design-lite/blob/master/LICENSE">Apache-2</a>
+license.</p>
+
+      <footer class="site-footer">
+        <span class="site-footer-owner"><a href="https://github.com/mh-cbon/material-design-lite">Material-design-lite</a> is maintained by <a href="https://github.com/mh-cbon">mh-cbon</a>.</span>
+
+        <span class="site-footer-credits">This page was generated by <a href="https://pages.github.com">GitHub Pages</a> using the <a href="https://github.com/jasonlong/cayman-theme">Cayman theme</a> by <a href="https://twitter.com/jasonlong">Jason Long</a>.</span>
+      </footer>
+
+    </section>
+
+  
+  </body>
+</html>
