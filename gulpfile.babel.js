@@ -689,7 +689,7 @@ gulp.task('serve:browsersync', () => {
 
 gulp.task('build-serve', cb => {
   runSequence(
-    // ['build-dist'],
+    ['build-dist'],
     ['demofork'],
     cb);
 });
