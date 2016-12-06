@@ -1,0 +1,8 @@
+{
+  "SuccessTo": "/test-form-ajax.hmtl?success=yes",
+  "Valid": true,
+  "HasFailure": false,
+  "Failure": "",
+  "HasFieldErrors": false,
+  "FieldErrors": {}
+}

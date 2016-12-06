@@ -1,0 +1,11 @@
+{
+  "SuccessTo": null,
+  "Valid": false,
+  "HasFailure": false,
+  "Failure": "",
+  "HasFieldErrors": true,
+  "FieldErrors": {
+    "Username": "Anyway its wrong for the demo!",
+    "Upload": "Incorrect!"
+  }
+}

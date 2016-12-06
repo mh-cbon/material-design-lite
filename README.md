@@ -24,13 +24,15 @@ To see an half-functional version, check
 - [general test](https://mh-cbon.github.io/material-design-lite/test.html)
 - [form ajax](https://mh-cbon.github.io/material-design-lite/test-form-ajax.html)
 - [loader over](https://mh-cbon.github.io/material-design-lite/test-loaderover.html)
-- [ajax table with form](https://mh-cbon.github.io/material-design-lite/test-formajaxtable.html)
+- [ajax table](https://mh-cbon.github.io/material-design-lite/test-ajax-table.html)
+- [ajax table with form](https://mh-cbon.github.io/material-design-lite/test-form-ajax-table.html)
 
-To see an full-functional version, please, clone the project, run `gulp serve`, browse 
+To see an full-functional version, please, clone the project, run `gulp serve`, browse
 - [general test](http://localhost:5000/test.html)
 - [form ajax](http://localhost:5000/test-form-ajax.html)
 - [loader over](http://localhost:5000/test-loaderover.html)
-- [ajax table with form](http://localhost:5000/test-formajaxtable.html)
+- [ajax table](http://localhost:5000/test-ajax-table.html)
+- [ajax table with form](http://localhost:5000/test-form-ajax-table.html)
 
 ### Install
 

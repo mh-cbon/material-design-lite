@@ -1,0 +1,8 @@
+{
+  "SuccessTo": null,
+  "Valid": false,
+  "HasFailure": true,
+  "Failure": "Something went wrong",
+  "HasFieldErrors": false,
+  "FieldErrors": {}
+}

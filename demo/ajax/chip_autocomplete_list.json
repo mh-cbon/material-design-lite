@@ -1,0 +1,21 @@
+[
+  {"Text":"C#","Value":0},
+  {"Text":"Go","Value":1},
+  {"Text":"C++","Value":2},
+  {"Text":"Javascript","Value":3},
+  {"Text":"Php","Value":4},
+  {"Text":"Scala","Value":5},
+  {"Text":"Java","Value":6},
+  {"Text":"Ruby","Value":7},
+  {"Text":"Python","Value":8},
+  {"Text":"Haskell","Value":9},
+  {"Text":"Lisp","Value":10},
+  {"Text":"Erlang","Value":11},
+  {"Text":"ADA","Value":12},
+  {"Text":"Cobol","Value":13},
+  {"Text":"ASM","Value":14},
+  {"Text":"Pascal","Value":15},
+  {"Text":"Vbscript","Value":16},
+  {"Text":"F#","Value":17},
+  {"Text":"Rust","Value":18}
+]

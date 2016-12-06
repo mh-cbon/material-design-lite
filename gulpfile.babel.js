@@ -689,7 +689,7 @@ gulp.task('serve:browsersync', () => {
 
 gulp.task('build-serve', cb => {
   runSequence(
-    ['build-dist'],
+    // ['build-dist'],
     ['demofork'],
     cb);
 });
@@ -718,78 +718,25 @@ gulp.task('serve', ['build-serve'], () => {
 });
 
 function formAjax() {
-  var responseTemplate = {
-    SuccessTo: null,
-    Valid: false,
-    HasFailure: true,
-    Failure: '',
-    HasFieldErrors: true,
-    FieldErrors: {},
-  };
-  var FieldErrors = {
-    'Username': 'Anyway its wrong for the demo!',
-    'Email': 'Anyway its wrong for the demo!',
-    'RoleId': 'Anyway its wrong for the demo!',
-  };
-  var FieldErrors2 = {
-    'Username': 'Anyway its wrong for the demo!',
-    'Password': 'Mismatch!',
-  };
-  var FieldErrors3 = {
-    'Username': 'Anyway its wrong for the demo!',
-    'Upload': 'Incorrect!',
-  };
+
   return function(req, res, next) {
-    if (req.url.match(/form-ajax[.]json/)) {
-      var parsedUrl = url.parse(req.url, true);
-      var timeout = parsedUrl.query.Timeout || 0;
-      var Return = parsedUrl.query.Return || '';
 
-      var response = JSON.parse(JSON.stringify(responseTemplate));
-      if (Return === 'form_failure') {
-        response.Valid = false;
-        response.HasFailure = true;
-        response.HasFieldErrors = false;
-        response.Failure = 'Something went wrong';
+    var response = {};
+    var parsedUrl = url.parse(req.url, true);
+    var timeout = parsedUrl.query.Timeout || 0;
 
-      } else if (Return === 'field_errors') {
-        response.Valid = false;
-        response.HasFailure = false;
-        response.HasFieldErrors = true;
-        response.FieldErrors = FieldErrors;
-
-      } else if (Return === 'field_errors2') {
-        response.Valid = false;
-        response.HasFieldErrors = true;
-        response.FieldErrors = FieldErrors2;
-        response.HasFailure = true;
-        response.Failure = 'Something went wrong';
-
-      } else if (Return === 'field_errors3') {
-        response.Valid = false;
-        response.HasFieldErrors = true;
-        response.FieldErrors = FieldErrors3;
-        response.HasFailure = true;
-        response.Failure = 'Something went wrong';
-
-      } else if (Return === 'valid') {
-        response.Valid = true;
-        response.HasFailure = false;
-        response.HasFieldErrors = false;
-
-      } else {
-        response.SuccessTo = '/test-form-ajax.hmtl?success=yes';
-        response.Valid = true;
-        response.HasFailure = false;
-        response.HasFieldErrors = false;
-      }
-
+    if (req.url.match(/form-ajax-[^.]+[.]json/)) {
+      var file = req.url.match(/(form-ajax-[^.]+[.]json)/)[1];
+      var data = fs.readFileSync('demo/ajax/' + file).toString();
+      response = JSON.parse(data);
       res.setHeader('Content-Type', 'application/json');
       setTimeout(function() {
         res.end(JSON.stringify(response));
       }, timeout);
       return;
+
     }
+
     next();
   };
 }
@@ -912,10 +859,10 @@ function datatableMw() {
     });
   }
   return function(req, res, next) {
-    if (req.url.match(/form-table[.]json/)) {
+    if (req.url.match(/form-datatable[.]json/)) {
       handlePostDataTale(req, res);
 
-    } else if (req.url.match(/ajax-data[.]json/)) {
+    } else if (req.url.match(/datatable[.]json/)) {
       handleGetDataTale(req, res);
 
     } else {
