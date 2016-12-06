@@ -18,8 +18,8 @@
 
 <div class="container">
   <form
-    method="POST"
-    action="form-ajax.json?Return=field_errors"
+    method="GET"
+    action="ajax/form-ajax-field_errors.json"
     class="custom-js-form-ajax"
     pre-notify="#form-notifier"
     pre-notify-message="You are about to submit :D"
@@ -74,7 +74,7 @@
 <div class="container">
   <form
     method="POST"
-    action="/form-ajax.json?Timeout=2500"
+    action="ajax/form-ajax.json?Timeout=2500"
     class="custom-js-form-ajax"
     pre-notify="#form-notifier"
     pre-notify-message="You are about to submit :D"
@@ -121,8 +121,8 @@
   </form>
   <button type="submit" name="form"
     form="form1"
-    formmethod="POST"
-    formaction="/form-ajax.json?Return=form_failure&Timeout=2500"
+    formmethod="GET"
+    formaction="ajax/form-ajax-form_failure.json?Timeout=2500"
     formenctype="multipart/form-data"
     class="mdl-button mdl-js-button mdl-js-ripple-effect mdl-button--raised mdl-button--colored"
     value="users_filters">Appliquer</button>
@@ -130,7 +130,7 @@
 
 <div class="container">
   <form
-    method="POST"
+    method="GET"
     action="/go-south.json"
     class="custom-js-form-ajax"
     pre-notify="#form-notifier"
@@ -162,8 +162,8 @@
 
 <div class="container">
   <form
-    method="POST"
-    action="/form-ajax.json"
+    method="GET"
+    action="ajax/form-ajax-valid.json"
     class="custom-js-form-ajax"
     pre-notify="#form-notifier"
     pre-notify-message="You are about to submit :D"
@@ -194,8 +194,8 @@
 
 <div class="container">
   <form
-    method="POST"
-    action="/form-ajax.json?Return=field_errors2"
+    method="GET"
+    action="ajax/form-ajax-field_errors2.json"
     class="custom-js-form-ajax"
     post-notify="#notifier2"
     post-notify-failure="Please fix errors"
@@ -258,8 +258,8 @@
 
 <div class="container">
   <form
-    method="POST"
-    action="/form-ajax.json?Return=field_errors3"
+    method="GET"
+    action="ajax/form-ajax-field_errors3.json"
     class="custom-js-form-ajax"
     post-notify="#notifier3"
     post-notify-failure="Please fix errors"

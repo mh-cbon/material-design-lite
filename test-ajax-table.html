@@ -14,33 +14,7 @@
 </head>
 <body>
 
-<div class="container">
-  <form
-    method="GET"
-    action="/form-table.json?Timeout=2500"
-    class="custom-js-form-ajax"
-    pre-notify="#form-notifier"
-    pre-notify-message="You are about to submit :D"
-    post-notify="#form-notifier"
-    post-notify-failure="Please fix errors"
-    post-notify-critical="It gone south, pleas try again later"
-    post-notify-success="All correct!"
-    id="form1">
-
-    <div class="mdl-textfield mdl-js-textfield
-        mdl-textfield--floating-label">
-      <input name="Material" id="rnd-3" class="mdl-textfield__input " value="" type="text">
-      <label class="mdl-textfield__label" for="rnd-3">Type material</label>
-      <span class="mdl-textfield__error"></span>
-    </div>
-
-    <input class="" name="Offset" value="0" type="hidden">
-    <input class="" name="Limit" value="10" type="hidden">
-    <button type="submit" name="form"
-      class="mdl-button mdl-js-button mdl-js-ripple-effect mdl-button--raised mdl-button--colored"
-      value="users_filters">Filter</button>
-  </form>
-</div>
+<br/><br/><br/><br/>
 
 <table
   class="mdl-data-table
@@ -48,24 +22,24 @@
   custom-js-ajax-table custom-ajax-table
   custom-data-table__body--scroll
   mdl-data-table--selectable mdl-shadow--2dp"
-  checkbox-action-bt="#bt-action2"
+  checkbox-action-bt="#bt-action"
   checkbox-name="some"
   checkbox-property-value="Id"
-  loadmore-action-bt="#bt-loadmore2"
-  refresh-action-bt="#bt-refresh2"
-  loader-selector="#table-loader2"
+  loadmore-action-bt="#bt-loadmore"
+  refresh-action-bt="#bt-refresh"
+  loader-selector="#table-loader"
   sort-qs-name="Sort"
   limit-qs-name="Limit"
   offset-qs-name="Offset"
   limit-value="15"
-  form-recipient="#form1"
+  data-url="ajax/datatable.json"
   >
   <thead>
     <tr>
       <th class="mdl-data-table__cell--non-numeric mdl-data-table__header--sorted"
-        data-name="Material"><a href="?sort=asc">Material</a></th>
-      <th data-name="Quantity" class="mdl-data-table__header--sorted"><a href="?sort=asc">Quantity</a></th>
-      <th data-name="UnitPrice" class="mdl-data-table__header--sorted"><a href="?sort=asc">Unit price</a></th>
+        data-name="Material"><a href="">Material</a></th>
+      <th data-name="Quantity" class="mdl-data-table__header--sorted"><a href="">Quantity</a></th>
+      <th data-name="UnitPrice" class="mdl-data-table__header--sorted"><a href="">Unit price</a></th>
       <th data-link="/edit/{:Id}">
         Edit
         <div class="template"><a>edit</a></div>
@@ -105,22 +79,24 @@
   </tbody>
 </table>
 
-<div id="table-loader2" class="custom-loaderover custom-js-loaderover">
+<div id="table-loader" class="custom-loaderover custom-js-loaderover">
   <div class="custom-loaderover-bg"></div>
-  <div class="mdl-spinner mdl-js-spinner is-active custom-spinner"></div>
+  <div class="mdl-spinner mdl-js-spinner custom-spinner"></div>
 </div>
 
-<button class="mdl-button mdl-js-button mdl-button--raised mdl-button--colored" id="bt-action2">
+<button class="mdl-button mdl-js-button mdl-button--raised mdl-button--colored" id="bt-action">
   Checkbox button
 </button>
 
-<button class="mdl-button mdl-js-button mdl-button--raised mdl-button--colored" id="bt-loadmore2">
+<button class="mdl-button mdl-js-button mdl-button--raised mdl-button--colored" id="bt-loadmore">
   Load more button
 </button>
 
-<button class="mdl-button mdl-js-button mdl-button--raised mdl-button--colored" id="bt-refresh2">
+<button class="mdl-button mdl-js-button mdl-button--raised mdl-button--colored" id="bt-refresh">
   Refresh button
 </button>
+
+<br/><br/><br/><br/>
 
 </body>
 </html>
