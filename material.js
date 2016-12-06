@@ -5991,8 +5991,25 @@ MaterialSpinner.prototype.init = function () {
         for (var i = 1; i <= this.Constant_.MDL_SPINNER_LAYER_COUNT; i++) {
             this.createLayer(i);
         }
+        var cherry = window.cherry;
+        cherry.on(this.element_, 'MaterialSpinner.enable', this.start).bind(this);
+        cherry.on(this.element_, 'MaterialSpinner.disable', this.stop).bind(this);
         this.element_.classList.add('is-upgraded');
     }
+};
+/**
+   * Downgrade element.
+   */
+MaterialSpinner.prototype.mdlDowngrade_ = function () {
+    this.stop();
+    var cherry = window.cherry;
+    cherry.off(this.element_, 'MaterialSpinner.enable');
+    cherry.off(this.element_, 'MaterialSpinner.disable');
+    var layer = this.element_.querySelector(this.CssClasses_.MDL_SPINNER_LAYER);
+    if (layer) {
+        layer.remove();
+    }
+    this.element_.classList.remove(this.CssClasses_.IS_UPGRADED);
 };
 // The component registers itself. It can assume componentHandler is available
 // in the global scope.
@@ -10956,31 +10973,18 @@ CustomLoaderOver.prototype.CssClasses_ = { IS_UPGRADED: 'is-upgraded' };
    */
 CustomLoaderOver.prototype.show = function (targetEl) {
     var cherry = window.cherry;
-    if (this.status_ === 'showing' || this.status_ === 'shown') {
-        return;
-    } else if (this.status_ === 'hidding') {
-        cherry.once(this.element_, 'CustomLoaderOver.transitionend', function () {
-            this.show(targetEl);
-        }).bind(this);
+    clearTimeout(this.pendingHide_);
+    cherry.off(this.element_, 'CustomLoaderOver.transitionend');
+    targetEl.CustomLoaderOver = { oldPosition_: targetEl.style.position };
+    if (this.element_.parentNode !== targetEl) {
+        cherry.trigger(this.spinner_, 'enable');
+        targetEl.appendChild(this.element_);
+        this.adjustSize_(targetEl);
+        this.element_.classList.add('show');
+        if (cherry.getStyle(targetEl, 'position') === 'static') {
+            targetEl.style.position = 'relative';
+        }
     }
-    targetEl.CustomLoaderOver = {
-        busy: true,
-        oldPosition_: targetEl.style.position
-    };
-    if (cherry.getStyle(targetEl, 'position') === 'static') {
-        targetEl.style.position = 'relative';
-    }
-    targetEl.appendChild(this.element_);
-    this.spinner_.classList.add('is-active');
-    this.element_.classList.add('beforeshow');
-    this.adjustSize_(targetEl);
-    this.element_.classList.add('show');
-    this.status_ = 'showing';
-    // this timeout should be a transitionend event,
-    // but its not reliable, it won t always trigger..
-    setTimeout(function () {
-        this.status_ = 'shown';
-    }.bind(this), 500);
 };
 /**
    * Adjust size and position.
@@ -11021,36 +11025,27 @@ CustomLoaderOver.prototype.adjustSize_ = function (targetEl) {
 CustomLoaderOver.prototype.hide = function (targetEl) {
     var cherry = window.cherry;
     if (this.element_.classList.contains('show')) {
-        this.status_ = 'hidding';
-        cherry.once(this.element_, 'CustomLoaderOver.transitionend', function () {
-            this.cleanup_(targetEl);
-        }).bind(this);
-        this.element_.classList.remove('show');
-    } else {
-        cherry.once(this.element_, 'CustomLoaderOver.transitionend', function () {
-            this.hide(targetEl);
-        }).bind(this);
+        this.pendingHide_ = setTimeout(function () {
+            cherry.off(this.element_, 'CustomLoaderOver.transitionend');
+            cherry.once(this.element_, 'CustomLoaderOver.transitionend', function () {
+                cherry.trigger(this.spinner_, 'disable');
+                this.placeholder_.appendChild(this.element_);
+                targetEl.style.position = targetEl.CustomLoaderOver.oldPosition_;
+            }).bind(this);
+            this.element_.classList.remove('show');
+        }.bind(this), 100);    // this is required to ensure transitionend does trigger
+                               // when show/hide are called consecutively
     }
-};
-/**
-   * Hide the loader.
-   */
-CustomLoaderOver.prototype.cleanup_ = function (targetEl) {
-    this.element_.classList.remove('beforeshow');
-    this.spinner_.classList.remove('is-active');
-    this.placeholder_.parentNode.insertBefore(this.element_, this.placeholder_);
-    targetEl.style.position = targetEl.CustomLoaderOver.oldPosition_;
-    targetEl.CustomLoaderOver.busy = false;
-    this.status_ = 'hidden';
 };
 /**
    * Initialize element.
    */
 CustomLoaderOver.prototype.init = function () {
     if (this.element_) {
-        this.placeholder_ = document.createElement('input');
-        this.placeholder_.setAttribute('type', 'hidden');
+        this.placeholder_ = document.createElement('div');
+        this.placeholder_.classList.add('custom-loaderover-container');
         this.element_.parentNode.insertBefore(this.placeholder_, this.element_);
+        this.placeholder_.appendChild(this.element_);
         this.spinner_ = this.element_.querySelector('.custom-spinner');
         this.element_.classList.add(this.CssClasses_.IS_UPGRADED);
     }
@@ -11061,15 +11056,14 @@ CustomLoaderOver.prototype.init = function () {
 CustomLoaderOver.prototype.mdlDowngrade_ = function () {
     var cherry = window.cherry;
     cherry.off(this.element_, 'CustomLoaderOver.tansitionend');
-    this.spinner_.classList.remove('is-active');
+    clearTimeout(this.pendingHide_);
+    cherry.trigger(this.spinner_, 'disable');
     this.spinner_ = null;
-    this.element_.classList.remove('beforehide');
-    this.element_.classList.remove('beforeshow');
     this.element_.classList.remove('show');
+    this.placeholder_.parentNode.insertBefore(this.element_, this.placeholder_);
     this.placeholder_.remove();
-    this.element_.classList.remove(this.CssClasses_.IS_UPGRADED);
-    this.element_.parentNode.insertBefore(this.placeholder_, this.element_);
     this.placeholder_ = null;
+    this.element_.classList.remove(this.CssClasses_.IS_UPGRADED);
 };
 // The component registers itself. It can assume componentHandler is available
 // in the global scope.
