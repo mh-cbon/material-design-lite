@@ -62,38 +62,24 @@
    */
   CustomLoaderOver.prototype.show = function(targetEl) {
     var cherry = window.cherry;
-
-    if (this.status_ === 'showing' || this.status_ === 'shown') {
-      return ;
-    } else if (this.status_ === 'hidding') {
-      cherry.once(this.element_, 'CustomLoaderOver.transitionend', function() {
-        this.show(targetEl);
-      }).bind(this);
-    }
+    clearTimeout(this.pendingHide_);
+    cherry.off(this.element_, 'CustomLoaderOver.transitionend');
 
     targetEl.CustomLoaderOver = {
       busy: true,
       oldPosition_: targetEl.style.position,
     };
 
-    if (cherry.getStyle(targetEl, 'position') === 'static') {
-      targetEl.style.position = 'relative';
-    }
-
     targetEl.appendChild(this.element_);
-
-    this.spinner_.classList.add('is-active');
-    this.element_.classList.add('beforeshow');
+    cherry.trigger(this.spinner_, 'enable');
 
     this.adjustSize_(targetEl);
 
     this.element_.classList.add('show');
-    this.status_ = 'showing';
-    // this timeout should be a transitionend event,
-    // but its not reliable, it won t always trigger..
-    setTimeout(function() {
-      this.status_ = 'shown';
-    }.bind(this), 500);
+
+    if (cherry.getStyle(targetEl, 'position') === 'static') {
+      targetEl.style.position = 'relative';
+    }
   };
 
   /**
@@ -142,28 +128,18 @@
   CustomLoaderOver.prototype.hide = function(targetEl) {
     var cherry = window.cherry;
     if (this.element_.classList.contains('show')) {
-      this.status_ = 'hidding';
-      cherry.once(this.element_, 'CustomLoaderOver.transitionend', function() {
-        this.cleanup_(targetEl);
-      }).bind(this);
-      this.element_.classList.remove('show');
-    } else {
-      cherry.once(this.element_, 'CustomLoaderOver.transitionend', function() {
-        this.hide(targetEl);
-      }).bind(this);
+      this.pendingHide_ = setTimeout(function() {
+        cherry.off(this.element_, 'CustomLoaderOver.transitionend');
+        cherry.once(this.element_, 'CustomLoaderOver.transitionend', function() {
+          cherry.trigger(this.spinner_, 'disable');
+          this.placeholder_.appendChild(this.element_);
+          targetEl.style.position = targetEl.CustomLoaderOver.oldPosition_;
+          targetEl.CustomLoaderOver.busy = false;
+        }).bind(this);
+        this.element_.classList.remove('show');
+      }.bind(this), 100); // this is required to ensure transitionend does trigger
+      // when show/hide are called consecutively
     }
-  };
-
-  /**
-   * Hide the loader.
-   */
-  CustomLoaderOver.prototype.cleanup_ = function(targetEl) {
-    this.element_.classList.remove('beforeshow');
-    this.spinner_.classList.remove('is-active');
-    this.placeholder_.parentNode.insertBefore(this.element_, this.placeholder_);
-    targetEl.style.position = targetEl.CustomLoaderOver.oldPosition_;
-    targetEl.CustomLoaderOver.busy = false;
-    this.status_ = 'hidden';
   };
 
   /**
@@ -171,9 +147,10 @@
    */
   CustomLoaderOver.prototype.init = function() {
     if (this.element_) {
-      this.placeholder_ = document.createElement('input');
-      this.placeholder_.setAttribute('type', 'hidden');
+      this.placeholder_ = document.createElement('div');
+      this.placeholder_.classList.add('custom-loaderover-container');
       this.element_.parentNode.insertBefore(this.placeholder_, this.element_);
+      this.placeholder_.appendChild(this.element_);
       this.spinner_ = this.element_.querySelector('.custom-spinner');
       this.element_.classList.add(this.CssClasses_.IS_UPGRADED);
     }
@@ -187,17 +164,18 @@
     var cherry = window.cherry;
     cherry.off(this.element_, 'CustomLoaderOver.tansitionend');
 
-    this.spinner_.classList.remove('is-active');
+    cherry.trigger(this.spinner_, 'disable');
     this.spinner_ = null;
 
     this.element_.classList.remove('beforehide');
     this.element_.classList.remove('beforeshow');
     this.element_.classList.remove('show');
 
+    this.placeholder_.parentNode.insertBefore(this.element_, this.placeholder_);
     this.placeholder_.remove();
-    this.element_.classList.remove(this.CssClasses_.IS_UPGRADED);
-    this.element_.parentNode.insertBefore(this.placeholder_, this.element_);
     this.placeholder_ = null;
+
+    this.element_.classList.remove(this.CssClasses_.IS_UPGRADED);
   };
 
   // The component registers itself. It can assume componentHandler is available

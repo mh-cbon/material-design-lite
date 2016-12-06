@@ -95,7 +95,57 @@ describe('CustomLoaderOver', function () {
         done();
       }, defTout)
     }, defTout)
+  });
 
+  it('should always hide', function (done) {
+    var el = document.createElement('div');
+    document.body.appendChild(el);
+    el.innerHTML = templatesLoader.get('LoaderOver');
+
+    var div = document.createElement('div');
+    div.style.height = '50px';
+    div.style.width = '50px';
+    div.style.backgroundColor = 'silver';
+    el.appendChild(div);
+
+    componentHandler.upgradeElements(el);
+    var loader = el.querySelector('.custom-js-loaderover');
+    loader['CustomLoaderOver'].show(div);
+    loader['CustomLoaderOver'].hide(div);
+    var spinner = el.querySelector('.custom-spinner');
+
+    setTimeout(function() {
+      expect(spinner.classList.contains('is-active')).to.be.equal(false);
+      componentHandler.downgradeElementRecursive(el);
+      el.remove();
+      done();
+    }, defTout)
+  });
+
+  it('should always show', function (done) {
+    var el = document.createElement('div');
+    document.body.appendChild(el);
+    el.innerHTML = templatesLoader.get('LoaderOver');
+
+    var div = document.createElement('div');
+    div.style.height = '50px';
+    div.style.width = '50px';
+    div.style.backgroundColor = 'silver';
+    el.appendChild(div);
+
+    componentHandler.upgradeElements(el);
+    var loader = el.querySelector('.custom-js-loaderover');
+    loader['CustomLoaderOver'].show(div);
+    loader['CustomLoaderOver'].hide(div);
+    loader['CustomLoaderOver'].show(div);
+    var spinner = el.querySelector('.custom-spinner');
+
+    setTimeout(function() {
+      expect(spinner.classList.contains('is-active')).to.be.equal(true);
+      componentHandler.downgradeElementRecursive(el);
+      el.remove();
+      done();
+    }, defTout)
   });
 
 });
