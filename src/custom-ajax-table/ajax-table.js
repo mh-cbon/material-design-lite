@@ -258,13 +258,14 @@
    * @private
    */
   CustomAjaxTable.prototype.showLoader_ = function() {
+    var cherry = window.cherry;
 
     var tbody = this.element_.querySelector('tbody');
     var bodyRect = tbody.getBoundingClientRect();
     tbody.style.minHeight = bodyRect.height + 'px';
 
-    if (this.loader_ && this.loader_['CustomLoaderOver']) {
-      this.loader_['CustomLoaderOver'].show(this.element_);
+    if (this.loader_) {
+      cherry.trigger(this.loader_, 'enable', {loaderTarget: this.element_});
     }
 
     this.disbableButtons_();
@@ -276,11 +277,12 @@
    * @private
    */
   CustomAjaxTable.prototype.hideLoader_ = function() {
+    var cherry = window.cherry;
     var tbody = this.element_.querySelector('tbody');
     tbody.style.minHeight = null;
 
-    if (this.loader_ && this.loader_['CustomLoaderOver']) {
-      this.loader_['CustomLoaderOver'].hide(this.element_);
+    if (this.loader_) {
+      cherry.trigger(this.loader_, 'disable', {loaderTarget: this.element_});
     }
 
     this.enableButtons_();

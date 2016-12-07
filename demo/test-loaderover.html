@@ -118,10 +118,10 @@
   var showtable = document.getElementById("show-on-table");
   var hidetable = document.getElementById("hide-on-table");
   cherry.on(showtable, 'click', function() {
-    loader['CustomLoaderOver'].show(table);
+    cherry.trigger(loader, 'enable', {loaderTarget: table});
   });
   cherry.on(hidetable, 'click', function() {
-    loader['CustomLoaderOver'].hide(table);
+    cherry.trigger(loader, 'disable', {loaderTarget: table});
   });
 
   //-

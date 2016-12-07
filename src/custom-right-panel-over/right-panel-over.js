@@ -66,15 +66,15 @@
    * Show the dialog.
    */
   CustomRightPanelOver.prototype.showBox_ = function() {
-    if (this.loader_ && this.loader_['CustomLoaderOver']) {
-      this.loader_['CustomLoaderOver'].show(this.container_);
+    var cherry = window.cherry;
+    if (this.loader_) {
+      cherry.trigger(this.loader_, 'enable', {loaderTarget: this.container_});
     }
 
     this.element_.classList.add('show');
     document.body.classList.add('custom-rightpanelover-noscroll');
     document.body.appendChild(this.element_);
 
-    var cherry = window.cherry;
     this.iframe_.setAttribute('src', this.href_);
     cherry.on(this.iframe_, 'load', this.frameLoaded_).bind(this);
     this.container_.appendChild(this.iframe_);
@@ -92,8 +92,8 @@
     this.container_.classList.add('loaded');
     cherry.once(this.iframe_.contentWindow, 'beforeunload', this.frameUnloaded_).bind(this);
 
-    if (this.loader_ && this.loader_['CustomLoaderOver']) {
-      this.loader_['CustomLoaderOver'].hide(this.container_);
+    if (this.loader_) {
+      cherry.trigger(this.loader_, 'disable', {loaderTarget: this.container_});
     }
 
     var doc = this.iframe_.contentDocument || this.iframe_.contentWindow.document;
@@ -112,6 +112,7 @@
    * Update the view once frame is ready.
    */
   CustomRightPanelOver.prototype.frameUnloaded_ = function() {
+    var cherry = window.cherry;
     //NOTE: for some unexplicable reasons,
     // this event wont let us off events on anyhing related to
     // contentWindow.
@@ -120,8 +121,8 @@
     // var cherry = window.cherry;
     // cherry.off(this.iframe_.contentWindow, 'beforeunload', this.frameUnloaded_);
     this.container_.classList.remove('loaded');
-    if (this.loader_ && this.loader_['CustomLoaderOver']) {
-      this.loader_['CustomLoaderOver'].show(this.container_);
+    if (this.loader_) {
+      cherry.trigger(this.loader_, 'enable', {loaderTarget: this.container_});
     }
 
     // var doc = this.iframe_.contentDocument || this.iframe_.contentWindow.document;
