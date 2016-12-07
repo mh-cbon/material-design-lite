@@ -7,7 +7,7 @@
   <style type="text/css">
   .custom-data-table.custom-data-table__body--scroll tbody {
       display: block;
-      max-height: 450px;
+      max-height: 300px;
       overflow-y: scroll;
   }
   </style>
@@ -16,7 +16,7 @@
 
 <div class="container">
   <form
-    method="GET"
+    method="POST"
     action="ajax/form-datatable.json?Timeout=2500"
     class="custom-js-form-ajax"
     pre-notify="#form-notifier"
@@ -48,11 +48,13 @@
   custom-js-ajax-table custom-ajax-table
   custom-data-table__body--scroll
   mdl-data-table--selectable mdl-shadow--2dp"
-  checkbox-action-bt="#bt-action2"
+  checkbox-action-bt="#bt-action"
   checkbox-name="some"
   checkbox-property-value="Id"
-  loadmore-action-bt="#bt-loadmore2"
-  refresh-action-bt="#bt-refresh2"
+  loadmore-action-bt="#bt-loadmore"
+  refresh-action-bt="#bt-refresh"
+  prev-page-bt="#prev-page"
+  next-page-bt="#next-page"
   loader-selector="#table-loader2"
   sort-qs-name="Sort"
   limit-qs-name="Limit"
@@ -76,6 +78,16 @@
     <tr class="template navigation-helper" show-nav-helper-every="10">
       <td collapse="auto">
         Past {:Offset} items
+      </td>
+    </tr>
+    <tr class="template unreachable-helper">
+      <td collapse="auto">
+        Remote is unreachable
+      </td>
+    </tr>
+    <tr class="template empty-helper">
+      <td collapse="auto">
+        No more results
       </td>
     </tr>
     <tr checkbox-value="r">
@@ -110,16 +122,24 @@
   <div class="mdl-spinner mdl-js-spinner is-active custom-spinner"></div>
 </div>
 
-<button class="mdl-button mdl-js-button mdl-button--raised mdl-button--colored" id="bt-action2">
-  Checkbox button
+<button class="mdl-button mdl-js-button mdl-button--raised mdl-button--colored" id="bt-action">
+  Checkbox action
 </button>
 
-<button class="mdl-button mdl-js-button mdl-button--raised mdl-button--colored" id="bt-loadmore2">
-  Load more button
+<button class="mdl-button mdl-js-button mdl-button--raised mdl-button--colored" id="bt-loadmore">
+  Load more
 </button>
 
-<button class="mdl-button mdl-js-button mdl-button--raised mdl-button--colored" id="bt-refresh2">
-  Refresh button
+<button class="mdl-button mdl-js-button mdl-button--raised mdl-button--colored" id="bt-refresh">
+  Refresh
+</button>
+
+<button class="mdl-button mdl-js-button mdl-button--raised mdl-button--colored" id="prev-page">
+  previous page
+</button>
+
+<button class="mdl-button mdl-js-button mdl-button--raised mdl-button--colored" id="next-page">
+  next page
 </button>
 
 </body>

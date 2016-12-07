@@ -3,6 +3,10 @@
  custom-js-ajax-table custom-ajax-table
  mdl-data-table--selectable" id="data-table-test"
  data-url="ajax/datatable.json"
+ loadmore-action-bt="#loadmore"
+ refresh-action-bt="#refresh"
+ prev-page-bt="#btprev"
+ next-page-bt="#btnext"
  checkbox-name="cbname">
  <thead>
    <tr>
@@ -12,5 +16,24 @@
    </tr>
  </thead>
  <tbody>
+   <tr class="template navigation-helper" show-nav-helper-every="10">
+     <td collapse="auto">
+       Past {:Offset} items
+     </td>
+   </tr>
+   <tr class="template empty-helper">
+     <td collapse="auto">
+       No more results
+     </td>
+   </tr>
+   <tr class="template unreachable-helper">
+     <td collapse="auto">
+       Remote is unreachable
+     </td>
+   </tr>
  </tbody>
 </table>
+<button id="loadmore">Load more</button>
+<button id="refresh">Refresh</button>
+<button id="btprev">preious</button>
+<button id="btnext">next</button>

@@ -24,6 +24,22 @@ describe('CustomAjaxTable', function () {
 
   var defTout = 200;
 
+  function removeUrlParams() {
+    var url = new URL(window.location.href);
+    url.searchParams.delete("Limit")
+    url.searchParams.delete("Offset")
+    url.searchParams.delete("Sort")
+
+    var title = '';
+    var el = document.getElementsByTagName('title');
+    if (el.length) {
+      el = el[0].innerHTML;
+    }
+    window.history.replaceState({}, title, url.toString());
+  }
+  beforeEach(removeUrlParams);
+  afterEach(removeUrlParams);
+
   it('should be globally available', function () {
     expect(CustomAjaxTable).to.be.a('function');
   });
@@ -33,7 +49,7 @@ describe('CustomAjaxTable', function () {
     return true;
   }
 
-  it('should upgrade successfully', function () {
+  it('should upgrade successfully', function (done) {
     var TEMPLATE = templatesLoader.get('AJAX_TABLE');
     var el = document.createElement('div');
     document.body.appendChild(el);
@@ -45,10 +61,12 @@ describe('CustomAjaxTable', function () {
     expect(table.getAttribute('data-upgraded')).to.not.equal('');
     expect(table.getAttribute('data-upgraded')).to.be.equal(',CustomDataTable,CustomAjaxTable');
 
-    componentHandler.downgradeElementRecursive(el);
-    expect(table.getAttribute('data-upgraded')).to.be.equal('');
-
-    el.remove();
+    setTimeout(function() {
+      componentHandler.downgradeElementRecursive(el);
+      expect(table.getAttribute('data-upgraded')).to.be.equal('');
+      el.remove();
+      done();
+    }, defTout);
   });
 
   it('should respect limit attribute value', function (done) {
@@ -68,8 +86,6 @@ describe('CustomAjaxTable', function () {
       expect(tr.length).to.be.equal(2);
 
       componentHandler.downgradeElementRecursive(el);
-      expect(table.getAttribute('data-upgraded')).to.be.equal('');
-
       el.remove();
       done();
     }, defTout);
@@ -90,7 +106,7 @@ describe('CustomAjaxTable', function () {
 
     setTimeout(function() {
       var tr = table.querySelectorAll('tbody tr')[0];
-      var td = table.querySelectorAll('td')
+      var td = table.querySelectorAll('td');
       expect(td[0].innerHTML).to.be.equal('Wood (1)');
       expect(td[3].innerHTML).to.be.equal('Concrete (2)');
 
@@ -99,7 +115,7 @@ describe('CustomAjaxTable', function () {
 
       el.remove();
       done();
-    }, defTout);
+    }, defTout * 2);
 
   });
 
@@ -514,22 +530,14 @@ describe('CustomAjaxTable', function () {
     }, defTout);
   });
 
-  it.skip('should test ajax table with a form')
-
-  function removeUrlParams() {
-    var url = new URL(window.location.href);
-    url.searchParams.delete("Limit")
-    url.searchParams.delete("Offset")
-    url.searchParams.delete("Sort")
-
-    var title = '';
-    var el = document.getElementsByTagName('title');
-    if (el.length) {
-      el = el[0].innerHTML;
-    }
-    window.history.replaceState({}, title, url.toString());
-  }
-  beforeEach(removeUrlParams);
-  afterEach(removeUrlParams);
+  it.skip('should disable navigation buttons while loading data');
+  it.skip('should disable next page button when it reaches end of list');
+  it.skip('should disable pre page button when offset is zero');
+  it.skip('should show the navigation helper');
+  it.skip('should show the empty helper');
+  it.skip('should disable navigation buttons when the results are empty');
+  it.skip('should show the unreachable helper');
+  it.skip('should disable navigation buttons when the remote is unreachable');
+  it.skip('should test ajax table with a form');
 
 });
