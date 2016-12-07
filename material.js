@@ -9871,60 +9871,41 @@ CustomAjaxTable.prototype.CssClasses_ = {
    *
    * @private
    */
-CustomAjaxTable.prototype.loadDataFromUrl_ = function (offset, limit, clearLines) {
+CustomAjaxTable.prototype.loadDataFromUrl_ = function () {
     if (!this.dataUrl_) {
         throw 'Did you forget to define data-url / form-recipient attribute ?';
     }
-    this.changeButtonStatus_(this.refreshActionBt_, 'disabled');
-    this.changeButtonStatus_(this.loadMoreActionBt_, 'disabled');
-    var ajax = window.ajax;
     this.showLoader_();
     var url = new URL(this.dataUrl_);
     var params = url.searchParams;
-    if (this.limitQsName_) {
-        url.searchParams.set(this.limitQsName_, limit);
-    }
     if (this.offsetQsName_) {
-        url.searchParams.set(this.offsetQsName_, offset);
+        url.searchParams.set(this.offsetQsName_, this.offsetValue_);
+    }
+    if (this.limitQsName_) {
+        url.searchParams.set(this.limitQsName_, this.limitValue_);
     }
     this.getSortParams_().forEach(function (s) {
         params.append(this.sortQsName_, s);
     }.bind(this));
+    var ajax = window.ajax;
     var request = ajax().get(url.toString());
     return request.then(function (results) {
-        if (clearLines) {
-            this.allResults_ = [];
-        }
-        this.emptyLines_();
-        this.allResults_ = this.allResults_.concat(results.Data);
-        if (!this.allResults_.length) {
-            this.offsetValue_ = 0;
-        } else {
-            this.offsetValue_ = Math.ceil(this.allResults_.length / this.limitValue_) * this.limitValue_;
-        }
-        this.setLocationUrl_(this.offsetValue_ - this.limitValue_, this.limitValue_, this.getSortParams_());
-        var url = new URL(window.location.href);
-        this.sortAllResults_(url);
-        if (this.allResults_.length) {
-            this.addLines_(this.allResults_);
-        }
-        this.hideLoader_();
+        this.handleResults_(results.Data);
     }.bind(this)).catch(function (response, xhr) {
-        throw 'beep boop';
-    });
+        this.handleCriticalFailure();
+    }.bind(this));
 };
 /**
    * Load data from the form recipient.
    *
    * @private
    */
-CustomAjaxTable.prototype.loadDataFromFormRecipient_ = function (offset, limit, clearLines) {
+CustomAjaxTable.prototype.loadDataFromFormRecipient_ = function () {
     var data = {};
-    data[this.offsetQsName_] = offset;
-    data[this.limitQsName_] = limit;
+    data[this.offsetQsName_] = this.offsetValue_;
+    data[this.limitQsName_] = this.limitValue_;
     data[this.sortQsName_] = this.getSortParams_();
     this.formRecipient_['CustomFormAjax'].setDataOverride(data);
-    this.postSubmitClearLines_ = clearLines;
     this.showLoader_();
     this.formRecipient_['CustomFormAjax'].sendSubmit();
 };
@@ -9934,12 +9915,12 @@ CustomAjaxTable.prototype.loadDataFromFormRecipient_ = function (offset, limit, 
    * @private
    */
 CustomAjaxTable.prototype.formRecipientSubmit_ = function (ev) {
-    this.changeButtonStatus_(this.refreshActionBt_, 'disabled');
-    this.changeButtonStatus_(this.loadMoreActionBt_, 'disabled');
     ev.preventDefault();
     ev.stopImmediatePropagation();
+    this.offsetValue_ = 0;
+    this.limitValue_ = this.limitAttr_;
     this.sourceClick_ = 'form';
-    this.loadDataFromFormRecipient_(0, this.limitValue_, true);
+    this.loadDataFromFormRecipient_();
 };
 /**
    * Handles form post-submit event.
@@ -9947,32 +9928,67 @@ CustomAjaxTable.prototype.formRecipientSubmit_ = function (ev) {
    * @private
    */
 CustomAjaxTable.prototype.formRecipientPostSubmit_ = function (ev) {
-    var data = ev.Data || [];
-    if (this.postSubmitClearLines_) {
-        this.allResults_ = [];
-    }
-    this.emptyLines_();
-    this.allResults_ = this.allResults_.concat(data);
-    if (!this.allResults_.length) {
-        this.offsetValue_ = 0;
+    if (ev.CriticalFailure) {
+        this.handleCriticalFailure();
     } else {
-        this.offsetValue_ = Math.ceil(this.allResults_.length / this.limitValue_) * this.limitValue_;
+        this.handleResults_(ev.Data || []);
     }
-    this.setLocationUrl_(this.offsetValue_ - this.limitValue_, this.limitValue_, this.getSortParams_());
-    var url = new URL(window.location.href);
-    this.sortAllResults_(url);
-    if (this.allResults_.length) {
-        this.addLines_(this.allResults_);
+    this.sourceClick_ = null;
+};
+/**
+   * Handles results.
+   *
+   * @private
+   */
+CustomAjaxTable.prototype.handleResults_ = function (data) {
+    this.allResults_ = [];
+    if (this.limitValue_ - data.length > 0) {
+        if (this.limitValue_ > this.allResults_.length) {
+            var newLimit = this.limitValue_ - (this.limitValue_ - data.length);
+            if (newLimit > 0) {
+                this.limitValue_ = newLimit;
+            }
+        }
+    }
+    var sort = this.getSortParams_();
+    this.setLocationUrl_(sort);
+    this.allResults_ = this.allResults_.concat(data);
+    this.sortAllResults_(sort);
+    this.emptyLines_();
+    this.addLines_();
+    if (!this.allResults_.length && this.emptyHelper_) {
+        this.emptyLines_();
+        var tbody = this.element_.querySelector('tbody');
+        tbody.appendChild(this.emptyHelper_);
     }
     this.hideLoader_();
+    if (!this.allResults_.length && this.emptyHelper_) {
+        this.changeButtonStatus_(this.loadMoreActionBt_, 'disabled');
+        this.changeButtonStatus_(this.nextPageBt_, 'disabled');
+    }
     this.sourceClick_ = null;
+};
+/**
+   * Handles critical fetch failure.
+   *
+   * @private
+   */
+CustomAjaxTable.prototype.handleCriticalFailure = function () {
+    this.emptyLines_();
+    if (this.unreachableHelper_) {
+        var tbody = this.element_.querySelector('tbody');
+        tbody.appendChild(this.unreachableHelper_);
+    }
+    this.hideLoader_();
+    this.disbableButtons_();
+    this.changeButtonStatus_(this.refreshActionBt_, '');
 };
 /**
    * Update current brower url.
    *
    * @private
    */
-CustomAjaxTable.prototype.setLocationUrl_ = function (offset, limit, sort) {
+CustomAjaxTable.prototype.setLocationUrl_ = function (sort) {
     var url = new URL(window.location.href);
     if (this.sortQsName_) {
         url.searchParams.delete(this.sortQsName_);
@@ -9981,10 +9997,10 @@ CustomAjaxTable.prototype.setLocationUrl_ = function (offset, limit, sort) {
         }.bind(this));
     }
     if (this.offsetQsName_) {
-        url.searchParams.set(this.offsetQsName_, 0);
+        url.searchParams.set(this.offsetQsName_, this.offsetValue_);
     }
     if (this.limitQsName_) {
-        url.searchParams.set(this.limitQsName_, limit + (offset < 0 ? 0 : offset));
+        url.searchParams.set(this.limitQsName_, this.limitValue_);
     }
     var title = '';
     var el = document.getElementsByTagName('title');
@@ -9998,8 +10014,7 @@ CustomAjaxTable.prototype.setLocationUrl_ = function (offset, limit, sort) {
    *
    * @private
    */
-CustomAjaxTable.prototype.sortAllResults_ = function (dataUrl) {
-    var sort = dataUrl.searchParams.getAll(this.sortQsName_);
+CustomAjaxTable.prototype.sortAllResults_ = function (sort) {
     if (sort.length) {
         var k = sort.pop();
         var j = k.split('-');
@@ -10027,6 +10042,7 @@ CustomAjaxTable.prototype.showLoader_ = function () {
     if (this.loader_ && this.loader_['CustomLoaderOver']) {
         this.loader_['CustomLoaderOver'].show(this.element_);
     }
+    this.disbableButtons_();
 };
 /**
    * Hide a loader over the table body.
@@ -10039,8 +10055,7 @@ CustomAjaxTable.prototype.hideLoader_ = function () {
     if (this.loader_ && this.loader_['CustomLoaderOver']) {
         this.loader_['CustomLoaderOver'].hide(this.element_);
     }
-    this.changeButtonStatus_(this.refreshActionBt_);
-    this.changeButtonStatus_(this.loadMoreActionBt_);
+    this.enableButtons_();
 };
 /**
    * Change dsibaled button of given selector.
@@ -10048,16 +10063,45 @@ CustomAjaxTable.prototype.hideLoader_ = function () {
    * @private
    */
 CustomAjaxTable.prototype.changeButtonStatus_ = function (selector, status) {
+    var ret = null;
     if (selector) {
         var k = document.querySelector(selector);
         if (k) {
+            ret = k.getAttribute('disabled');
             if (status) {
-                k.setAttribute('disabled', status);
+                k.setAttribute('disabled', 'disabled');
             } else {
                 k.removeAttribute('disabled');
             }
         }
     }
+    return ret;
+};
+/**
+   * Disable navigation buttons.
+   *
+   * @private
+   */
+CustomAjaxTable.prototype.disbableButtons_ = function () {
+    this.changeButtonStatus_(this.refreshActionBt_, 'disabled');
+    this.changeButtonStatus_(this.loadMoreActionBt_, 'disabled');
+    this.changeButtonStatus_(this.nextPageBt_, 'disabled');
+    this.changeButtonStatus_(this.prevPageBt_, 'disabled');
+    this.cbActionBtWasDisabled_ = this.changeButtonStatus_(this.checkboxActionBt_, 'disabled');
+};
+/**
+   * Enable navigation buttons.
+   *
+   * @private
+   */
+CustomAjaxTable.prototype.enableButtons_ = function () {
+    this.changeButtonStatus_(this.refreshActionBt_, '');
+    this.changeButtonStatus_(this.loadMoreActionBt_, '');
+    this.changeButtonStatus_(this.nextPageBt_, '');
+    if (this.offsetValue_ > 0) {
+        this.changeButtonStatus_(this.prevPageBt_, '');
+    }
+    this.changeButtonStatus_(this.checkboxActionBt_, this.cbActionBtWasDisabled_);
 };
 /**
    * Remove lines from the table body.
@@ -10077,8 +10121,6 @@ CustomAjaxTable.prototype.emptyLines_ = function () {
    * @private
    */
 CustomAjaxTable.prototype.removeLine_ = function (line) {
-    line.style.visibility = 'hidden';
-    line.style.height = '0px';
     window['componentHandler'].downgradeElementRecursive(line);
     line.remove();
 };
@@ -10087,22 +10129,34 @@ CustomAjaxTable.prototype.removeLine_ = function (line) {
    *
    * @private
    */
-CustomAjaxTable.prototype.addLines_ = function (results) {
+CustomAjaxTable.prototype.addLines_ = function () {
+    var offset = this.offsetValue_;
+    var limit = this.limitValue_;
+    var results = this.allResults_;
     var thList = this.element_.querySelectorAll('thead > tr > th');
     var tbody = this.element_.querySelector('tbody');
     var isSelectable = this.element_.classList.contains('mdl-data-table--selectable');
+    var collapseBy = thList.length + (isSelectable ? 1 : 0);
+    var helperData = {
+        Offset: offset,
+        Limit: limit,
+        Next: offset + limit
+    };
     for (var e = 0; e < results.length; e++) {
-        var x = e;
-        if (x > 0 && x % this.navigationRepeat_ === 0) {
-            var helperData = {
-                Offset: e,
-                Limit: this.limitValue_,
-                Next: e + this.limitValue_
-            };
-            this.addNavigationHelper_(tbody, thList.length + (isSelectable ? 1 : 0), helperData);
-        }
+        helperData = {
+            Offset: offset + e,
+            Limit: limit,
+            Next: offset + e + limit
+        };
+        this.addNavigationHelper_(tbody, collapseBy, helperData);
         this.addLine_(results[e], thList, tbody, isSelectable);
     }
+    helperData = {
+        Offset: offset + e,
+        Limit: limit,
+        Next: offset + e + limit
+    };
+    this.addNavigationHelper_(tbody, collapseBy, helperData);
 };
 /**
    * Add a line to the table body.
@@ -10145,10 +10199,9 @@ CustomAjaxTable.prototype.addLine_ = function (data, thList, tbody, isSelectable
    * @private
    */
 CustomAjaxTable.prototype.addNavigationHelper_ = function (tbody, tdLen, data) {
-    var cherry = window.cherry;
-    if (this.navigationHelper_) {
+    if (this.navigationHelper_ && data.Offset > 0 && data.Offset % this.navigationRepeat_ === 0) {
+        var cherry = window.cherry;
         var row = this.navigationHelper_.cloneNode(true);
-        row.classList.remove('template');
         var td = row.querySelector('td');
         if (td.getAttribute('collapse') === 'auto') {
             td.setAttribute('colspan', tdLen);
@@ -10288,11 +10341,12 @@ CustomAjaxTable.prototype.makeProperUrl = function (url) {
    * @private
    */
 CustomAjaxTable.prototype.onLoadMoreClick_ = function () {
+    this.limitValue_ += this.limitAttr_;
     if (this.formRecipient_) {
         this.sourceClick_ = 'table';
-        this.loadDataFromFormRecipient_(this.offsetValue_, this.limitValue_, false);
+        this.loadDataFromFormRecipient_();
     } else {
-        this.loadDataFromUrl_(this.offsetValue_, this.limitValue_, false);
+        this.loadDataFromUrl_();
     }
 };
 /**
@@ -10303,9 +10357,40 @@ CustomAjaxTable.prototype.onLoadMoreClick_ = function () {
 CustomAjaxTable.prototype.onRefreshClick_ = function () {
     if (this.formRecipient_) {
         this.sourceClick_ = 'table';
-        this.loadDataFromFormRecipient_(0, this.offsetValue_, true);
+        this.loadDataFromFormRecipient_();
     } else {
-        this.loadDataFromUrl_(0, this.offsetValue_, true);
+        this.loadDataFromUrl_();
+    }
+};
+/**
+   * Handles previous page btn click event.
+   *
+   * @private
+   */
+CustomAjaxTable.prototype.onPrevClick_ = function () {
+    this.offsetValue_ -= this.limitValue_;
+    if (this.offsetValue_ < 0) {
+        this.offsetValue_ = 0;
+    }
+    if (this.formRecipient_) {
+        this.sourceClick_ = 'table';
+        this.loadDataFromFormRecipient_();
+    } else {
+        this.loadDataFromUrl_();
+    }
+};
+/**
+   * Handles next page btn click event.
+   *
+   * @private
+   */
+CustomAjaxTable.prototype.onNextClick_ = function () {
+    this.offsetValue_ += this.limitValue_;
+    if (this.formRecipient_) {
+        this.sourceClick_ = 'table';
+        this.loadDataFromFormRecipient_();
+    } else {
+        this.loadDataFromUrl_();
     }
 };
 /**
@@ -10355,12 +10440,17 @@ CustomAjaxTable.prototype.init = function () {
         var cherry = window.cherry;
         this.allResults_ = [];
         this.checkboxDataValue_ = this.element_.getAttribute('checkbox-property-value');
+        this.checkboxActionBt_ = this.element_.getAttribute('checkbox-action-bt');
         this.loadMoreActionBt_ = this.element_.getAttribute('loadmore-action-bt');
         this.refreshActionBt_ = this.element_.getAttribute('refresh-action-bt');
+        this.prevPageBt_ = this.element_.getAttribute('prev-page-bt');
+        this.nextPageBt_ = this.element_.getAttribute('next-page-bt');
         this.sortQsName_ = this.element_.getAttribute('sort-qs-name');
         this.limitQsName_ = this.element_.getAttribute('limit-qs-name');
         this.offsetQsName_ = this.element_.getAttribute('offset-qs-name');
-        this.limitValue_ = this.element_.getAttribute('limit-value');
+        this.limitAttr_ = this.element_.getAttribute('limit-value');
+        this.limitAttr_ = parseInt(this.limitAttr_);
+        this.limitValue_ = this.limitAttr_;
         this.limitValue_ = parseInt(this.limitValue_);
         this.isSelectable_ = this.element_.classList.contains(this.CssClasses_.SELECTABLE);
         this.dataUrl_ = this.element_.getAttribute('data-url');
@@ -10375,50 +10465,39 @@ CustomAjaxTable.prototype.init = function () {
         var searchParams = window.location.search.slice(1);
         this.QsParams_ = new window.URLSearchParams(searchParams);
         this.offsetValue_ = 0;
-        this.initialOffsetValue_ = 0;
         if (this.QsParams_.has(this.offsetQsName_)) {
             this.offsetValue_ = this.QsParams_.get(this.offsetQsName_);
             this.offsetValue_ = parseInt(this.offsetValue_);
-            this.initialOffsetValue_ = this.offsetValue_;
+        }
+        if (this.QsParams_.has(this.limitQsName_)) {
+            this.limitValue_ = this.QsParams_.get(this.limitQsName_);
+            this.limitValue_ = parseInt(this.limitValue_);
         }
         this.navigationRepeat_ = this.limitValue_;
         this.navigationHelper_ = this.element_.querySelector('tbody > .navigation-helper');
         if (this.navigationHelper_) {
             this.navigationHelper_.remove();
+            this.navigationHelper_.classList.remove('template');
             if (this.navigationHelper_.hasAttribute('show-nav-helper-every')) {
-                this.navigationRepeat_ = parseInt(this.navigationHelper_.getAttribute('show-nav-helper-every'));
+                this.navigationRepeat_ = this.navigationHelper_.getAttribute('show-nav-helper-every');
+                this.navigationRepeat_ = parseInt(this.navigationRepeat_);
             }
+        }
+        this.emptyHelper_ = this.element_.querySelector('tbody > .empty-helper');
+        if (this.emptyHelper_) {
+            this.emptyHelper_.remove();
+            this.emptyHelper_.classList.remove('template');
+        }
+        this.unreachableHelper_ = this.element_.querySelector('tbody > .unreachable-helper');
+        if (this.unreachableHelper_) {
+            this.unreachableHelper_.remove();
+            this.unreachableHelper_.classList.remove('template');
         }
         this.loader_ = this.element_.getAttribute('loader-selector');
         this.loader_ = document.querySelector(this.loader_);
         this.setupSortcolumnDisplay_();
-        var initLimit = this.limitValue_;
-        if (this.QsParams_.has(this.limitQsName_)) {
-            initLimit = this.QsParams_.get(this.limitQsName_);
-            initLimit = parseInt(initLimit);
-        }
-        /**
-      * xx
-      */
-        var initialLoad = function () {
-            if (this.formRecipient_) {
-                cherry.on(this.formRecipient_, 'submit', this.formRecipientSubmit_).bind(this).first();
-                this.sourceClick_ = 'table';
-                if (!this.formRecipient_.classList.contains('is-upgraded')) {
-                    cherry.once(this.formRecipient_, 'mdl-componentupgraded', function () {
-                        this.loadDataFromFormRecipient_(0, initLimit, true);
-                    }).bind(this);
-                } else {
-                    this.loadDataFromFormRecipient_(0, initLimit, true);
-                }
-            } else {
-                this.loadDataFromUrl_(0, initLimit, true);
-            }
-        };
-        if (this.loader_ && !this.loader_.classList.contains('is-upgraded')) {
-            cherry.once(this.loader_, 'mdl-componentupgraded', initialLoad).bind(this);
-        } else {
-            initialLoad.bind(this)();
+        if (this.formRecipient_) {
+            cherry.on(this.formRecipient_, 'submit', this.formRecipientSubmit_).bind(this).first();
         }
         var sortLinks = this.element_.querySelectorAll('thead tr th a');
         if (sortLinks.length) {
@@ -10433,6 +10512,42 @@ CustomAjaxTable.prototype.init = function () {
         if (this.refreshActionBt_) {
             cherry.on(this.refreshActionBt_, 'CustomAjaxTable.click', this.onRefreshClick_).bind(this);
         }
+        if (this.prevPageBt_) {
+            cherry.on(this.prevPageBt_, 'CustomAjaxTable.click', this.onPrevClick_).bind(this);
+        }
+        if (this.nextPageBt_) {
+            cherry.on(this.nextPageBt_, 'CustomAjaxTable.click', this.onNextClick_).bind(this);
+        }
+        /**
+      * jj
+      */
+        var onUpgraded = function (el, fn) {
+            if (!el.classList.contains('is-upgraded')) {
+                cherry.once(el, 'mdl-componentupgraded', fn);
+            } else {
+                fn();
+            }
+        };
+        /**
+      * xx
+      */
+        var initialLoad = function () {
+            if (this.formRecipient_) {
+                this.sourceClick_ = 'table';
+                onUpgraded(this.formRecipient_, function () {
+                    this.loadDataFromFormRecipient_();
+                }.bind(this));
+            } else {
+                this.loadDataFromUrl_();
+            }
+        }.bind(this);
+        setTimeout(function () {
+            if (this.loader_) {
+                onUpgraded(this.loader_, initialLoad);
+            } else {
+                initialLoad();
+            }
+        }, 10);
     }
 };
 /**
@@ -10442,6 +10557,8 @@ CustomAjaxTable.prototype.mdlDowngrade_ = function () {
     var cherry = window.cherry;
     cherry.off(this.refreshActionBt_, 'CustomAjaxTable.click', this.onRefreshClick_);
     cherry.off(this.loadMoreActionBt_, 'CustomAjaxTable.click', this.onLoadMoreClick_);
+    cherry.off(this.prevPageBt_, 'CustomAjaxTable.click', this.onPrevClick_);
+    cherry.off(this.nextPageBt_, 'CustomAjaxTable.click', this.onNextClick_);
     var sortALinks = this.element_.querySelectorAll('thead tr th a');
     cherry.off(sortALinks, 'CustomAjaxTable.click', this.onSortAClick_);
     var sortThLinks = this.element_.querySelectorAll('thead tr th');
@@ -10450,8 +10567,24 @@ CustomAjaxTable.prototype.mdlDowngrade_ = function () {
         cherry.off(this.formRecipient_, 'submit', this.formRecipientSubmit_);
         cherry.off(this.formRecipient_, 'post-submit', this.formRecipientPostSubmit_);
     }
+    var tbody = this.element_.querySelector('tbody');
+    if (this.emptyHelper_) {
+        this.emptyHelper_.classList.add('template');
+        tbody.appendChild(this.emptyHelper_);
+    }
+    if (this.unreachableHelper_) {
+        this.unreachableHelper_.classList.add('template');
+        tbody.appendChild(this.unreachableHelper_);
+    }
+    if (this.navigationHelper_) {
+        this.navigationHelper_.classList.add('template');
+        tbody.appendChild(this.navigationHelper_);
+    }
     this.loader_ = null;
     this.navigationRepeat_ = null;
+    this.navigationHelper_ = null;
+    this.emptyHelper_ = null;
+    this.unreachableHelper_ = null;
     this.navigationHelper_ = null;
     this.allResults_ = null;
     this.checkboxDataValue_ = null;
@@ -10463,7 +10596,6 @@ CustomAjaxTable.prototype.mdlDowngrade_ = function () {
     this.dataUrl_ = null;
     this.QsParams_ = null;
     this.offsetValue_ = null;
-    this.initialOffsetValue_ = null;
     this.element_.classList.remove(this.CssClasses_.IS_UPGRADED);
 };
 // The component registers itself. It can assume componentHandler is available
@@ -10657,7 +10789,7 @@ CustomFormAjax.prototype.handleSubmitResponse_ = function (response) {
    */
 CustomFormAjax.prototype.handleSubmitFail_ = function () {
     this.hideLoader_();
-    this.notifyPostsubmit_({}, true);
+    this.notifyPostsubmit_({ CriticalFailure: true });
     this.inputBtn_ = null;
 };
 /**
@@ -10713,7 +10845,7 @@ CustomFormAjax.prototype.notifyPresubmit_ = function (data) {
    *
    * @private
    */
-CustomFormAjax.prototype.notifyPostsubmit_ = function (data, critical) {
+CustomFormAjax.prototype.notifyPostsubmit_ = function (data) {
     var cherry = window.cherry;
     cherry.trigger(this.element_, 'post-submit', data);
     if (data.Valid) {
@@ -10733,7 +10865,7 @@ CustomFormAjax.prototype.notifyPostsubmit_ = function (data, critical) {
             actionText: this.postNotifyActionText_
         }
     };
-    if (critical) {
+    if (data.CriticalFailure) {
         notifyData.notification.notificationType = 'critical';
         notifyData.notification.message = this.postNotifyCriticalMessage_;
         notifyData.notification.timeout = this.postNotifyFailureTimeout_;
@@ -10998,15 +11130,17 @@ CustomLoaderOver.prototype.show = function (targetEl) {
     clearTimeout(this.pendingHide_);
     cherry.off(this.element_, 'CustomLoaderOver.transitionend');
     targetEl.CustomLoaderOver = { oldPosition_: targetEl.style.position };
-    if (this.element_.parentNode !== targetEl) {
+    if (!this.element_.classList.contains('show')) {
         cherry.trigger(this.spinner_, 'enable');
+    }
+    if (this.element_.parentNode !== targetEl) {
         targetEl.appendChild(this.element_);
         this.adjustSize_(targetEl);
-        this.element_.classList.add('show');
         if (cherry.getStyle(targetEl, 'position') === 'static') {
             targetEl.style.position = 'relative';
         }
     }
+    this.element_.classList.add('show');
 };
 /**
    * Adjust size and position.
@@ -11046,18 +11180,16 @@ CustomLoaderOver.prototype.adjustSize_ = function (targetEl) {
    */
 CustomLoaderOver.prototype.hide = function (targetEl) {
     var cherry = window.cherry;
-    if (this.element_.classList.contains('show')) {
-        this.pendingHide_ = setTimeout(function () {
-            cherry.off(this.element_, 'CustomLoaderOver.transitionend');
-            cherry.once(this.element_, 'CustomLoaderOver.transitionend', function () {
-                cherry.trigger(this.spinner_, 'disable');
-                this.placeholder_.appendChild(this.element_);
-                targetEl.style.position = targetEl.CustomLoaderOver.oldPosition_;
-            }).bind(this);
-            this.element_.classList.remove('show');
-        }.bind(this), 100);    // this is required to ensure transitionend does trigger
-                               // when show/hide are called consecutively
-    }
+    clearTimeout(this.pendingHide_);
+    this.pendingHide_ = setTimeout(function () {
+        cherry.once(this.element_, 'CustomLoaderOver.transitionend', function () {
+            cherry.trigger(this.spinner_, 'disable');
+            this.placeholder_.appendChild(this.element_);
+            targetEl.style.position = targetEl.CustomLoaderOver.oldPosition_;
+        }).bind(this);
+        this.element_.classList.remove('show');
+    }.bind(this), 100);    // this timeout is required to ensure transitionend does trigger
+                           // when show/hide are called consecutively
 };
 /**
    * Initialize element.
