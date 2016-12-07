@@ -119,6 +119,7 @@ const SOURCES = [
   'src/custom-loader-over/loader-over.js',
   'src/custom-snackbar-notify/snackbar-notify.js',
   'src/custom-select-change-url/select_change_url.js',
+  'src/custom-filet/custom-filet.js',
   // And finally, the ripples
   'src/ripple/ripple.js'
 ];
