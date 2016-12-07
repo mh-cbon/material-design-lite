@@ -142,6 +142,24 @@
   };
 
   /**
+   * Handles enable event.
+   */
+  CustomLoaderOver.prototype.enable = function(ev) {
+    if (ev.loaderTarget) {
+      this.show(ev.loaderTarget);
+    }
+  };
+
+  /**
+   * Handles disable event.
+   */
+  CustomLoaderOver.prototype.disable = function(ev) {
+    if (ev.loaderTarget) {
+      this.hide(ev.loaderTarget);
+    }
+  };
+
+  /**
    * Initialize element.
    */
   CustomLoaderOver.prototype.init = function() {
@@ -149,8 +167,15 @@
       this.placeholder_ = document.createElement('div');
       this.placeholder_.classList.add('custom-loaderover-container');
       this.element_.parentNode.insertBefore(this.placeholder_, this.element_);
+
       this.placeholder_.appendChild(this.element_);
+
       this.spinner_ = this.element_.querySelector('.custom-spinner');
+
+      var cherry = window.cherry;
+      cherry.on(this.element_, 'CustomLoaderOver.enable', this.enable).bind(this);
+      cherry.on(this.element_, 'CustomLoaderOver.disable', this.disable).bind(this);
+
       this.element_.classList.add(this.CssClasses_.IS_UPGRADED);
     }
   };
@@ -161,6 +186,9 @@
   CustomLoaderOver.prototype.mdlDowngrade_ = function() {
 
     var cherry = window.cherry;
+    cherry.off(this.element_, 'CustomLoaderOver.enable', this.enable);
+    cherry.off(this.element_, 'CustomLoaderOver.disable', this.disable);
+
     cherry.off(this.element_, 'CustomLoaderOver.tansitionend');
     clearTimeout(this.pendingHide_);
 
