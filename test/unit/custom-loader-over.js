@@ -122,6 +122,37 @@ describe('CustomLoaderOver', function () {
     }, defTout)
   });
 
+  it('should always hide 2', function (done) {
+    var el = document.createElement('div');
+    document.body.appendChild(el);
+    el.innerHTML = templatesLoader.get('LoaderOver');
+
+    var div = document.createElement('div');
+    div.style.height = '50px';
+    div.style.width = '50px';
+    div.style.backgroundColor = 'silver';
+    el.appendChild(div);
+
+    componentHandler.upgradeElements(el);
+    var loader = el.querySelector('.custom-js-loaderover');
+    var spinner = el.querySelector('.custom-spinner');
+    loader['CustomLoaderOver'].show(div);
+    loader['CustomLoaderOver'].hide(div);
+    setTimeout(function() {
+      loader['CustomLoaderOver'].show(div);
+    }, 110);
+    setTimeout(function() {
+      loader['CustomLoaderOver'].hide(div);
+    }, 250);
+
+    setTimeout(function() {
+      expect(spinner.classList.contains('is-active')).to.be.equal(false);
+      componentHandler.downgradeElementRecursive(el);
+      el.remove();
+      done();
+    }, 1000)
+  });
+
   it('should always show', function (done) {
     var el = document.createElement('div');
     document.body.appendChild(el);
