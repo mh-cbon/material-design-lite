@@ -798,6 +798,8 @@ function datatableMw() {
   * hh
   */
   function handlePostDataTale(req, res) {
+    var parsedUrl = url.parse(req.url, true);
+    var Timeout = parsedUrl.query.Timeout || 0;
     var material = req.body.Material;
     var offset = req.body.Offset || 0;
     var limit = req.body.Limit || 10;
@@ -824,7 +826,7 @@ function datatableMw() {
     res.setHeader('Content-Type', 'application/json');
     setTimeout(function() {
       res.end(JSON.stringify(copy));
-    }, 1500);
+    }, Timeout);
   }
 
   var ajaxTableData = {
