@@ -215,7 +215,7 @@
    */
   CustomFormAjax.prototype.handleSubmitFail_ = function() {
     this.hideLoader_();
-    this.notifyPostsubmit_({}, true);
+    this.notifyPostsubmit_({CriticalFailure: true});
     this.inputBtn_ = null;
   };
 
@@ -275,7 +275,7 @@
    *
    * @private
    */
-  CustomFormAjax.prototype.notifyPostsubmit_ = function(data, critical) {
+  CustomFormAjax.prototype.notifyPostsubmit_ = function(data) {
     var cherry = window.cherry;
     cherry.trigger(this.element_, 'post-submit', data);
     if (data.Valid) {
@@ -295,7 +295,7 @@
         actionText: this.postNotifyActionText_,
       }
     };
-    if (critical) {
+    if (data.CriticalFailure) {
       notifyData.notification.notificationType = 'critical';
       notifyData.notification.message = this.postNotifyCriticalMessage_;
       notifyData.notification.timeout = this.postNotifyFailureTimeout_;

@@ -510,5 +510,29 @@ describe('CustomFormAjax', function () {
     }, defTout);
   });
 
+  it('should emit post-submit crtical event', function (done) {
+    var el = document.createElement('div');
+    document.body.appendChild(el);
+    el.innerHTML = templatesLoader.get('FormAjaxHtml5');
+
+    var form = el.querySelector('.custom-js-form-ajax');
+    form.setAttribute('action', '/nop');
+    var bt = el.querySelector('button');
+    componentHandler.upgradeElements(el);
+
+    var critical = false;
+    form.addEventListener('post-submit', function(ev) {
+      critical = ev.CriticalFailure;
+    })
+
+    bt.click();
+    setTimeout(function() {
+      expect(critical).to.be.equal(true);
+      componentHandler.downgradeElementRecursive(el);
+      el.remove();
+      done();
+    }, defTout);
+  });
+
 
 });
