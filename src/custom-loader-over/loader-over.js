@@ -70,16 +70,17 @@
       oldPosition_: targetEl.style.position,
     };
 
-    if (this.element_.parentNode !== targetEl) {
+    if (!this.element_.classList.contains('show')) {
       cherry.trigger(this.spinner_, 'enable');
+    }
+    if (this.element_.parentNode !== targetEl) {
       targetEl.appendChild(this.element_);
       this.adjustSize_(targetEl);
-      this.element_.classList.add('show');
       if (cherry.getStyle(targetEl, 'position') === 'static') {
         targetEl.style.position = 'relative';
       }
     }
-
+    this.element_.classList.add('show');
   };
 
   /**
@@ -127,18 +128,17 @@
    */
   CustomLoaderOver.prototype.hide = function(targetEl) {
     var cherry = window.cherry;
-    if (this.element_.classList.contains('show')) {
-      this.pendingHide_ = setTimeout(function() {
-        cherry.off(this.element_, 'CustomLoaderOver.transitionend');
-        cherry.once(this.element_, 'CustomLoaderOver.transitionend', function() {
-          cherry.trigger(this.spinner_, 'disable');
-          this.placeholder_.appendChild(this.element_);
-          targetEl.style.position = targetEl.CustomLoaderOver.oldPosition_;
-        }).bind(this);
-        this.element_.classList.remove('show');
-      }.bind(this), 100); // this is required to ensure transitionend does trigger
-      // when show/hide are called consecutively
-    }
+    clearTimeout(this.pendingHide_);
+    this.pendingHide_ = setTimeout(function() {
+      cherry.once(this.element_, 'CustomLoaderOver.transitionend', function() {
+        cherry.trigger(this.spinner_, 'disable');
+        this.placeholder_.appendChild(this.element_);
+        targetEl.style.position = targetEl.CustomLoaderOver.oldPosition_;
+      }).bind(this);
+      this.element_.classList.remove('show');
+    }.bind(this), 100);
+    // this timeout is required to ensure transitionend does trigger
+    // when show/hide are called consecutively
   };
 
   /**
