@@ -1,18 +1,18 @@
 {
   "_args": [
     [
-      "tinymce",
+      "tinymce@^4.4.3",
       "/home/mh-cbon/projects/material-design-lite"
     ]
   ],
-  "_from": "tinymce@*",
-  "_id": "tinymce@4.4.3",
+  "_from": "tinymce@>=4.4.3 <5.0.0",
+  "_id": "tinymce@4.5.1",
   "_inCache": true,
   "_location": "/tinymce",
   "_nodeVersion": "5.11.1",
   "_npmOperationalInternal": {
-    "host": "packages-16-east.internal.npmjs.com",
-    "tmp": "tmp/tinymce-4.4.3.tgz_1472730612658_0.06911972630769014"
+    "host": "packages-12-west.internal.npmjs.com",
+    "tmp": "tmp/tinymce-4.5.1.tgz_1481095804385_0.5745696232188493"
   },
   "_npmUser": {
     "email": "is-accounts@ephox.com",
@@ -22,19 +22,19 @@
   "_phantomChildren": {},
   "_requested": {
     "name": "tinymce",
-    "raw": "tinymce",
-    "rawSpec": "",
+    "raw": "tinymce@^4.4.3",
+    "rawSpec": "^4.4.3",
     "scope": null,
-    "spec": "*",
+    "spec": ">=4.4.3 <5.0.0",
     "type": "range"
   },
   "_requiredBy": [
     "#DEV:/"
   ],
-  "_resolved": "https://registry.npmjs.org/tinymce/-/tinymce-4.4.3.tgz",
-  "_shasum": "63df0fb3ff90aedab506b7c451034bb5ea192cb1",
+  "_resolved": "https://registry.npmjs.org/tinymce/-/tinymce-4.5.1.tgz",
+  "_shasum": "0f6a353c6286b03618cd6045e607fc153f14f84d",
   "_shrinkwrap": null,
-  "_spec": "tinymce",
+  "_spec": "tinymce@^4.4.3",
   "_where": "/home/mh-cbon/projects/material-design-lite",
   "bugs": {
     "url": "http://www.tinymce.com/develop/bugtracker.php"
@@ -44,8 +44,8 @@
   "devDependencies": {},
   "directories": {},
   "dist": {
-    "shasum": "63df0fb3ff90aedab506b7c451034bb5ea192cb1",
-    "tarball": "https://registry.npmjs.org/tinymce/-/tinymce-4.4.3.tgz"
+    "shasum": "0f6a353c6286b03618cd6045e607fc153f14f84d",
+    "tarball": "https://registry.npmjs.org/tinymce/-/tinymce-4.5.1.tgz"
   },
   "installable": true,
   "keywords": [
@@ -57,6 +57,7 @@
     "wysiwyg"
   ],
   "license": "LGPL-2.1",
+  "main": "tinymce.js",
   "maintainers": [
     {
       "name": "ephox",
@@ -70,5 +71,5 @@
   "name": "tinymce",
   "optionalDependencies": {},
   "scripts": {},
-  "version": "4.4.3"
+  "version": "4.5.1"
 }

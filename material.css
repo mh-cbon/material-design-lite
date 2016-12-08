@@ -1,6 +1,6 @@
 /**
  * @mh-cbon/material-design-lite - Material Design Components in CSS, JS and HTML
- * @version v1.2.19
+ * @version v1.2.20
  * @license Apache-2.0
  * @copyright 2015 Google, Inc.
  * @link https://github.com/google/material-design-lite
@@ -11507,17 +11507,6 @@ _:-ms-input-placeholder, :root .mdl-slider.mdl-slider.is-upgraded {
   .custom-data-table thead th.mdl-data-table__header--sorted:hover:before {
     color: rgba(0, 0, 0, 0.26); }
 
-.custom-data-table thead th.mdl-data-table__header--sorted-ascending:hover, .custom-data-table thead th.mdl-data-table__header--sorted-descending:hover, .custom-data-table thead th.mdl-data-table__header--sorted:hover {
-  cursor: pointer;
-  /* FF3.6-15 */
-  /* Chrome10-25,Safari5.1-6 */
-  background: linear-gradient(to bottom, rgba(255, 255, 255, 0) 0%, #f7f7f7 100%);
-  /* W3C, IE10+, FF16+, Chrome26+, Opera12+, Safari7+ */
-  filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#00ffffff', endColorstr='#f7f7f7',GradientType=0 );
-  /* IE6-9 */ }
-  .custom-data-table thead th.mdl-data-table__header--sorted-ascending:hover:before, .custom-data-table thead th.mdl-data-table__header--sorted-descending:hover:before, .custom-data-table thead th.mdl-data-table__header--sorted:hover:before {
-    color: black; }
-
 .custom-data-table.mdl-data-table--selectable thead > tr > th:first-child,
 .custom-data-table.mdl-data-table--selectable thead > tr > th:last-child,
 .custom-data-table.mdl-data-table--selectable tbody > tr > td:first-child,
@@ -13337,6 +13326,37 @@ _:-ms-input-placeholder, :root .mdl-slider.mdl-slider.is-upgraded {
     top: 50%;
     left: 50%;
     opacity: 1; }
+
+/**
+ * Copyright 2015 Google Inc. All Rights Reserved.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+.custom-js-filet.custom-filet--show .custom-filet--filet {
+  width: 90% !important;
+  left: 5% !important; }
+
+.custom-filet--filet {
+  background-color: rgb(33,150,243);
+  height: 1px;
+  position: absolute;
+  left: 50%;
+  width: 0;
+  bottom: 0px;
+  transition: left .5s, width .5s; }
+  .custom-filet--filet.show {
+    width: 90%;
+    left: 5%; }
 
 .mdl-selectfield {
   position: relative;
