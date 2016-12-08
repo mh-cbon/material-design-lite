@@ -46,6 +46,7 @@ npm i @mh-cbon/material-design-lite --save
 git clone https://github.com/mh-cbon/material-design-lite.git
 cd material-design-lite
 npm i
+npm i node-sass # for some reasons you need to install it explicitly to trigger the install script.
 ./node_modules/.bin/gulp default
 ./node_modules/.bin/gulp test:web
 ./node_modules/.bin/gulp nightmare
