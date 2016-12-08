@@ -86,11 +86,11 @@
   },
   "scripts": {
     "git-clean": "[[ -z $(git status -uno --porcelain) ]] && [[ -z $(git cherry -v) ]] || ( git status && exit 1)",
-    "test": "node_modules/.bin/gulp && npm run git-clean",
+    "test": "node_modules/.bin/gulp",
     "patch": "npm version patch -m \"patch %s\"",
     "minor": "npm version minor -m \"minor %s\"",
     "major": "npm version major -m \"major %s\"",
-    "preversion": "npm run test",
+    "preversion": "npm run test && npm run git-clean",
     "version": "npm run build",
     "build": "node_modules/.bin/gulp build",
     "postversion": "git push && git push --tags && npm run public",
