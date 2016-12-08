@@ -18,7 +18,7 @@
     "browser-sync": "^2.2.3",
     "chai": "^3.3.0",
     "chai-jquery": "^2.0.0",
-    "cropperjs": "^0.8.1",
+    "cropperjs": "mh-cbon/cropperjs#preview-node",
     "del": "^2.0.2",
     "drool": "^0.3.1",
     "escodegen": "^1.6.1",
