@@ -193,8 +193,12 @@
   CustomFormAjax.prototype.handleSubmitResponse_ = function(response) {
     if (response) {
       if (response.HasFailure || response.HasFieldErrors) {
-        this.applyFormFailure_(response.Failure);
-        this.applyFieldErrors_(response.FieldErrors);
+        if (response.FailTo) {
+          window.location.href = response.FailTo;
+        } else {
+          this.applyFormFailure_(response.Failure);
+          this.applyFieldErrors_(response.FieldErrors);
+        }
       } else if (response.Valid) {
         if (response.SuccessTo) {
           window.location.href = response.SuccessTo;
