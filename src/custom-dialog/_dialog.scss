@@ -54,4 +54,11 @@
     right: 0;
   }
 
+
+  @media (max-width: $grid-tablet-breakpoint - 1) {
+    .custom-dialog-container{
+      width: 90%;
+      height: 90%;
+    }
+  }
 }
