@@ -85,6 +85,7 @@ const SOURCES = [
   'src/third_party/rAf.js',
   'src/third_party/vanilla.js',
   'src/third_party/event.js',
+  'src/third_party/resize.js',
   // Base components
   'src/button/button.js',
   'src/checkbox/checkbox.js',

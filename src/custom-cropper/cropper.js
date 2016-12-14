@@ -274,7 +274,7 @@
       cherry.on(this.dialogCancel_, 'customcropper.click', this.onDialogCanceled_).bind(this);
       cherry.on(this.btAction_, 'customcropper.click', this.onFileCleared).bind(this);
 
-      cherry.on(window, 'customcropper.resize', this.updateBoxPosition_).bind(this).debounce(100);
+      cherry.on(window, 'customcropper.optimizedResize', this.updateBoxPosition_).bind(this);
 
       this.element_.classList.add(this.CssClasses_.IS_UPGRADED);
     }
@@ -294,7 +294,7 @@
     cherry.off(this.dialogCancel_, 'customcropper.click', this.onDialogCanceled_);
     cherry.off(this.btAction_, 'customcropper.click', this.onFileCleared);
 
-    cherry.off(window, 'customcropper.resize', this.updateBoxPosition_, this);
+    cherry.off(window, 'customcropper.optimizedResize', this.updateBoxPosition_, this);
 
     this.file_ = null;
     this.dialog_ = null;

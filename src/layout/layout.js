@@ -484,18 +484,18 @@
         tabUpdateHandler();
 
         // Update tabs when the window resizes.
-        var windowResizeHandler = function() {
-          // Use timeouts to make sure it doesn't happen too often.
-          if (this.resizeTimeoutId_) {
-            clearTimeout(this.resizeTimeoutId_);
-          }
-          this.resizeTimeoutId_ = setTimeout(function() {
-            tabUpdateHandler();
-            this.resizeTimeoutId_ = null;
-          }.bind(this), /** @type {number} */ (this.Constant_.RESIZE_TIMEOUT));
-        }.bind(this);
+        // var windowResizeHandler = function() {
+        //   // Use timeouts to make sure it doesn't happen too often.
+        //   if (this.resizeTimeoutId_) {
+        //     clearTimeout(this.resizeTimeoutId_);
+        //   }
+        //   this.resizeTimeoutId_ = setTimeout(function() {
+        //     tabUpdateHandler();
+        //     this.resizeTimeoutId_ = null;
+        //   }.bind(this), /** @type {number} */ (this.Constant_.RESIZE_TIMEOUT));
+        // }.bind(this);
 
-        window.addEventListener('resize', windowResizeHandler);
+        window.addEventListener('optimizedResize', tabUpdateHandler);
 
         if (this.tabBar_.classList.contains(this.CssClasses_.JS_RIPPLE_EFFECT)) {
           this.tabBar_.classList.add(this.CssClasses_.RIPPLE_IGNORE_EVENTS);
