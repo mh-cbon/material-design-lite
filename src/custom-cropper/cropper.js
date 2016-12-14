@@ -294,7 +294,7 @@
     cherry.off(this.dialogCancel_, 'customcropper.click', this.onDialogCanceled_);
     cherry.off(this.btAction_, 'customcropper.click', this.onFileCleared);
 
-    cherry.off(window, 'customcropper.resize', this.updateBoxPosition_);
+    cherry.off(window, 'customcropper.resize', this.updateBoxPosition_, this);
 
     this.file_ = null;
     this.dialog_ = null;

@@ -134,8 +134,8 @@
       bt.click(); // force the dialog to hide
     }
     var cherry = window.cherry;
-    cherry.off(this.input_, 'customdatefield.click');
-    cherry.off(this.input_, 'customdatefield.onOk');
+    cherry.off(this.input_, 'customdatefield.click', this.onInputClick_);
+    cherry.off(this.input_, 'customdatefield.onOk', this.onOkClick_);
     this.dialog = null;
     this.input_ = null;
     this.value_ = null;

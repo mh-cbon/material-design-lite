@@ -240,29 +240,34 @@
   * @param {string} eventName The name of the event.
   * @param {string} handler The effective function, or the use function handler.
   * @param {string} delegationSelector The target of a delegated event.
+  * @param {object} scope The execution scope of the event handler.
   */
-  EventManager.prototype.removeUserEventHandler = function(eventName, handler, delegationSelector) {
+  EventManager.prototype.removeUserEventHandler = function(eventName, handler, delegationSelector, scope) {
     var domEventName = getEventName(eventName);
     if (this.userEventHandlers[domEventName]) {
       var rm = [];
       if (!handler) {
         this.userEventHandlers[domEventName].forEach(function(o, index) {
           if (o.eventName === eventName) {
-            rm.push(index);
+            if (!scope || scope && scope === o.scope) {
+              rm.push(index);
+            }
           }
         });
       } else {
         this.userEventHandlers[domEventName].forEach(function(o, index) {
           if (o.eventName === eventName) {
-            if (delegationSelector && o.delegationSelector === delegationSelector &&
-              o.userHandler && o.userHandler === handler) {
-              rm.push(index);
-            } else if (delegationSelector && o.delegationSelector === delegationSelector && !handler) {
-              rm.push(index);
-            } else if (o.userHandler && o.userHandler === handler) {
-              rm.push(index);
-            } else if (!o.userHandler && o.effectiveHandler === handler) {
-              rm.push(index);
+            if (!scope || scope && scope === o.scope) {
+              if (delegationSelector && o.delegationSelector === delegationSelector &&
+                o.userHandler && o.userHandler === handler) {
+                rm.push(index);
+              } else if (delegationSelector && o.delegationSelector === delegationSelector && !handler) {
+                rm.push(index);
+              } else if (o.userHandler && o.userHandler === handler) {
+                rm.push(index);
+              } else if (!o.userHandler && o.effectiveHandler === handler) {
+                rm.push(index);
+              }
             }
           }
         });
@@ -483,14 +488,15 @@
   * @param {DomNode} targetNode The node to listen.
   * @param {string} evName The name of the event.
   * @param {Function} evHandler The event handler callback.
+  * @param {object} scope The execution scope of the function handler.
   */
-  var off = function(selector, evName, evHandler) {
+  var off = function(selector, evName, evHandler, scope) {
     var targetNodes = getElement(selector);
     for (var i = 0; i < targetNodes.length; i++) {
       var targetNode = targetNodes[i];
       var nodeEventManager = targetNode.__eventManager;
       if (nodeEventManager) {
-        nodeEventManager.removeUserEventHandler(evName, evHandler);
+        nodeEventManager.removeUserEventHandler(evName, evHandler, null, scope);
         if (nodeEventManager.IsEmpty()) {
           nodeEventManager.Clear();
           targetNode.__eventManager = undefined;
@@ -564,14 +570,19 @@
   *   cherry.undelegate(rootNode, evName)
   *   cherry.undelegate(rootNode, evName, handler)
   * @param {DomNode} rootSelector The node listen.
-  * @param {string} evName The name of the event.
-  * @param {Function} evName The event handler callback.
+  * @param {string} selector The selector of the delegation.
+  * @param {string} evName The event name.
+  * @param {Function} evHandler The event handler callback.
+  * @param {Object} The user event handler object.
   */
-  var undelegate = function(rootSelector, selector, evName, evHandler) {
+  var undelegate = function(rootSelector, selector, evName, evHandler, scope) {
     if (!evName && !evHandler) {
+      scope = evHandler;
+      evHandler = evName;
       evName = selector;
       selector = null;
     } else if (evName.apply) {
+      scope = evHandler;
       evHandler = evName;
       evName = selector;
       selector = null;
@@ -582,7 +593,7 @@
 
       var nodeEventManager = rootNode.__eventManager;
       if (nodeEventManager) {
-        nodeEventManager.removeUserEventHandler(evName, evHandler, selector);
+        nodeEventManager.removeUserEventHandler(evName, evHandler, selector, scope);
         if (nodeEventManager.IsEmpty()) {
           nodeEventManager.Clear();
           rootNode.__eventManager = undefined;

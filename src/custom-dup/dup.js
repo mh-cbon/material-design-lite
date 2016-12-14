@@ -141,7 +141,7 @@
   CustomDup.prototype.mdlDowngrade_ = function() {
 
     var cherry = window.cherry;
-    cherry.off(window, 'customdup.mdl-componentsupgraded', this.onComponentsRegistered_);
+    cherry.off(window, 'customdup.mdl-componentsupgraded', this.onComponentsRegistered_, this);
     cherry.undelegate(this.element_, 'customdup.click', this.onBtAddClicked_);
     cherry.undelegate(this.element_, 'customdup.click', this.onBtRemoveClicked_);
 

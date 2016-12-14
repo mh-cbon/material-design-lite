@@ -182,10 +182,10 @@
     this.element_.classList.remove('show');
 
     var cherry = window.cherry;
-    cherry.off(this.close_, 'customdialog.click');
-    cherry.off(this.confirm_, 'customdialog.click');
-    cherry.off(this.cancel_, 'customdialog.click');
-    cherry.off(window, 'customdialog.resize', this.updateBoxPosition_);
+    cherry.off(this.close_, 'customdialog.click', this.cancelClicked_);
+    cherry.off(this.confirm_, 'customdialog.click', this.confirmClicked_);
+    cherry.off(this.cancel_, 'customdialog.click', this.cancelClicked_);
+    cherry.off(window, 'customdialog.resize', this.updateBoxPosition_, this);
     if (this.btSelector_) {
       cherry.off(this.btSelector_, 'customdialog.click', this.onBtClicked_);
     }

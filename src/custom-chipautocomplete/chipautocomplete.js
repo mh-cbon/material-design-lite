@@ -623,9 +623,10 @@
 
     var cherry = window.cherry;
 
-    cherry.off(this.input_, 'chipautocomplete.focus');
-    cherry.off(this.input_, 'chipautocomplete.blur');
-    cherry.off(this.input_, 'chipautocomplete.keypress');
+    cherry.off(this.input_, 'chipautocomplete.focus', this.onInputFocus);
+    cherry.off(this.input_, 'chipautocomplete.blur', this.clearComponent_);
+    cherry.off(this.input_, 'chipautocomplete.keypress', this.onInputCtrlKeys_);
+    cherry.off(this.input_, 'chipautocomplete.keypress', this.onInputChanged);
     cherry.undelegate(this.selected_, 'li', 'click', this.onResultClick_);
     cherry.undelegate(this.selected_, '.mdl-chip-action', 'click', this.removeChip_);
 
