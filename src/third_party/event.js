@@ -240,7 +240,7 @@
   * @param {string} eventName The name of the event.
   * @param {string} handler The effective function, or the use function handler.
   * @param {string} delegationSelector The target of a delegated event.
-  * @param {object} scope The execution scope of the event handler.
+  * @param {Object} scope The execution scope of the event handler.
   */
   EventManager.prototype.removeUserEventHandler = function(eventName, handler, delegationSelector, scope) {
     var domEventName = getEventName(eventName);
@@ -488,7 +488,7 @@
   * @param {DomNode} targetNode The node to listen.
   * @param {string} evName The name of the event.
   * @param {Function} evHandler The event handler callback.
-  * @param {object} scope The execution scope of the function handler.
+  * @param {Object} scope The execution scope of the function handler.
   */
   var off = function(selector, evName, evHandler, scope) {
     var targetNodes = getElement(selector);
