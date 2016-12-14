@@ -81,6 +81,7 @@
 
     setTimeout(function() {
       this.container_.classList.add('show');
+      this.overlay_.classList.add('show');
     }.bind(this), 100);
   };
 
@@ -163,6 +164,7 @@
     if (this.container_.classList.contains('show')) {
       cherry.once(this.container_, 'transitionend', this.cleanup_).bind(this);
       this.container_.classList.add('hide');
+      this.overlay_.classList.remove('show');
     } else {
       this.cleanup_();
     }
@@ -176,6 +178,7 @@
     this.container_.classList.remove('loaded');
     this.container_.classList.remove('show');
     this.container_.classList.remove('hide');
+    this.overlay_.classList.remove('show');
     this.iframe_.setAttribute('src', '');
     this.placeholder_.parentNode.insertBefore(this.element_, this.placeholder_);
   };
@@ -204,14 +207,15 @@
     ev.stopImmediatePropagation();
     ev.stopPropagation();
 
-    var bt = ev.target;
+    var bt = ev.delegateTarget;
     if (bt.getAttribute('disabled') === 'disabled') {
       return;
     }
 
-    this.href_ = bt.getAttribute('href');
-
-    this.showBox_();
+    if (bt.hasAttribute('href')) {
+      this.href_ = bt.getAttribute('href');
+      this.showBox_();
+    }
   };
 
   /**
@@ -220,6 +224,7 @@
   CustomRightPanelOver.prototype.init = function() {
     if (this.element_) {
       this.container_ = this.element_.querySelector('.custom-rightpanelover-container');
+      this.overlay_ = this.element_.querySelector('.custom-rightpanelover-overlay');
 
       this.loader_ = this.element_.getAttribute('loader-selector');
       this.loader_ = document.querySelector(this.loader_);
@@ -237,8 +242,10 @@
       cherry.on(this.element_, 'CustomRightPanelOver.dblclick', this.onCloserClicked_).bind(this);
 
       if (this.openerBtSelector_) {
-        cherry.on(this.openerBtSelector_,
-          'CustomRightPanelOver.click', this.onOpenerClicked_).bind(this).first();
+        cherry.delegate(document,
+          this.openerBtSelector_,
+          'CustomRightPanelOver.click', this.onOpenerClicked_
+        ).bind(this).first();
       }
 
       this.placeholder_ = document.createElement('input');
@@ -257,7 +264,10 @@
     var cherry = window.cherry;
     // cherry.off(window, 'CustomRightPanelOver.resize', this.updateBoxPosition_);
     if (this.openerBtSelector_) {
-      cherry.off(this.openerBtSelector_, 'CustomRightPanelOver.click', this.onOpenerClicked_);
+      cherry.undelegate(document,
+        this.openerBtSelector_,
+        'CustomRightPanelOver.click', this.onOpenerClicked_
+      );
     }
     // if (this.closerBtSelector_) {
     //   cherry.off(this.closerBtSelector_, 'CustomRightPanelOver.click', this.onCloserClicked_);
