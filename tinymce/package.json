@@ -1,7 +1,15 @@
 {
   "_args": [
     [
-      "tinymce@^4.4.3",
+      {
+        "raw": "tinymce@^4.4.3",
+        "scope": null,
+        "escapedName": "tinymce",
+        "name": "tinymce",
+        "rawSpec": "^4.4.3",
+        "spec": ">=4.4.3 <5.0.0",
+        "type": "range"
+      },
       "/home/mh-cbon/projects/material-design-lite"
     ]
   ],
@@ -15,16 +23,17 @@
     "tmp": "tmp/tinymce-4.5.1.tgz_1481095804385_0.5745696232188493"
   },
   "_npmUser": {
-    "email": "is-accounts@ephox.com",
-    "name": "ephox"
+    "name": "ephox",
+    "email": "is-accounts@ephox.com"
   },
   "_npmVersion": "3.8.6",
   "_phantomChildren": {},
   "_requested": {
-    "name": "tinymce",
     "raw": "tinymce@^4.4.3",
-    "rawSpec": "^4.4.3",
     "scope": null,
+    "escapedName": "tinymce",
+    "name": "tinymce",
+    "rawSpec": "^4.4.3",
     "spec": ">=4.4.3 <5.0.0",
     "type": "range"
   },
@@ -47,14 +56,13 @@
     "shasum": "0f6a353c6286b03618cd6045e607fc153f14f84d",
     "tarball": "https://registry.npmjs.org/tinymce/-/tinymce-4.5.1.tgz"
   },
-  "installable": true,
   "keywords": [
     "editor",
-    "html",
-    "javascript",
-    "richtext",
+    "wysiwyg",
     "tinymce",
-    "wysiwyg"
+    "richtext",
+    "javascript",
+    "html"
   ],
   "license": "LGPL-2.1",
   "main": "tinymce.js",
@@ -70,6 +78,7 @@
   ],
   "name": "tinymce",
   "optionalDependencies": {},
+  "readme": "ERROR: No README data found!",
   "scripts": {},
   "version": "4.5.1"
 }

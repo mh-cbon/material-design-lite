@@ -1,6 +1,6 @@
 /**
  * @mh-cbon/material-design-lite - Material Design Components in CSS, JS and HTML
- * @version v1.2.20
+ * @version v1.2.23
  * @license Apache-2.0
  * @copyright 2015 Google, Inc.
  * @link https://github.com/google/material-design-lite
@@ -11527,7 +11527,7 @@ _:-ms-input-placeholder, :root .mdl-slider.mdl-slider.is-upgraded {
     display: block;
     max-height: 150px;
     overflow-y: scroll; }
-  .custom-data-table.custom-data-table__body--scroll thead, .custom-data-table.custom-data-table__body--scroll tbody tr {
+  .custom-data-table.custom-data-table__body--scroll thead tr, .custom-data-table.custom-data-table__body--scroll tbody tr {
     width: 100%;
     display: table;
     table-layout: fixed; }
@@ -11598,6 +11598,10 @@ _:-ms-input-placeholder, :root .mdl-slider.mdl-slider.is-upgraded {
     position: absolute;
     top: 0;
     right: 0; }
+  @media (max-width: 479px) {
+    .custom-dialog .custom-dialog-container {
+      width: 90%;
+      height: 90%; } }
 
 /**
  * Copyright 2015 Google Inc. All Rights Reserved.
@@ -11624,9 +11628,13 @@ _:-ms-input-placeholder, :root .mdl-slider.mdl-slider.is-upgraded {
   height: auto; }
 
 .custom-expander .custom-expander-container {
-  height: 0;
   overflow: hidden;
-  transition: height .5s; }
+  transition: padding .5s, margin .5s, height .5s; }
+
+.custom-expander:not(.is-expanded) .custom-expander-container {
+  height: 0;
+  padding: 0;
+  margin: 0; }
 
 .custom-expander.custom-expander-notifier {
   position: relative; }
@@ -13105,7 +13113,7 @@ _:-ms-input-placeholder, :root .mdl-slider.mdl-slider.is-upgraded {
     background-color: white; }
     .custom-rightpanelover .custom-rightpanelover-container.show {
       right: 0%;
-      box-shadow: -25px 0 250px 30px rgba(70, 70, 70, 0.7); }
+      box-shadow: -25px 0 50px 40px rgba(70, 70, 70, 0.7); }
     .custom-rightpanelover .custom-rightpanelover-container.hide {
       box-shadow: 0px 0 0px 0px rgba(255, 255, 255, 0);
       right: -100%; }
@@ -13119,6 +13127,23 @@ _:-ms-input-placeholder, :root .mdl-slider.mdl-slider.is-upgraded {
       visibility: hidden; }
     .custom-rightpanelover .custom-rightpanelover-container.loaded > iframe {
       visibility: visible; }
+  .custom-rightpanelover .custom-rightpanelover-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    opacity: 0;
+    z-index: 0;
+    background-color: transparent;
+    transition: opacity 1s, background-color 1s; }
+    .custom-rightpanelover .custom-rightpanelover-overlay.show {
+      opacity: .60;
+      background-color: #8a8a8a; }
+  @media (max-width: 479px) {
+    .custom-rightpanelover .custom-rightpanelover-container {
+      width: 100%;
+      box-shadow: none; } }
 
 .custom-rightpanelover-noscroll {
   overflow-y: hidden; }
@@ -13216,7 +13241,9 @@ _:-ms-input-placeholder, :root .mdl-slider.mdl-slider.is-upgraded {
     right: 20px;
     overflow: hidden;
     height: 96px;
-    width: 96px; }
+    width: 96px;
+    border: 1px solid #85929e;
+    background-color: #f2f3f4; }
   .custom-cropper-dialog .custom-dialog-container .custom-cropper-dialog-img {
     max-width: 80%; }
 
