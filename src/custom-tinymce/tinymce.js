@@ -60,10 +60,19 @@
   CustomTinymce.prototype.init = function() {
     if (this.element_) {
       var element_ = this.element_;
+      var textarea = this.element_.querySelector('textarea');
 
-      window.tinymce.init({
-        target: element_.querySelector('textarea'),
-      });
+      var tinymce = window.tinymce;
+      tinymce.EditorManager.init({
+        target: element_.querySelector('textarea')
+      }).then(function(ed) {
+        ed[0].on('change', function(e) {
+          textarea.value = tinymce.activeEditor.getContent();
+        }.bind(this));
+        ed[0].on('keyup', function() {
+          textarea.value = tinymce.activeEditor.getContent();
+        }.bind(this));
+      }.bind(this));
 
       this.element_.classList.add(this.CssClasses_.IS_UPGRADED);
     }
