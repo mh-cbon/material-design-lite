@@ -8519,7 +8519,6 @@ CustomExpander.prototype.showBox_ = function () {
     cherry.off(this.container_, 'transitionend');
     cherry.once(this.container_, 'transitionend', function () {
         this.element_.classList.add(this.CssClasses_.IS_EXPANDED);
-        this.container_.style.height = 'auto';
     }).bind(this);
     this.container_.style.height = h + 'px';
 };
@@ -8528,8 +8527,12 @@ CustomExpander.prototype.showBox_ = function () {
    */
 CustomExpander.prototype.closeBox_ = function () {
     this.nextDir_ = 'open';
-    this.container_.style.height = null;
-    this.element_.classList.remove(this.CssClasses_.IS_EXPANDED);
+    var cherry = window.cherry;
+    cherry.off(this.container_, 'transitionend');
+    cherry.once(this.container_, 'transitionend', function () {
+        this.element_.classList.remove(this.CssClasses_.IS_EXPANDED);
+    }).bind(this);
+    this.container_.style.height = '0px';
 };
 /**
    * Hide the dialog.
@@ -8571,6 +8574,10 @@ CustomExpander.prototype.init = function () {
         this.bt_ = this.element_.querySelector('.custom-expander-bt');
         this.wasOpen_ = this.element_.classList.contains(this.CssClasses_.IS_EXPANDED);
         this.nextDir_ = this.wasOpen_ ? 'close' : 'open';
+        if (this.wasOpen_) {
+            var h = this.getContainerHeight_();
+            this.container_.style.height = h + 'px';
+        }
         var cherry = window.cherry;
         cherry.on(this.bt_, 'CustomExpander.click', this.toggleBox_).bind(this).debounce(10);
         cherry.on(this.element_, 'CustomExpander.notify', this.onNotify_).bind(this).first();
@@ -8581,8 +8588,13 @@ CustomExpander.prototype.init = function () {
    * Downgrade element.
    */
 CustomExpander.prototype.mdlDowngrade_ = function () {
-    this.container_.style.height = '0px';
     this.nextDir_ = 'open';
+    if (this.wasOpen_) {
+        this.element_.classList.add(this.CssClasses_.IS_EXPANDED);
+        this.container_.style.height = null;
+    } else {
+        this.container_.style.height = '0px';
+    }
     var cherry = window.cherry;
     cherry.off(this.bt_, 'CustomExpander.click', this.toggleBox_);
     cherry.off(this.element_, 'CustomExpander.notify', this.onNotify_);
@@ -8590,9 +8602,6 @@ CustomExpander.prototype.mdlDowngrade_ = function () {
     this.bt_ = null;
     this.container_ = null;
     this.element_.classList.remove(this.CssClasses_.IS_EXPANDED);
-    if (this.wasOpen_) {
-        this.element_.classList.add(this.CssClasses_.IS_EXPANDED);
-    }
     this.element_.classList.remove(this.CssClasses_.IS_UPGRADED);
 };
 // The component registers itself. It can assume componentHandler is available
