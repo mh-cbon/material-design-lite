@@ -54,11 +54,21 @@
     right: 0;
   }
 
+  .mdl-dialog__actions {
+    position: absolute;
+    bottom: 0;
+    right: 0;
+  }
 
-  @media (max-width: $grid-tablet-breakpoint - 1) {
+
+  @media (max-width: 561px) {
     .custom-dialog-container{
-      width: 90%;
-      height: 90%;
+      width: 97%;
+      height: 97%;
     }
   }
+}
+
+.custom-dialog-noscroll {
+  overflow: hidden;
 }

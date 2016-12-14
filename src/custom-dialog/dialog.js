@@ -68,6 +68,7 @@
    */
   CustomDialog.prototype.showBox_ = function() {
     document.body.appendChild(this.element_);
+    document.body.classList.add('custom-dialog-noscroll');
     this.element_.classList.add('beforeshow');
     this.updateBoxPosition_();
     this.element_.classList.add('show');
@@ -82,6 +83,7 @@
     this.pendingBt_ = null;
     this.element_.classList.remove('beforeshow');
     this.element_.classList.remove('show');
+    document.body.classList.remove('custom-dialog-noscroll');
     this.placeholder_.parentNode.insertBefore(this.element_, this.placeholder_);
   };
 
@@ -158,7 +160,7 @@
       cherry.on(this.confirm_, 'customdialog.click', this.confirmClicked_).bind(this);
       cherry.on(this.cancel_, 'customdialog.click', this.cancelClicked_).bind(this);
 
-      cherry.on(window, 'customdialog.resize', this.updateBoxPosition_).bind(this).debounce(100);
+      cherry.on(window, 'customdialog.optimizedResize', this.updateBoxPosition_).bind(this);
 
       if (this.btSelector_) {
         this.pendingBt_ = null;
@@ -185,7 +187,7 @@
     cherry.off(this.close_, 'customdialog.click', this.cancelClicked_);
     cherry.off(this.confirm_, 'customdialog.click', this.confirmClicked_);
     cherry.off(this.cancel_, 'customdialog.click', this.cancelClicked_);
-    cherry.off(window, 'customdialog.resize', this.updateBoxPosition_, this);
+    cherry.off(window, 'customdialog.optimizedResize', this.updateBoxPosition_, this);
     if (this.btSelector_) {
       cherry.off(this.btSelector_, 'customdialog.click', this.onBtClicked_);
     }
