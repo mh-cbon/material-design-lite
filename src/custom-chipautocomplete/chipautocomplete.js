@@ -299,6 +299,7 @@
       //dispaly above
       this.results_.style.top = '-' + (componentHeight - inputHeight + d) + 'px';
     }
+    this.results_.style.width = this.input_.offsetWidth + 'px';
     this.results_.style.visibility = 'visible';
   };
 
