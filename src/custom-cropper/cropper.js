@@ -211,12 +211,16 @@
       this.b64ExportHeight = parseInt(this.element_.getAttribute('b64-export-height'));
       if (this.currentImg_) {
         imagesLoaded(this.currentImg_, function() {
-          if (that.currentImg_) {
-            that.originalCurrentImg_ = cherry.imgAsDataUrl(that.currentImg_);
-            that.b64ExportWidth = that.b64ExportWidth || that.currentImg_.offsetWidth;
-            that.b64ExportHeight = that.b64ExportHeight || that.currentImg_.offsetHeight;
+          if (this.currentImg_) {
+            if (this.currentImg_.src.match(/^data:/)) {
+              this.originalCurrentImg_ = this.currentImg_.src;
+            } else {
+              this.originalCurrentImg_ = cherry.imgAsDataUrl(this.currentImg_);
+            }
+            this.b64ExportWidth = this.b64ExportWidth || this.currentImg_.offsetWidth;
+            this.b64ExportHeight = this.b64ExportHeight || this.currentImg_.offsetHeight;
           }
-        });
+        }.bind(this));
       }
 
       this.cropper_ = null;
