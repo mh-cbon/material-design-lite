@@ -90,17 +90,9 @@
    * Hide the dialog.
    */
   CustomExpander.prototype.closeBox_ = function() {
-    var cherry = window.cherry;
     this.nextDir_ = 'open';
-    var h = this.getContainerHeight_();
-    cherry.off(this.container_, 'transitionend');
-    cherry.once(this.container_, 'transitionend', function() {
-      this.element_.classList.remove(this.CssClasses_.IS_EXPANDED);
-    }).bind(this);
-    this.container_.style.height = h + 'px';
-    setTimeout(function() {
-      this.container_.style.height = '0px';
-    }.bind(this), 50);
+    this.container_.style.height = null;
+    this.element_.classList.remove(this.CssClasses_.IS_EXPANDED);
   };
 
   /**
