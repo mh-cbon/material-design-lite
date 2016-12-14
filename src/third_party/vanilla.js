@@ -289,9 +289,12 @@
   var imgAsDataUrl = function(img) {
     var canvas = document.createElement('canvas');
     var ctx = canvas.getContext('2d');
-    ctx.canvas.width  = img.offsetWidth;
-    ctx.canvas.height = img.offsetHeight;
-    ctx.drawImage(img, 0, 0, img.offsetWidth, img.offsetHeight);
+    // the || is for chromium
+    var imgW  = img.offsetWidth || img.width;
+    var imgH = img.offsetHeight || img.height;
+    ctx.canvas.width  = imgW;
+    ctx.canvas.height = imgH;
+    ctx.drawImage(img, 0, 0, imgW, imgH);
     return canvas.toDataURL('image/png');
   };
   cherry.imgAsDataUrl = imgAsDataUrl;
