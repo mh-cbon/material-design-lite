@@ -4745,6 +4745,24 @@ window.addEventListener('load', function() {
 })(window);
 
 /**
+  * throttle an event according to available animation frames
+  */
+var throttle = function (type, name) {
+    var running = false;
+    window.addEventListener(type, function () {
+        if (running) {
+            return;
+        }
+        running = true;
+        requestAnimationFrame(function () {
+            window.dispatchEvent(new CustomEvent(name));
+            running = false;
+        });
+    });
+};
+/* init - you can init any event */
+throttle('resize', 'optimizedResize', window);
+/**
  * @license
  * Copyright 2015 Google Inc. All Rights Reserved.
  *
@@ -7796,17 +7814,17 @@ MaterialLayout.prototype.init = function () {
             this.tabBar_.addEventListener('scroll', tabUpdateHandler);
             tabUpdateHandler();
             // Update tabs when the window resizes.
-            var windowResizeHandler = function () {
-                // Use timeouts to make sure it doesn't happen too often.
-                if (this.resizeTimeoutId_) {
-                    clearTimeout(this.resizeTimeoutId_);
-                }
-                this.resizeTimeoutId_ = setTimeout(function () {
-                    tabUpdateHandler();
-                    this.resizeTimeoutId_ = null;
-                }.bind(this), this.Constant_.RESIZE_TIMEOUT);
-            }.bind(this);
-            window.addEventListener('resize', windowResizeHandler);
+            // var windowResizeHandler = function() {
+            //   // Use timeouts to make sure it doesn't happen too often.
+            //   if (this.resizeTimeoutId_) {
+            //     clearTimeout(this.resizeTimeoutId_);
+            //   }
+            //   this.resizeTimeoutId_ = setTimeout(function() {
+            //     tabUpdateHandler();
+            //     this.resizeTimeoutId_ = null;
+            //   }.bind(this), /** @type {number} */ (this.Constant_.RESIZE_TIMEOUT));
+            // }.bind(this);
+            window.addEventListener('optimizedResize', tabUpdateHandler);
             if (this.tabBar_.classList.contains(this.CssClasses_.JS_RIPPLE_EFFECT)) {
                 this.tabBar_.classList.add(this.CssClasses_.RIPPLE_IGNORE_EVENTS);
             }
@@ -8328,6 +8346,7 @@ CustomDialog.prototype.CssClasses_ = { IS_UPGRADED: 'is-upgraded' };
    */
 CustomDialog.prototype.showBox_ = function () {
     document.body.appendChild(this.element_);
+    document.body.classList.add('custom-dialog-noscroll');
     this.element_.classList.add('beforeshow');
     this.updateBoxPosition_();
     this.element_.classList.add('show');
@@ -8341,6 +8360,7 @@ CustomDialog.prototype.closeBox_ = function () {
     this.pendingBt_ = null;
     this.element_.classList.remove('beforeshow');
     this.element_.classList.remove('show');
+    document.body.classList.remove('custom-dialog-noscroll');
     this.placeholder_.parentNode.insertBefore(this.element_, this.placeholder_);
 };
 /**
@@ -8405,7 +8425,7 @@ CustomDialog.prototype.init = function () {
         cherry.on(this.close_, 'customdialog.click', this.cancelClicked_).bind(this);
         cherry.on(this.confirm_, 'customdialog.click', this.confirmClicked_).bind(this);
         cherry.on(this.cancel_, 'customdialog.click', this.cancelClicked_).bind(this);
-        cherry.on(window, 'customdialog.resize', this.updateBoxPosition_).bind(this).debounce(100);
+        cherry.on(window, 'customdialog.optimizedResize', this.updateBoxPosition_).bind(this);
         if (this.btSelector_) {
             this.pendingBt_ = null;
             cherry.on(this.btSelector_, 'customdialog.click', this.onBtClicked_).bind(this).first();
@@ -8426,7 +8446,7 @@ CustomDialog.prototype.mdlDowngrade_ = function () {
     cherry.off(this.close_, 'customdialog.click', this.cancelClicked_);
     cherry.off(this.confirm_, 'customdialog.click', this.confirmClicked_);
     cherry.off(this.cancel_, 'customdialog.click', this.cancelClicked_);
-    cherry.off(window, 'customdialog.resize', this.updateBoxPosition_, this);
+    cherry.off(window, 'customdialog.optimizedResize', this.updateBoxPosition_, this);
     if (this.btSelector_) {
         cherry.off(this.btSelector_, 'customdialog.click', this.onBtClicked_);
     }
@@ -10283,7 +10303,7 @@ CustomCropper.prototype.init = function () {
         cherry.on(this.dialogClose_, 'customcropper.click', this.onDialogCanceled_).bind(this);
         cherry.on(this.dialogCancel_, 'customcropper.click', this.onDialogCanceled_).bind(this);
         cherry.on(this.btAction_, 'customcropper.click', this.onFileCleared).bind(this);
-        cherry.on(window, 'customcropper.resize', this.updateBoxPosition_).bind(this).debounce(100);
+        cherry.on(window, 'customcropper.optimizedResize', this.updateBoxPosition_).bind(this);
         this.element_.classList.add(this.CssClasses_.IS_UPGRADED);
     }
 };
@@ -10298,7 +10318,7 @@ CustomCropper.prototype.mdlDowngrade_ = function () {
     cherry.off(this.dialogClose_, 'customcropper.click', this.onDialogCanceled_);
     cherry.off(this.dialogCancel_, 'customcropper.click', this.onDialogCanceled_);
     cherry.off(this.btAction_, 'customcropper.click', this.onFileCleared);
-    cherry.off(window, 'customcropper.resize', this.updateBoxPosition_, this);
+    cherry.off(window, 'customcropper.optimizedResize', this.updateBoxPosition_, this);
     this.file_ = null;
     this.dialog_ = null;
     this.componentContainer_ = null;
