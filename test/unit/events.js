@@ -150,6 +150,38 @@ describe('events', function () {
     expect(bt.__eventManager).to.be.equal(undefined);
   });
 
+  it('should be able to remove event handlers with a scope', function () {
+    var bt = document.createElement("button");
+    var res1 = false;
+    var res2 = false;
+    var handler1 = function () {
+      res1 = true;
+    };
+    var handler2 = function () {
+      res2 = true;
+    };
+    var obj = {id:'1'};
+    cherry.on(bt, 'click', handler1).bind(obj);
+    cherry.on(bt, 'click', handler2).bind(this);
+    expect(bt.__eventManager.IsEmpty()).to.be.equal(false);
+
+    bt.click();
+    expect(res1).to.be.equal(true);
+    expect(res2).to.be.equal(true);
+
+    res1 = false;
+    res2 = false;
+    cherry.off(bt, 'click', handler1, obj);
+    expect(bt.__eventManager.IsEmpty()).to.be.equal(false);
+    cherry.off(bt, 'click', handler2, this);
+    expect(bt.__eventManager).to.be.equal(undefined);
+
+    bt.click();
+    expect(res1).to.be.equal(false);
+    expect(res2).to.be.equal(false);
+    expect(bt.__eventManager).to.be.equal(undefined);
+  });
+
   it('should be able to add an once event', function () {
     var bt = document.createElement("button");
     var res = false;
@@ -735,6 +767,40 @@ describe('events', function () {
     expect(obj.res).to.be.equal(true);
 
     cherry.undelegate(div, 'click', obj.handler);
+    expect(div.__eventManager).to.be.equal(undefined);
+
+    obj.res = false;
+    expect(obj.res).to.be.equal(false);
+    bt1.click();
+    expect(obj.res).to.be.equal(false);
+
+    div.remove();
+  });
+
+  it('should be able to undelegate a bound handler with a scope', function () {
+    var div = document.createElement("button");
+    var bt1 = document.createElement("button");
+    bt1.classList.add("bt1");
+    var bt2 = document.createElement("button");
+    bt2.classList.add("bt2");
+    div.appendChild(bt1);
+    div.appendChild(bt2);
+    document.body.appendChild(div); // this very specific line is for phantomjs@2.1.1
+
+    var obj = new ObjScope();
+
+    expect(div.__eventManager).to.be.equal(undefined);
+    cherry.delegate(div, '.bt1', 'click', obj.handler).bind(obj);
+    cherry.delegate(div, '.bt1', 'click', obj.handler).bind(this);
+    expect(div.__eventManager.IsEmpty()).to.be.equal(false);
+
+    expect(obj.res).to.be.equal(false);
+    bt1.click();
+    expect(obj.res).to.be.equal(true);
+
+    cherry.undelegate(div, 'click', obj.handler, obj);
+    expect(div.__eventManager.IsEmpty()).to.be.equal(false);
+    cherry.undelegate(div, 'click', obj.handler, this);
     expect(div.__eventManager).to.be.equal(undefined);
 
     obj.res = false;
