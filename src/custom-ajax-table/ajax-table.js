@@ -59,6 +59,8 @@
     SORT_DESC: 'mdl-data-table__header--sorted-descending',
     SORT_ABLE: 'mdl-data-table__header--sorted',
     NOT_NUMERIC: 'mdl-data-table__cell--non-numeric',
+    HIDE_PHONE: 'mdl-cell--hide-phone',
+    HIDE_TABLET: 'mdl-cell--hide-tablet',
     IS_UPGRADED: 'is-upgraded'
   };
 
@@ -121,6 +123,7 @@
    */
   CustomAjaxTable.prototype.formRecipientSubmit_ = function(ev) {
     ev.preventDefault();
+    ev.stopPropagation();
     ev.stopImmediatePropagation();
     this.offsetValue_ = 0;
     this.limitValue_ = this.limitAttr_;
@@ -411,6 +414,12 @@
       var tdH = thList[i];
       if (tdH.classList.contains(this.CssClasses_.NOT_NUMERIC)) {
         td.classList.add(this.CssClasses_.NOT_NUMERIC);
+      }
+      if (tdH.classList.contains(this.CssClasses_.HIDE_PHONE)) {
+        td.classList.add(this.CssClasses_.HIDE_PHONE);
+      }
+      if (tdH.classList.contains(this.CssClasses_.HIDE_TABLET)) {
+        td.classList.add(this.CssClasses_.HIDE_TABLET);
       }
       var propertyName = tdH.getAttribute('data-name');
       var propertyLink = tdH.getAttribute('data-link');
