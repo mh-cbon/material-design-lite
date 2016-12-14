@@ -439,6 +439,8 @@
    */
   CustomFormAjax.prototype.onSubmit_ = function(ev) {
     ev.preventDefault();
+    ev.stopPropagation();
+    ev.stopImmediatePropagation();
     this.handleSubmit_();
   };
   /**
