@@ -81,7 +81,6 @@
     cherry.off(this.container_, 'transitionend');
     cherry.once(this.container_, 'transitionend', function() {
       this.element_.classList.add(this.CssClasses_.IS_EXPANDED);
-      this.container_.style.height = 'auto';
     }).bind(this);
     this.container_.style.height = h + 'px';
   };
@@ -91,8 +90,12 @@
    */
   CustomExpander.prototype.closeBox_ = function() {
     this.nextDir_ = 'open';
-    this.container_.style.height = null;
-    this.element_.classList.remove(this.CssClasses_.IS_EXPANDED);
+    var cherry = window.cherry;
+    cherry.off(this.container_, 'transitionend');
+    cherry.once(this.container_, 'transitionend', function() {
+      this.element_.classList.remove(this.CssClasses_.IS_EXPANDED);
+    }).bind(this);
+    this.container_.style.height = '0px';
   };
 
   /**
