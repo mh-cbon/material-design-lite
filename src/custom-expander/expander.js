@@ -142,6 +142,11 @@
       this.wasOpen_ = this.element_.classList.contains(this.CssClasses_.IS_EXPANDED);
       this.nextDir_ = this.wasOpen_ ? 'close' : 'open';
 
+      if (this.wasOpen_) {
+        var h = this.getContainerHeight_();
+        this.container_.style.height = h + 'px';
+      }
+
       var cherry = window.cherry;
       cherry.on(this.bt_, 'CustomExpander.click', this.toggleBox_).bind(this).debounce(10);
       cherry.on(this.element_, 'CustomExpander.notify', this.onNotify_).bind(this).first();
@@ -153,8 +158,13 @@
    * Downgrade element.
    */
   CustomExpander.prototype.mdlDowngrade_ = function() {
-    this.container_.style.height = '0px';
     this.nextDir_ = 'open';
+    if (this.wasOpen_) {
+      this.element_.classList.add(this.CssClasses_.IS_EXPANDED);
+      this.container_.style.height = null;
+    } else {
+      this.container_.style.height = '0px';
+    }
     var cherry = window.cherry;
     cherry.off(this.bt_, 'CustomExpander.click', this.toggleBox_);
     cherry.off(this.element_, 'CustomExpander.notify', this.onNotify_);
@@ -162,9 +172,6 @@
     this.bt_ = null;
     this.container_ = null;
     this.element_.classList.remove(this.CssClasses_.IS_EXPANDED);
-    if (this.wasOpen_) {
-      this.element_.classList.add(this.CssClasses_.IS_EXPANDED);
-    }
     this.element_.classList.remove(this.CssClasses_.IS_UPGRADED);
   };
 
