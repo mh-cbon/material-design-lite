@@ -4104,6 +4104,127 @@ window.addEventListener('load', function() {
   cherry.isAWindow = isAWindow;
   cherry['isAWindow'] = isAWindow;
 
+  /**
+   * Browse a set of value node, returns an object of their value.
+   *
+   * @param {!Array} nodes The nodes to browse.
+   * @return {!Object} The values in the form.
+   */
+  var browseValueNodes = function(nodes) {
+    var values = {};
+    var nodeNames = ['input', 'select', 'textarea', 'button'];
+    for (var i = 0; i < nodes.length; i++) {
+      var nodeName = nodes[i].nodeName.toLowerCase();
+      var name = nodes[i].name;
+      var value = nodes[i].value;
+      var type = nodes[i].getAttribute('type') || '';
+      type = type.toLowerCase();
+
+      if (!name) {
+        continue;
+      }
+
+      if (nodeNames.indexOf(nodeName) === -1) {
+        continue;
+      }
+
+      if (nodeName.toLowerCase() === 'select') {
+        // if no opt, skip
+        var opts = nodes[i].querySelectorAll('option');
+        if (!opts.length) {
+          continue;
+        }
+        // it s a multiple node, adjust value to all selected options.
+        if (nodes[i].hasAttribute('multiple')) {
+          value = [];
+          opts = nodes[i].querySelectorAll('option');
+          for (var e = 0; e < opts.length; e++) {
+            if (opts[e].selected && opts[e].hasAttribute('value')) {
+              value.push(opts[e].value);
+            }
+          }
+          if (value.length === 1) {
+            value = value[0];
+          }
+        }
+      }
+
+      if (nodeName === 'input') {
+        if (type === 'checkbox') {
+          // if not checked, skip
+          if (!nodes[i].hasAttribute('checked')) {
+            continue;
+          }
+          // checkbox can have only one value, always the last one
+          if (name in values) {
+            delete values[name];
+          }
+        }
+        if (type === 'radio') {
+          // if not checked, skip
+          if (!nodes[i].hasAttribute('checked')) {
+            continue;
+          }
+        }
+      }
+
+      // checkbox ? radio ?
+      if (name in values) {
+        if (!(values[name] instanceof Array)) {
+          values[name] = [values[name]];
+        }
+        if (value instanceof Array) {
+          values[name] = values[name].concat(value);
+        } else {
+          values[name].push(value);
+        }
+      } else {
+        values[name] = value;
+      }
+    }
+    return values;
+  };
+  /**
+   * Merge values object b in to a.
+   *
+   * @param {!Object} a The destination object.
+   * @param {!Object} b The object to merge in the destination.
+   * @return {!Object} The values in the form.
+   */
+  var mergeValues = function(a, b) {
+    Object.keys(b).forEach(function(name) {
+      if (name in a) {
+        if (!(a[name] instanceof Array)) {
+          a[name] = [a[name]];
+        }
+        if (b[name] instanceof Array) {
+          a[name] = a[name].concat(b[name]);
+        } else {
+          a[name].push(b[name]);
+        }
+      } else {
+        a[name] = b[name];
+      }
+    });
+    return a;
+  };
+
+  /**
+   * Get form as an object of values
+   *
+   * @param {!DomNode} form The form element to process.
+   * @return {!Object} The values in the form.
+   */
+  var formValues = function(form) {
+    var values = {};
+    var nodes = form.querySelectorAll('textarea, select, [value]');
+    var nodesValues = browseValueNodes(nodes);
+    values = mergeValues(values, nodesValues);
+    return values;
+  };
+  cherry.formValues = formValues;
+  cherry['formValues'] = formValues;
+
 })(window);
 
 (function(window) {
@@ -4749,15 +4870,37 @@ window.addEventListener('load', function() {
   */
 var throttle = function (type, name) {
     var running = false;
-    window.addEventListener(type, function () {
-        if (running) {
-            return;
-        }
+    var needmore = false;
+    /**
+    * jj
+    */
+    var triggermore = function () {
+        clearTimeout(needmore);
+        needmore = setTimeout(function () {
+            running = true;
+            requestAnimationFrame(function () {
+                window.dispatchEvent(new CustomEvent(name));
+                running = false;
+            });
+        }, 250);
+    };
+    /**
+    * jj
+    */
+    var trigger = function () {
         running = true;
         requestAnimationFrame(function () {
             window.dispatchEvent(new CustomEvent(name));
+            triggermore();
             running = false;
         });
+    };
+    window.addEventListener(type, function () {
+        if (running) {
+            triggermore();
+            return;
+        }
+        trigger();
     });
 };
 /* init - you can init any event */
@@ -8358,10 +8501,13 @@ CustomDialog.prototype.showBox_ = function () {
    */
 CustomDialog.prototype.closeBox_ = function () {
     this.pendingBt_ = null;
-    this.element_.classList.remove('beforeshow');
     this.element_.classList.remove('show');
-    document.body.classList.remove('custom-dialog-noscroll');
-    this.placeholder_.parentNode.insertBefore(this.element_, this.placeholder_);
+    var cherry = window.cherry;
+    cherry.once(this.container_, 'transitionend', function () {
+        this.element_.classList.remove('beforeshow');
+        document.body.classList.remove('custom-dialog-noscroll');
+        this.placeholder_.parentNode.insertBefore(this.element_, this.placeholder_);
+    }).bind(this);
 };
 /**
    * Hide the dialog.
@@ -8534,25 +8680,17 @@ CustomExpander.prototype.toggleBox_ = function (ev) {
    */
 CustomExpander.prototype.showBox_ = function () {
     this.nextDir_ = 'close';
-    var cherry = window.cherry;
     var h = this.getContainerHeight_();
-    cherry.off(this.container_, 'transitionend');
-    cherry.once(this.container_, 'transitionend', function () {
-        this.element_.classList.add(this.CssClasses_.IS_EXPANDED);
-    }).bind(this);
     this.container_.style.height = h + 'px';
+    this.element_.classList.add(this.CssClasses_.IS_EXPANDED);
 };
 /**
    * Hide the dialog.
    */
 CustomExpander.prototype.closeBox_ = function () {
     this.nextDir_ = 'open';
-    var cherry = window.cherry;
-    cherry.off(this.container_, 'transitionend');
-    cherry.once(this.container_, 'transitionend', function () {
-        this.element_.classList.remove(this.CssClasses_.IS_EXPANDED);
-    }).bind(this);
-    this.container_.style.height = '0px';
+    this.container_.style.height = null;
+    this.element_.classList.remove(this.CssClasses_.IS_EXPANDED);
 };
 /**
    * Hide the dialog.
@@ -11314,18 +11452,13 @@ CustomFormAjax.prototype.handleSubmit_ = function () {
 CustomFormAjax.prototype.sendSubmit = function () {
     var options = this.getSubmitOptions(this.inputBtn_);
     options.data = this.getSubmitData();
-    if (this.dataOverride_) {
-        Object.keys(this.dataOverride_).forEach(function (key) {
-            options.data[key] = this.dataOverride_[key];
-        }.bind(this));
-    }
-    var cherry = window.cherry;
-    if (typeof options.data === 'object') {
-        options.data = cherry.stringifyUrlArgs(options.data);    // what about FormData object ?
-    }
     this.notifyPresubmit_(options);
     this.disableFieldErrors_();
     this.showLoader_();
+    if (!this.containsFileInput_()) {
+        var cherry = window.cherry;
+        options.data = cherry.stringifyUrlArgs(options.data);
+    }
     var ajax = window.ajax;
     var request = ajax(options);
     request.then(function (response, xhr) {
@@ -11385,15 +11518,29 @@ CustomFormAjax.prototype.getSubmitData = function () {
     var params = hasFile ? this.getFormData() : this.getFormDataRaw();
     if (this.inputBtn_) {
         // handle html5 button outside of the form
+        var form = this.inputBtn_.getAttribute('form');
         var name = this.inputBtn_.getAttribute('name');
         var value = this.inputBtn_.value;
-        if (name && Object.keys(params).indexOf(name) === -1 && value) {
-            if (params.append) {
+        if (name && value && form && form === this.element_.getAttribute('id')) {
+            if (hasFile) {
                 params.append(name, value);
             } else {
-                params[name] = value;
+                if (params[name] instanceof Array) {
+                    params[name].push(value);
+                } else {
+                    params[name] = value;
+                }
             }
         }
+    }
+    if (this.dataOverride_) {
+        Object.keys(this.dataOverride_).forEach(function (key) {
+            if (hasFile) {
+                params.append(key, this.dataOverride_[key]);
+            } else {
+                params.data[key] = this.dataOverride_[key];
+            }
+        }.bind(this));
     }
     return params;
 };
@@ -11454,19 +11601,13 @@ CustomFormAjax.prototype.getFormData = function () {
     return new FormData(this.element_);
 };
 /**
-   * Returns a form data as a query string.
+   * Returns a form data as an object.
    *
    * @private
    */
 CustomFormAjax.prototype.getFormDataRaw = function () {
-    var params = {};
-    var nodes = this.element_.querySelectorAll('[value]');
-    for (var i = 0; i < nodes.length; ++i) {
-        if (nodes[i].name) {
-            params[nodes[i].name] = nodes[i].value;
-        }
-    }
-    return params;
+    var cherry = window.cherry;
+    return cherry.formValues(this.element_);
 };
 /**
    * Emits pre-submit event, notify listeners for pre-submit.
