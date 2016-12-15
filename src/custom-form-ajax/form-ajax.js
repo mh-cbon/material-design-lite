@@ -73,21 +73,15 @@
 
     var options = this.getSubmitOptions(this.inputBtn_);
     options.data = this.getSubmitData();
-    if (this.dataOverride_) {
-      Object.keys(this.dataOverride_).forEach(function(key) {
-        options.data[key] = this.dataOverride_[key];
-      }.bind(this));
-    }
-
-    var cherry = window.cherry;
-
-    if (typeof options.data === 'object') {
-      options.data = cherry.stringifyUrlArgs(options.data); // what about FormData object ?
-    }
 
     this.notifyPresubmit_(options);
     this.disableFieldErrors_();
     this.showLoader_();
+
+    if (!this.containsFileInput_()) {
+      var cherry = window.cherry;
+      options.data = cherry.stringifyUrlArgs(options.data);
+    }
 
     var ajax = window.ajax;
     var request = ajax(options);
@@ -159,16 +153,32 @@
 
     if (this.inputBtn_) {
       // handle html5 button outside of the form
+      var form = this.inputBtn_.getAttribute('form');
       var name = this.inputBtn_.getAttribute('name');
       var value = this.inputBtn_.value;
-      if (name && Object.keys(params).indexOf(name) === -1 && value) {
-        if (params.append) {
+      if (name && value && form && form === this.element_.getAttribute('id')) {
+        if (hasFile) {
           params.append(name, value);
         } else {
-          params[name] = value;
+          if (params[name] instanceof Array) {
+            params[name].push(value);
+          } else {
+            params[name] = value;
+          }
         }
       }
     }
+
+    if (this.dataOverride_) {
+      Object.keys(this.dataOverride_).forEach(function(key) {
+        if (hasFile) {
+          params.append(key, this.dataOverride_[key]);
+        } else {
+          params.data[key] = this.dataOverride_[key];
+        }
+      }.bind(this));
+    }
+
     return params;
   };
 
@@ -233,19 +243,13 @@
   };
 
   /**
-   * Returns a form data as a query string.
+   * Returns a form data as an object.
    *
    * @private
    */
   CustomFormAjax.prototype.getFormDataRaw = function() {
-    var params = {};
-    var nodes = this.element_.querySelectorAll('[value]');
-    for (var i = 0; i < nodes.length; ++i) {
-      if (nodes[i].name) {
-        params[nodes[i].name] = nodes[i].value;
-      }
-    }
-    return params;
+    var cherry = window.cherry;
+    return cherry.formValues(this.element_);
   };
 
   /**
