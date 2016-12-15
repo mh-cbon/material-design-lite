@@ -174,7 +174,7 @@
         if (hasFile) {
           params.append(key, this.dataOverride_[key]);
         } else {
-          params.data[key] = this.dataOverride_[key];
+          params[key] = this.dataOverride_[key];
         }
       }.bind(this));
     }

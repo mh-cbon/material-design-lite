@@ -534,5 +534,9 @@ describe('CustomFormAjax', function () {
     }, defTout);
   });
 
+  it.skip('should grab form values', function () {
+    // ensure getSubmitData works well
+  });
+
 
 });
