@@ -69,7 +69,7 @@
 
   /**
    * innerHeight .
-   * @param  {!DomElement} The element we want the outer heihgt of.
+   * @param  {!DomElement} The element we want the inner heihgt of.
    * @return {!Integer} The value of the height in pixel.
    */
   var innerHeight = function(el) {
@@ -80,6 +80,20 @@
   };
   cherry.innerHeight = innerHeight;
   cherry['innerHeight'] = innerHeight;
+
+  /**
+   * innerWidth .
+   * @param  {!DomElement} The element we want the inner width of.
+   * @return {!Integer} The value of the width in pixel.
+   */
+  var innerWidth = function(el) {
+    var s = el.offsetWidth;
+    var style = getComputedStyle(el);
+    s -= parseInt(style.paddingLeft) + parseInt(style.paddingRight);
+    return s;
+  };
+  cherry.innerWidth = innerWidth;
+  cherry['innerWidth'] = innerWidth;
 
   /**
    * Get child element nodes only.
