@@ -76,13 +76,9 @@
    */
   CustomExpander.prototype.showBox_ = function() {
     this.nextDir_ = 'close';
-    var cherry = window.cherry;
     var h = this.getContainerHeight_();
-    cherry.off(this.container_, 'transitionend');
-    cherry.once(this.container_, 'transitionend', function() {
-      this.element_.classList.add(this.CssClasses_.IS_EXPANDED);
-    }).bind(this);
     this.container_.style.height = h + 'px';
+    this.element_.classList.add(this.CssClasses_.IS_EXPANDED);
   };
 
   /**
@@ -90,12 +86,8 @@
    */
   CustomExpander.prototype.closeBox_ = function() {
     this.nextDir_ = 'open';
-    var cherry = window.cherry;
-    cherry.off(this.container_, 'transitionend');
-    cherry.once(this.container_, 'transitionend', function() {
-      this.element_.classList.remove(this.CssClasses_.IS_EXPANDED);
-    }).bind(this);
-    this.container_.style.height = '0px';
+    this.container_.style.height = null;
+    this.element_.classList.remove(this.CssClasses_.IS_EXPANDED);
   };
 
   /**
