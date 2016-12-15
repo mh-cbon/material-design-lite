@@ -101,23 +101,31 @@
   };
 
   /**
-   * Load data from the form recipient.
+   * Update form data overrides.
    *
    * @private
    */
-  CustomAjaxTable.prototype.loadDataFromFormRecipient_ = function() {
+  CustomAjaxTable.prototype.updateFormOverrides_ = function() {
     var data = {};
     data[this.offsetQsName_] = this.offsetValue_;
     data[this.limitQsName_] = this.limitValue_;
     data[this.sortQsName_] = this.getSortParams_();
     this.formRecipient_['CustomFormAjax'].setDataOverride(data);
+  };
 
+  /**
+   * Load data from the form recipient.
+   *
+   * @private
+   */
+  CustomAjaxTable.prototype.loadDataFromFormRecipient_ = function() {
+    this.updateFormOverrides_();
     this.showLoader_();
     this.formRecipient_['CustomFormAjax'].sendSubmit();
   };
 
   /**
-   * Handles form pre-submit event.
+   * Handles form submit event.
    *
    * @private
    */
@@ -128,7 +136,7 @@
     this.offsetValue_ = 0;
     this.limitValue_ = this.limitAttr_;
     this.sourceClick_ = 'form';
-    this.loadDataFromFormRecipient_();
+    this.showLoader_();
   };
 
   /**
