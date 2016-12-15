@@ -19,7 +19,7 @@
 
 describe('CustomChipAutocomplete', function () {
 
-  var defTout = 250;
+  var defTout = 350;
 
   it('should be globally available', function () {
     expect(CustomChipAutocomplete).to.be.a('function');
@@ -63,17 +63,19 @@ describe('CustomChipAutocomplete', function () {
     expect(styles.display).to.be.equal('none');
     input.focus();
     setTimeout(function() {
+      results.offsetWidth;
       styles = window.getComputedStyle(results);
       expect(styles.display).to.be.equal('block');
       input.blur();
       setTimeout(function() {
+        results.offsetWidth;
         styles = window.getComputedStyle(results);
         expect(styles.display).to.be.equal('none');
         componentHandler.downgradeElementRecursive(el);
         el.remove();
         done();
-      }, 200);
-    }, 100);
+      }, defTout * 1.4);
+    }, defTout * 1.4);
   });
 
   it('should add selected result to the chips', function (done) {

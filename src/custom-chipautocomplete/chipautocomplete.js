@@ -55,17 +55,6 @@
   };
 
   /**
-   * Remove existing chip.
-   * this must be bound to the chip to delete.
-   *
-   * @private
-   */
-  CustomChipAutocomplete.prototype.removeChip_ = function(ev) {
-    var target = ev.delegateTarget;
-    target.parentNode.remove();
-  };
-
-  /**
    * Hide results list.
    * Clear input text value.
    *
@@ -280,9 +269,11 @@
    * @private
    */
   CustomChipAutocomplete.prototype.showResults_ = function() {
+    this.results_.style.height = 'auto';
     this.results_.style.visibility = 'hidden';
     this.results_.classList.add('show');
     var cherry = window.cherry;
+    cherry.off(this.results_, 'CustomChipAutocomplete.transitionend');
 
     var componentHeight = cherry.outerHeight(this.results_);
     var inputRect       = this.input_.getBoundingClientRect();
@@ -290,17 +281,19 @@
     var inputHeight     = cherry.outerHeight(this.input_);
     var textFieldHeight = cherry.outerHeight(this.textfield_);
     var intFrameHeight  = window.innerHeight;
-    var d = (textFieldHeight - inputHeight) / 2;
+    var d = (textFieldHeight - inputHeight);
 
     if (intFrameHeight > inputTop + inputHeight + componentHeight) {
       //dispaly below
-      this.results_.style.top = '' + (inputHeight + d + 1) + 'px';
+      this.results_.style.top = '' + (inputHeight + d / 2) + 'px';
     } else {
       //dispaly above
-      this.results_.style.top = '-' + (componentHeight - inputHeight + d) + 'px';
+      this.results_.style.bottom = textFieldHeight + 'px';
     }
+    this.results_.style.height = '0px';
     this.results_.style.width = this.input_.offsetWidth + 'px';
     this.results_.style.visibility = 'visible';
+    this.results_.style.height = componentHeight + 'px';
   };
 
   /**
@@ -331,8 +324,15 @@
    * @private
    */
   CustomChipAutocomplete.prototype.hideResults_ = function() {
-    this.results_.classList.remove('show');
-    this.results_.style.visibility = 'hidden';
+    var cherry = window.cherry;
+    cherry.off(this.results_, 'CustomChipAutocomplete.transitionend');
+    cherry.on(this.results_, 'CustomChipAutocomplete.transitionend', function() {
+      this.results_.classList.remove('show');
+      this.results_.style.visibility = 'hidden';
+      this.results_.style.top = '';
+      this.results_.style.bottom = '';
+    }).bind(this);
+    this.results_.style.height = '0px';
   };
 
   /**
@@ -471,7 +471,7 @@
 
     var icon = document.createElement('i');
     icon.classList.add('material-icons');
-    icon.innerHTML = 'close';
+    icon.innerHTML = '&#xE5C9;';
 
     var button = document.createElement('button');
     button.setAttribute('type', 'button');
@@ -489,6 +489,33 @@
 
     this.selected_.appendChild(span);
     componentHandler.upgradeDom(span);
+
+    this.selected_.offsetWidth; // jshint ignore:line
+
+    var cherry = window.cherry;
+    var w = cherry.innerWidth(span);
+    span.style.width = '0px';
+    this.selected_.offsetWidth; // jshint ignore:line
+    span.classList.add('show');
+    span.style.width = w + 'px';
+  };
+
+  /**
+   * Remove existing chip.
+   * this must be bound to the chip to delete.
+   *
+   * @private
+   */
+  CustomChipAutocomplete.prototype.removeChip_ = function(ev) {
+    var target = ev.delegateTarget.parentNode;
+    var cherry = window.cherry;
+    cherry.off(target, 'CustomChipAutocomplete.transitionend');
+    cherry.on(target, 'CustomChipAutocomplete.transitionend', function() {
+      target.remove();
+      target.classList.remove('show');
+    }).bind(this);
+    target.style.width = '0px';
+    target.style.opacity = '0';
   };
 
   /**
@@ -597,6 +624,11 @@
       // document.body.appendChild(this.results_);
       this.textfield_.appendChild(this.results_);
       this.results_.style.width = this.input_.offsetWidth + 'px';
+
+      var existingChips = this.selected_.querySelectorAll('.mdl-chip');
+      for (var i = 0; i < existingChips.length; i++) {
+        existingChips[i].classList.add('show');
+      }
 
       var cherry = window.cherry;
 
