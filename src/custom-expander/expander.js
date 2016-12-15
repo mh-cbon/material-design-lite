@@ -79,8 +79,8 @@
     var h = this.getContainerHeight_();
     this.container_.style.height = h + 'px';
     var cherry = window.cherry;
-    cherry.off(this.container_, 'transitionend');
-    cherry.on(this.container_, 'transitionend', function() {
+    cherry.off(this.container_, 'CustomExpander.transitionend');
+    cherry.on(this.container_, 'CustomExpander.transitionend', function() {
       this.container_.style.height = 'auto';
     }).bind(this);
     this.element_.classList.add(this.CssClasses_.IS_EXPANDED);
@@ -92,7 +92,7 @@
   CustomExpander.prototype.closeBox_ = function() {
     this.nextDir_ = 'open';
     var cherry = window.cherry;
-    cherry.off(this.container_, 'transitionend');
+    cherry.off(this.container_, 'CustomExpander.transitionend');
     var h = this.getContainerHeight_();
     this.container_.style.height = h + 'px';
     // jscs:disable
