@@ -429,4 +429,125 @@
   cherry.isAWindow = isAWindow;
   cherry['isAWindow'] = isAWindow;
 
+  /**
+   * Browse a set of value node, returns an object of their value.
+   *
+   * @param {!Array} nodes The nodes to browse.
+   * @return {!Object} The values in the form.
+   */
+  var browseValueNodes = function(nodes) {
+    var values = {};
+    var nodeNames = ['input', 'select', 'textarea', 'button'];
+    for (var i = 0; i < nodes.length; i++) {
+      var nodeName = nodes[i].nodeName.toLowerCase();
+      var name = nodes[i].name;
+      var value = nodes[i].value;
+      var type = nodes[i].getAttribute('type') || '';
+      type = type.toLowerCase();
+
+      if (!name) {
+        continue;
+      }
+
+      if (nodeNames.indexOf(nodeName) === -1) {
+        continue;
+      }
+
+      if (nodeName.toLowerCase() === 'select') {
+        // if no opt, skip
+        var opts = nodes[i].querySelectorAll('option');
+        if (!opts.length) {
+          continue;
+        }
+        // it s a multiple node, adjust value to all selected options.
+        if (nodes[i].hasAttribute('multiple')) {
+          value = [];
+          opts = nodes[i].querySelectorAll('option');
+          for (var e = 0; e < opts.length; e++) {
+            if (opts[e].selected && opts[e].hasAttribute('value')) {
+              value.push(opts[e].value);
+            }
+          }
+          if (value.length === 1) {
+            value = value[0];
+          }
+        }
+      }
+
+      if (nodeName === 'input') {
+        if (type === 'checkbox') {
+          // if not checked, skip
+          if (!nodes[i].hasAttribute('checked')) {
+            continue;
+          }
+          // checkbox can have only one value, always the last one
+          if (name in values) {
+            delete values[name];
+          }
+        }
+        if (type === 'radio') {
+          // if not checked, skip
+          if (!nodes[i].hasAttribute('checked')) {
+            continue;
+          }
+        }
+      }
+
+      // checkbox ? radio ?
+      if (name in values) {
+        if (!(values[name] instanceof Array)) {
+          values[name] = [values[name]];
+        }
+        if (value instanceof Array) {
+          values[name] = values[name].concat(value);
+        } else {
+          values[name].push(value);
+        }
+      } else {
+        values[name] = value;
+      }
+    }
+    return values;
+  };
+  /**
+   * Merge values object b in to a.
+   *
+   * @param {!Object} a The destination object.
+   * @param {!Object} b The object to merge in the destination.
+   * @return {!Object} The values in the form.
+   */
+  var mergeValues = function(a, b) {
+    Object.keys(b).forEach(function(name) {
+      if (name in a) {
+        if (!(a[name] instanceof Array)) {
+          a[name] = [a[name]];
+        }
+        if (b[name] instanceof Array) {
+          a[name] = a[name].concat(b[name]);
+        } else {
+          a[name].push(b[name]);
+        }
+      } else {
+        a[name] = b[name];
+      }
+    });
+    return a;
+  };
+
+  /**
+   * Get form as an object of values
+   *
+   * @param {!DomNode} form The form element to process.
+   * @return {!Object} The values in the form.
+   */
+  var formValues = function(form) {
+    var values = {};
+    var nodes = form.querySelectorAll('textarea, select, [value]');
+    var nodesValues = browseValueNodes(nodes);
+    values = mergeValues(values, nodesValues);
+    return values;
+  };
+  cherry.formValues = formValues;
+  cherry['formValues'] = formValues;
+
 })(window);
