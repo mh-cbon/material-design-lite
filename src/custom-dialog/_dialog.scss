@@ -22,13 +22,15 @@
   height: 100%;
   z-index: 100;
   display: none;
+  opacity: 0;
+  transition: opacity .5s;
 
   &.beforeshow{
-    visibility: hidden;
+    opacity: 0;
     display: block;
   }
   &.show{
-    visibility: visible;
+    opacity: 1;
   }
 
   .custom-dialog-container {
@@ -36,6 +38,17 @@
     top: 50%;
     left: 50%;
     width: 560px;
+    transition: left .5s;
+  }
+  &.beforeshow{
+    .custom-dialog-container {
+      left: 55%;
+    }
+  }
+  &.show{
+    .custom-dialog-container {
+      left: 50%;
+    }
   }
 
   .custom-dialog-bg {

@@ -81,10 +81,13 @@
    */
   CustomDialog.prototype.closeBox_ = function() {
     this.pendingBt_ = null;
-    this.element_.classList.remove('beforeshow');
     this.element_.classList.remove('show');
-    document.body.classList.remove('custom-dialog-noscroll');
-    this.placeholder_.parentNode.insertBefore(this.element_, this.placeholder_);
+    var cherry = window.cherry;
+    cherry.once(this.container_, 'transitionend', function() {
+      this.element_.classList.remove('beforeshow');
+      document.body.classList.remove('custom-dialog-noscroll');
+      this.placeholder_.parentNode.insertBefore(this.element_, this.placeholder_);
+    }).bind(this);
   };
 
   /**
