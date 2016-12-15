@@ -402,7 +402,6 @@
    */
   var getStyle = function(oElm, css3Prop) {
     var strValue = '';
-
     if (window.getComputedStyle) {
       strValue = getComputedStyle(oElm).getPropertyValue(css3Prop);
     } //IE
@@ -416,6 +415,21 @@
   };
   cherry.getStyle = getStyle;
   cherry['getStyle'] = getStyle;
+
+  /**
+   * Remove a style property.
+   *
+   * @param {!DomNode} element The element to interrogate.
+   * @param {!string} prop The name of the css property.
+   */
+  var removeStyle = function(oElm, css3Prop) {
+    var originalStyle = oElm.getAttribute('style');
+    var regex = new RegExp('(' + css3Prop + ':).+?(;[\s]?|$)', 'g');
+    var modStyle = originalStyle.replace(regex, '');
+    oElm.setAttribute('style', modStyle);
+  };
+  cherry.removeStyle = removeStyle;
+  cherry['removeStyle'] = removeStyle;
 
   /**
    * Test if the object is a window.

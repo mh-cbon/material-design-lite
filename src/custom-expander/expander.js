@@ -78,6 +78,11 @@
     this.nextDir_ = 'close';
     var h = this.getContainerHeight_();
     this.container_.style.height = h + 'px';
+    var cherry = window.cherry;
+    cherry.off(this.container_, 'transitionend');
+    cherry.on(this.container_, 'transitionend', function() {
+      this.container_.style.height = 'auto';
+    }).bind(this);
     this.element_.classList.add(this.CssClasses_.IS_EXPANDED);
   };
 
@@ -86,7 +91,14 @@
    */
   CustomExpander.prototype.closeBox_ = function() {
     this.nextDir_ = 'open';
-    this.container_.style.height = null;
+    var cherry = window.cherry;
+    cherry.off(this.container_, 'transitionend');
+    var h = this.getContainerHeight_();
+    this.container_.style.height = h + 'px';
+    // jscs:disable
+    this.container_.offsetHeight; // jshint ignore:line
+    // jscs:enable
+    this.container_.style.height = '0px';
     this.element_.classList.remove(this.CssClasses_.IS_EXPANDED);
   };
 

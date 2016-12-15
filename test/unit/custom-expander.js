@@ -114,19 +114,25 @@ describe('CustomExpander', function () {
     }, defTout);
   });
 
-  it('should upgrade successfully a notifier', function () {
+  it('should set height:auto on the container after expansion', function (done) {
     var el = document.createElement('div');
     document.body.appendChild(el);
-    el.innerHTML = templatesLoader.get('EXPANDER_NOTIFIER');
+    el.innerHTML = templatesLoader.get('EXPANDER');
 
-    componentHandler.upgradeElements(el);
     var expander = el.querySelector('.custom-js-expander');
-    expect(expander.getAttribute('data-upgraded')).to.be.equal(',CustomExpander');
+    var bt = el.querySelector('.custom-expander-bt');
+    var container = el.querySelector('.custom-expander-container');
+    componentHandler.upgradeElements(el);
 
-    componentHandler.downgradeElementRecursive(el);
-    expect(expander.getAttribute('data-upgraded')).to.be.equal('');
-
-    el.remove();
+    var cherry = window.cherry;
+    bt.click();
+    setTimeout(function() {
+      expect(container.style.height).to.be.equal('auto');
+      expect(expander.classList.contains('is-expanded')).to.be.equal(true);
+      componentHandler.downgradeElementRecursive(el);
+      el.remove();
+      done();
+    }, defTout);
   });
 
   it('should expand on notification', function (done) {
@@ -158,7 +164,6 @@ describe('CustomExpander', function () {
       el.remove();
       done();
     }, defTout);
-
   });
 
   it('should hide on notification with empty message', function (done) {
