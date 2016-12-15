@@ -4077,7 +4077,6 @@ window.addEventListener('load', function() {
    */
   var getStyle = function(oElm, css3Prop) {
     var strValue = '';
-
     if (window.getComputedStyle) {
       strValue = getComputedStyle(oElm).getPropertyValue(css3Prop);
     } //IE
@@ -4091,6 +4090,21 @@ window.addEventListener('load', function() {
   };
   cherry.getStyle = getStyle;
   cherry['getStyle'] = getStyle;
+
+  /**
+   * Remove a style property.
+   *
+   * @param {!DomNode} element The element to interrogate.
+   * @param {!string} prop The name of the css property.
+   */
+  var removeStyle = function(oElm, css3Prop) {
+    var originalStyle = oElm.getAttribute('style');
+    var regex = new RegExp('(' + css3Prop + ':).+?(;[\s]?|$)', 'g');
+    var modStyle = originalStyle.replace(regex, '');
+    oElm.setAttribute('style', modStyle);
+  };
+  cherry.removeStyle = removeStyle;
+  cherry['removeStyle'] = removeStyle;
 
   /**
    * Test if the object is a window.
@@ -8682,6 +8696,11 @@ CustomExpander.prototype.showBox_ = function () {
     this.nextDir_ = 'close';
     var h = this.getContainerHeight_();
     this.container_.style.height = h + 'px';
+    var cherry = window.cherry;
+    cherry.off(this.container_, 'transitionend');
+    cherry.on(this.container_, 'transitionend', function () {
+        this.container_.style.height = 'auto';
+    }).bind(this);
     this.element_.classList.add(this.CssClasses_.IS_EXPANDED);
 };
 /**
@@ -8689,7 +8708,15 @@ CustomExpander.prototype.showBox_ = function () {
    */
 CustomExpander.prototype.closeBox_ = function () {
     this.nextDir_ = 'open';
-    this.container_.style.height = null;
+    var cherry = window.cherry;
+    cherry.off(this.container_, 'transitionend');
+    var h = this.getContainerHeight_();
+    this.container_.style.height = h + 'px';
+    // jscs:disable
+    this.container_.offsetHeight;
+    // jshint ignore:line
+    // jscs:enable
+    this.container_.style.height = '0px';
     this.element_.classList.remove(this.CssClasses_.IS_EXPANDED);
 };
 /**
