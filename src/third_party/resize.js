@@ -6,15 +6,37 @@
   */
   var throttle = function(type, name) {
     var running = false;
-    window.addEventListener(type, function() {
-      if (running) {
-        return;
-      }
+    var needmore = false;
+    /**
+    * jj
+    */
+    var triggermore = function() {
+      clearTimeout(needmore);
+      needmore = setTimeout(function() {
+        running = true;
+        requestAnimationFrame(function() {
+          window.dispatchEvent(new CustomEvent(name));
+          running = false;
+        });
+      }, 250);
+    };
+    /**
+    * jj
+    */
+    var trigger = function() {
       running = true;
       requestAnimationFrame(function() {
         window.dispatchEvent(new CustomEvent(name));
+        triggermore();
         running = false;
       });
+    };
+    window.addEventListener(type, function() {
+      if (running) {
+        triggermore();
+        return;
+      }
+      trigger();
     });
   };
 
