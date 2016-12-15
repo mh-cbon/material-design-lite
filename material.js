@@ -3744,7 +3744,7 @@ window.addEventListener('load', function() {
 
   /**
    * innerHeight .
-   * @param  {!DomElement} The element we want the outer heihgt of.
+   * @param  {!DomElement} The element we want the inner heihgt of.
    * @return {!Integer} The value of the height in pixel.
    */
   var innerHeight = function(el) {
@@ -3755,6 +3755,20 @@ window.addEventListener('load', function() {
   };
   cherry.innerHeight = innerHeight;
   cherry['innerHeight'] = innerHeight;
+
+  /**
+   * innerWidth .
+   * @param  {!DomElement} The element we want the inner width of.
+   * @return {!Integer} The value of the width in pixel.
+   */
+  var innerWidth = function(el) {
+    var s = el.offsetWidth;
+    var style = getComputedStyle(el);
+    s -= parseInt(style.paddingLeft) + parseInt(style.paddingRight);
+    return s;
+  };
+  cherry.innerWidth = innerWidth;
+  cherry['innerWidth'] = innerWidth;
 
   /**
    * Get child element nodes only.
@@ -8697,8 +8711,8 @@ CustomExpander.prototype.showBox_ = function () {
     var h = this.getContainerHeight_();
     this.container_.style.height = h + 'px';
     var cherry = window.cherry;
-    cherry.off(this.container_, 'transitionend');
-    cherry.on(this.container_, 'transitionend', function () {
+    cherry.off(this.container_, 'CustomExpander.transitionend');
+    cherry.on(this.container_, 'CustomExpander.transitionend', function () {
         this.container_.style.height = 'auto';
     }).bind(this);
     this.element_.classList.add(this.CssClasses_.IS_EXPANDED);
@@ -8709,7 +8723,7 @@ CustomExpander.prototype.showBox_ = function () {
 CustomExpander.prototype.closeBox_ = function () {
     this.nextDir_ = 'open';
     var cherry = window.cherry;
-    cherry.off(this.container_, 'transitionend');
+    cherry.off(this.container_, 'CustomExpander.transitionend');
     var h = this.getContainerHeight_();
     this.container_.style.height = h + 'px';
     // jscs:disable
@@ -9689,16 +9703,6 @@ CustomChipAutocomplete.prototype.Constant_ = {};
    */
 CustomChipAutocomplete.prototype.CssClasses_ = { IS_UPGRADED: 'is-upgraded' };
 /**
-   * Remove existing chip.
-   * this must be bound to the chip to delete.
-   *
-   * @private
-   */
-CustomChipAutocomplete.prototype.removeChip_ = function (ev) {
-    var target = ev.delegateTarget;
-    target.parentNode.remove();
-};
-/**
    * Hide results list.
    * Clear input text value.
    *
@@ -9893,25 +9897,29 @@ CustomChipAutocomplete.prototype.resultsContainsText_ = function (results, text)
    * @private
    */
 CustomChipAutocomplete.prototype.showResults_ = function () {
+    this.results_.style.height = 'auto';
     this.results_.style.visibility = 'hidden';
     this.results_.classList.add('show');
     var cherry = window.cherry;
+    cherry.off(this.results_, 'CustomChipAutocomplete.transitionend');
     var componentHeight = cherry.outerHeight(this.results_);
     var inputRect = this.input_.getBoundingClientRect();
     var inputTop = inputRect.top;
     var inputHeight = cherry.outerHeight(this.input_);
     var textFieldHeight = cherry.outerHeight(this.textfield_);
     var intFrameHeight = window.innerHeight;
-    var d = (textFieldHeight - inputHeight) / 2;
+    var d = textFieldHeight - inputHeight;
     if (intFrameHeight > inputTop + inputHeight + componentHeight) {
         //dispaly below
-        this.results_.style.top = '' + (inputHeight + d + 1) + 'px';
+        this.results_.style.top = '' + (inputHeight + d / 2) + 'px';
     } else {
         //dispaly above
-        this.results_.style.top = '-' + (componentHeight - inputHeight + d) + 'px';
+        this.results_.style.bottom = textFieldHeight + 'px';
     }
+    this.results_.style.height = '0px';
     this.results_.style.width = this.input_.offsetWidth + 'px';
     this.results_.style.visibility = 'visible';
+    this.results_.style.height = componentHeight + 'px';
 };
 /**
    * Handle result click event.
@@ -9939,8 +9947,15 @@ CustomChipAutocomplete.prototype.onResultClick_ = function (ev) {
    * @private
    */
 CustomChipAutocomplete.prototype.hideResults_ = function () {
-    this.results_.classList.remove('show');
-    this.results_.style.visibility = 'hidden';
+    var cherry = window.cherry;
+    cherry.off(this.results_, 'CustomChipAutocomplete.transitionend');
+    cherry.on(this.results_, 'CustomChipAutocomplete.transitionend', function () {
+        this.results_.classList.remove('show');
+        this.results_.style.visibility = 'hidden';
+        this.results_.style.top = '';
+        this.results_.style.bottom = '';
+    }).bind(this);
+    this.results_.style.height = '0px';
 };
 /**
    * Empty the results list.
@@ -10067,7 +10082,7 @@ CustomChipAutocomplete.prototype.addChip_ = function (option) {
     text.innerHTML = option.Text;
     var icon = document.createElement('i');
     icon.classList.add('material-icons');
-    icon.innerHTML = 'close';
+    icon.innerHTML = '&#xE5C9;';
     var button = document.createElement('button');
     button.setAttribute('type', 'button');
     button.classList.add('mdl-chip__action');
@@ -10081,6 +10096,32 @@ CustomChipAutocomplete.prototype.addChip_ = function (option) {
     span.appendChild(hidden);
     this.selected_.appendChild(span);
     componentHandler.upgradeDom(span);
+    this.selected_.offsetWidth;
+    // jshint ignore:line
+    var cherry = window.cherry;
+    var w = cherry.innerWidth(span);
+    span.style.width = '0px';
+    this.selected_.offsetWidth;
+    // jshint ignore:line
+    span.classList.add('show');
+    span.style.width = w + 'px';
+};
+/**
+   * Remove existing chip.
+   * this must be bound to the chip to delete.
+   *
+   * @private
+   */
+CustomChipAutocomplete.prototype.removeChip_ = function (ev) {
+    var target = ev.delegateTarget.parentNode;
+    var cherry = window.cherry;
+    cherry.off(target, 'CustomChipAutocomplete.transitionend');
+    cherry.on(target, 'CustomChipAutocomplete.transitionend', function () {
+        target.remove();
+        target.classList.remove('show');
+    }).bind(this);
+    target.style.width = '0px';
+    target.style.opacity = '0';
 };
 /**
    * Add multiple chips.
@@ -10178,6 +10219,10 @@ CustomChipAutocomplete.prototype.init = function () {
         // document.body.appendChild(this.results_);
         this.textfield_.appendChild(this.results_);
         this.results_.style.width = this.input_.offsetWidth + 'px';
+        var existingChips = this.selected_.querySelectorAll('.mdl-chip');
+        for (var i = 0; i < existingChips.length; i++) {
+            existingChips[i].classList.add('show');
+        }
         var cherry = window.cherry;
         cherry.delegate(this.selected_, '.mdl-chip__action', 'click', this.removeChip_).bind(this);
         cherry.delegate(this.ul_, 'li', 'click', this.onResultClick_).bind(this);
@@ -11975,9 +12020,8 @@ CustomLoaderOver.prototype.show = function (targetEl) {
    * Adjust size and position.
    */
 CustomLoaderOver.prototype.adjustSize_ = function (targetEl) {
-    var b = this.spinner_.getBoundingClientRect();
-    this.spinner_.style.marginTop = '-' + b.height / 2 + 'px';
-    this.spinner_.style.marginLeft = '-' + b.width / 2 + 'px';
+    this.spinner_.style.marginTop = '-' + this.spinner_.offsetHeight / 2 + 'px';
+    this.spinner_.style.marginLeft = '-' + this.spinner_.offsetWidth / 2 + 'px';
     this.element_.style.padding = 0;
     this.element_.style.top = 0;
     this.element_.style.left = 0;
