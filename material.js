@@ -10674,21 +10674,29 @@ CustomAjaxTable.prototype.loadDataFromUrl_ = function () {
     }.bind(this));
 };
 /**
-   * Load data from the form recipient.
+   * Update form data overrides.
    *
    * @private
    */
-CustomAjaxTable.prototype.loadDataFromFormRecipient_ = function () {
+CustomAjaxTable.prototype.updateFormOverrides_ = function () {
     var data = {};
     data[this.offsetQsName_] = this.offsetValue_;
     data[this.limitQsName_] = this.limitValue_;
     data[this.sortQsName_] = this.getSortParams_();
     this.formRecipient_['CustomFormAjax'].setDataOverride(data);
+};
+/**
+   * Load data from the form recipient.
+   *
+   * @private
+   */
+CustomAjaxTable.prototype.loadDataFromFormRecipient_ = function () {
+    this.updateFormOverrides_();
     this.showLoader_();
     this.formRecipient_['CustomFormAjax'].sendSubmit();
 };
 /**
-   * Handles form pre-submit event.
+   * Handles form submit event.
    *
    * @private
    */
@@ -10699,7 +10707,7 @@ CustomAjaxTable.prototype.formRecipientSubmit_ = function (ev) {
     this.offsetValue_ = 0;
     this.limitValue_ = this.limitAttr_;
     this.sourceClick_ = 'form';
-    this.loadDataFromFormRecipient_();
+    this.showLoader_();
 };
 /**
    * Handles form post-submit event.
@@ -11538,7 +11546,7 @@ CustomFormAjax.prototype.getSubmitData = function () {
             if (hasFile) {
                 params.append(key, this.dataOverride_[key]);
             } else {
-                params.data[key] = this.dataOverride_[key];
+                params[key] = this.dataOverride_[key];
             }
         }.bind(this));
     }
@@ -11788,8 +11796,6 @@ CustomFormAjax.prototype.showLoader_ = function () {
    */
 CustomFormAjax.prototype.onSubmit_ = function (ev) {
     ev.preventDefault();
-    ev.stopPropagation();
-    ev.stopImmediatePropagation();
     this.handleSubmit_();
 };
 /**
