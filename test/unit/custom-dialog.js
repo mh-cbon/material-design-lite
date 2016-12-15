@@ -18,7 +18,7 @@ templatesLoader.register('DIALOG', '/src/custom-dialog/snippets/dialog.html');
 
 describe('CustomDialog', function () {
 
-  var defTout = 250;
+  var defTout = 600;
 
   it('should be globally available', function () {
     expect(CustomDialog).to.be.a('function');
@@ -40,7 +40,7 @@ describe('CustomDialog', function () {
     el.remove();
   });
 
-  it('should open on bt click', function () {
+  it('should open on bt click', function (done) {
     var TEMPLATE = templatesLoader.get('DIALOG');
     var el = document.createElement('div');
     document.body.appendChild(el);
@@ -55,15 +55,18 @@ describe('CustomDialog', function () {
     expect(display).to.be.equal('none');
 
     bt.click();
-    display = cherry.getStyle(dialog, 'display');
-    expect(display).to.be.equal('block');
+    setTimeout(function() {
+      display = cherry.getStyle(dialog, 'display');
+      expect(display).to.be.equal('block');
 
-    dialog['CustomDialog'].hide();
-    componentHandler.downgradeElementRecursive(el);
-    el.remove();
+      dialog['CustomDialog'].hide();
+      componentHandler.downgradeElementRecursive(el);
+      el.remove();
+      done();
+    }, defTout)
   });
 
-  it('should close on cancel click', function () {
+  it('should close on cancel click', function (done) {
     var TEMPLATE = templatesLoader.get('DIALOG');
     var el = document.createElement('div');
     document.body.appendChild(el);
@@ -79,18 +82,23 @@ describe('CustomDialog', function () {
     expect(display).to.be.equal('none');
 
     bt.click();
-    display = cherry.getStyle(dialog, 'display');
-    expect(display).to.be.equal('block');
+    setTimeout(function(){
+      display = cherry.getStyle(dialog, 'display');
+      expect(display).to.be.equal('block');
 
-    cancel.click();
-    var display = cherry.getStyle(dialog, 'display');
-    expect(display).to.be.equal('none');
+      cancel.click();
+      setTimeout(function() {
+        var display = cherry.getStyle(dialog, 'display');
+        expect(display).to.be.equal('none');
 
-    componentHandler.downgradeElementRecursive(el);
-    el.remove();
+        componentHandler.downgradeElementRecursive(el);
+        el.remove();
+        done();
+      }, defTout)
+    }, defTout)
   });
 
-  it('should close on close click', function () {
+  it('should close on close click', function (done) {
     var TEMPLATE = templatesLoader.get('DIALOG');
     var el = document.createElement('div');
     document.body.appendChild(el);
@@ -106,18 +114,23 @@ describe('CustomDialog', function () {
     expect(display).to.be.equal('none');
 
     bt.click();
-    display = cherry.getStyle(dialog, 'display');
-    expect(display).to.be.equal('block');
+    setTimeout(function() {
+      display = cherry.getStyle(dialog, 'display');
+      expect(display).to.be.equal('block');
 
-    close.click();
-    var display = cherry.getStyle(dialog, 'display');
-    expect(display).to.be.equal('none');
+      close.click();
+      setTimeout(function() {
+        var display = cherry.getStyle(dialog, 'display');
+        expect(display).to.be.equal('none');
 
-    componentHandler.downgradeElementRecursive(el);
-    el.remove();
+        componentHandler.downgradeElementRecursive(el);
+        el.remove();
+        done();
+      }, defTout)
+    }, defTout)
   });
 
-  it('should prevent first click on button enabler', function () {
+  it('should prevent first click on button enabler', function (done) {
     var TEMPLATE = templatesLoader.get('DIALOG');
     var el = document.createElement('div');
     document.body.appendChild(el);
@@ -137,18 +150,19 @@ describe('CustomDialog', function () {
     expect(display).to.be.equal('none');
 
     bt.click();
-    display = cherry.getStyle(dialog, 'display');
-    expect(display).to.be.equal('block');
-
     expect(clicked).to.be.equal(false);
+    setTimeout(function() {
+      display = cherry.getStyle(dialog, 'display');
+      expect(display).to.be.equal('block');
 
-
-    dialog['CustomDialog'].hide();
-    componentHandler.downgradeElementRecursive(el);
-    el.remove();
+      dialog['CustomDialog'].hide();
+      componentHandler.downgradeElementRecursive(el);
+      el.remove();
+      done();
+    }, defTout)
   });
 
-  it('should enable click on button enabler after confirm', function () {
+  it('should enable click on button enabler after confirm', function (done) {
     var TEMPLATE = templatesLoader.get('DIALOG');
     var el = document.createElement('div');
     document.body.appendChild(el);
@@ -169,15 +183,19 @@ describe('CustomDialog', function () {
     expect(display).to.be.equal('none');
 
     bt.click();
-    display = cherry.getStyle(dialog, 'display');
-    expect(display).to.be.equal('block');
     expect(clicked).to.be.equal(false);
+    setTimeout(function() {
+      display = cherry.getStyle(dialog, 'display');
+      expect(display).to.be.equal('block');
 
-    confirm.click();
-    expect(clicked).to.be.equal(true);
-
-    componentHandler.downgradeElementRecursive(el);
-    el.remove();
+      confirm.click();
+      expect(clicked).to.be.equal(true);
+      setTimeout(function() {
+        componentHandler.downgradeElementRecursive(el);
+        el.remove();
+        done();
+      }, defTout)
+    }, defTout)
   });
 
 });
