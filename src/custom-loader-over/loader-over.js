@@ -88,9 +88,8 @@
    */
   CustomLoaderOver.prototype.adjustSize_ = function(targetEl) {
 
-    var b = this.spinner_.getBoundingClientRect();
-    this.spinner_.style.marginTop = '-' + (b.height / 2) + 'px';
-    this.spinner_.style.marginLeft = '-' + (b.width / 2) + 'px';
+    this.spinner_.style.marginTop = '-' + (this.spinner_.offsetHeight / 2) + 'px';
+    this.spinner_.style.marginLeft = '-' + (this.spinner_.offsetWidth / 2) + 'px';
 
     this.element_.style.padding = 0;
     this.element_.style.top = 0;
